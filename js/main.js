@@ -260,17 +260,23 @@ class MainController {
     }
 
     /**
-     * 알림 메시지 표시
+     * 알림 메시지 표시 - 다중 라인 지원 ✅
      */
     showAlert(message, type = 'info', duration = 5000) {
         const alertContainer = this.getOrCreateAlertContainer();
         
+        // 메시지에서 \n을 <br>로 변환
+        const formattedMessage = message.replace(/\n/g, '<br>');
+        
+        // 긴 메시지인지 확인 (3줄 이상 또는 100자 이상)
+        const isLongMessage = message.includes('\n\n') || message.length > 100;
+        
         const alertElement = document.createElement('div');
-        alertElement.className = `alert alert-${type}`;
+        alertElement.className = `alert alert-${type} ${isLongMessage ? 'alert-large' : ''}`;
         alertElement.innerHTML = `
-            <div class="flex items-center justify-between">
-                <span>${message}</span>
-                <button class="ml-4 text-xl hover:opacity-70" onclick="this.parentElement.parentElement.remove()">×</button>
+            <div class="flex ${isLongMessage ? 'flex-col' : 'items-center justify-between'}">
+                <div class="${isLongMessage ? 'mb-3' : ''}" style="line-height: 1.5; ${isLongMessage ? 'max-width: 400px;' : ''}">${formattedMessage}</div>
+                <button class="${isLongMessage ? 'self-end' : 'ml-4'} text-xl hover:opacity-70 flex-shrink-0" onclick="this.closest('.alert').remove()" title="닫기">×</button>
             </div>
         `;
         
@@ -286,11 +292,14 @@ class MainController {
             alertElement.style.transform = 'translateX(0)';
         });
         
+        // 긴 메시지는 더 오래 표시 (10초), 짧은 메시지는 기본 시간
+        const displayDuration = isLongMessage ? 10000 : duration;
+        
         // 자동으로 제거
-        if (duration > 0) {
+        if (displayDuration > 0) {
             setTimeout(() => {
                 this.removeAlert(alertElement);
-            }, duration);
+            }, displayDuration);
         }
     }
 

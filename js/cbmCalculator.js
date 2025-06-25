@@ -124,12 +124,6 @@ class CBMCalculator {
                 element.addEventListener('change', () => this.saveCurrentInput());
             }
         });
-
-        // 팔레트 적재 방식 라디오 버튼도 자동 저장 대상에 추가
-        const palletLoadingTypeInputs = document.querySelectorAll('input[name="palletLoadingType"]');
-        palletLoadingTypeInputs.forEach(input => {
-            input.addEventListener('change', () => this.saveCurrentInput());
-        });
     }
 
     /**
@@ -259,10 +253,6 @@ class CBMCalculator {
      * 입력값 수집
      */
     collectInput() {
-        // 팔레트 적재 방식 수집
-        const palletLoadingTypeElement = document.querySelector('input[name="palletLoadingType"]:checked');
-        const palletLoadingType = palletLoadingTypeElement ? palletLoadingTypeElement.value : 'standard';
-
         return {
             box: {
                 length: parseFloat(document.getElementById('boxLength').value) || 0,
@@ -278,27 +268,108 @@ class CBMCalculator {
                 width: parseFloat(document.getElementById('palletWidth').value) || 110,
                 height: parseFloat(document.getElementById('palletHeight').value) || 15,
                 layers: parseInt(document.getElementById('palletLayers').value) || 1
-            },
-            palletLoadingType: palletLoadingType
+            }
         };
     }
 
     /**
-     * 입력값 검증
+     * 입력값 검증 - 친절한 안내 메시지 포함 ✅
      */
     validateInput(input) {
-        const { box, totalQuantity } = input;
+        const { box, totalQuantity, usePallet, pallet } = input;
 
-        if (box.length <= 0 || box.width <= 0 || box.height <= 0) {
-            return { valid: false, message: '박스 규격을 올바르게 입력해주세요.' };
+        // 🔍 박스 길이 검증
+        if (box.length <= 0) {
+            return { 
+                valid: false, 
+                message: '📏 박스 길이를 입력해주세요!\n\n📝 예시:\n• 작은 박스: 20cm\n• 일반 박스: 30cm\n• 큰 박스: 50cm\n\n💡 팁: 제품 포장 후 실제 박스 크기를 측정하세요.' 
+            };
         }
 
+        // 🔍 박스 너비 검증
+        if (box.width <= 0) {
+            return { 
+                valid: false, 
+                message: '📏 박스 너비를 입력해주세요!\n\n📝 예시:\n• 작은 박스: 15cm\n• 일반 박스: 25cm\n• 큰 박스: 40cm\n\n💡 팁: 가장 넓은 부분을 측정하세요.' 
+            };
+        }
+
+        // 🔍 박스 높이 검증
+        if (box.height <= 0) {
+            return { 
+                valid: false, 
+                message: '📏 박스 높이를 입력해주세요!\n\n📝 예시:\n• 얇은 박스: 5cm\n• 일반 박스: 15cm\n• 높은 박스: 30cm\n\n💡 팁: 포장재 두께도 포함해서 측정하세요.' 
+            };
+        }
+
+        // 🔍 총 수량 검증
         if (totalQuantity <= 0) {
-            return { valid: false, message: '총 수량을 입력해주세요.' };
+            return { 
+                valid: false, 
+                message: '📦 총 박스 수량을 입력해주세요!\n\n📝 예시:\n• 샘플 주문: 10박스\n• 소량 주문: 100박스\n• 대량 주문: 1,000박스\n\n💡 팁: 전체 주문량 ÷ 박스당 개수 = 총 박스 수' 
+            };
         }
 
+        // 🔍 박스 무게 검증
         if (box.weight <= 0) {
-            return { valid: false, message: '박스 무게를 입력해주세요.' };
+            return { 
+                valid: false, 
+                message: '⚖️ 박스 무게를 입력해주세요!\n\n📝 예시:\n• 전자제품: 2~5kg\n• 의류: 1~3kg\n• 기계부품: 5~15kg\n\n💡 팁: 제품 + 포장재 무게를 모두 포함하세요.' 
+            };
+        }
+
+        // 🔍 박스 크기 합리성 검증
+        const boxCBM = this.calculateBoxCBM(box);
+        if (boxCBM > 0.5) {
+            return { 
+                valid: false, 
+                message: '📦 박스가 너무 큽니다! (현재: ' + boxCBM.toFixed(3) + 'CBM)\n\n📝 일반적인 박스 크기:\n• 소형: 0.01~0.05 CBM\n• 중형: 0.05~0.2 CBM\n• 대형: 0.2~0.5 CBM\n\n💡 박스 크기를 다시 확인해주세요.' 
+            };
+        }
+
+        // 🔍 박스 무게 합리성 검증
+        if (box.weight > 50) {
+            return { 
+                valid: false, 
+                message: '⚖️ 박스가 너무 무겁습니다! (현재: ' + box.weight + 'kg)\n\n📝 일반적인 박스 무게:\n• 경량: 1~5kg\n• 중량: 5~20kg\n• 중량급: 20~30kg\n\n💡 30kg 이상은 포크리프트가 필요합니다.' 
+            };
+        }
+
+        // 🔍 팔레트 사용 시 추가 검증
+        if (usePallet) {
+            if (pallet.layers <= 0) {
+                return { 
+                    valid: false, 
+                    message: '📚 팔레트 적재 단수를 입력해주세요!\n\n📝 일반적인 적재 단수:\n• 가벼운 제품: 8~12단\n• 일반 제품: 4~8단\n• 무거운 제품: 2~4단\n\n💡 팁: 박스 무게 × 단수가 200kg을 넘지 않도록 하세요.' 
+                };
+            }
+
+            // 팔레트 무게 제한 확인
+            const palletWeight = box.weight * (pallet.layers * Math.floor(110/box.length) * Math.floor(110/box.width));
+            if (palletWeight > 1000) {
+                return { 
+                    valid: false, 
+                    message: '⚖️ 팔레트가 너무 무겁습니다! (예상: ' + Math.round(palletWeight) + 'kg)\n\n📝 팔레트 무게 제한:\n• 일반 팔레트: 1,000kg\n• 중량 팔레트: 1,500kg\n\n💡 적재 단수를 줄이거나 박스 무게를 확인하세요.' 
+                };
+            }
+
+            // 높이 제한 확인
+            const totalHeight = pallet.height + (pallet.layers * box.height);
+            if (totalHeight > 240) {
+                return { 
+                    valid: false, 
+                    message: '📏 팔레트 높이가 너무 높습니다! (현재: ' + totalHeight + 'cm)\n\n📝 높이 제한:\n• 일반 창고: 240cm\n• 컨테이너: 239cm (20ft/40ft GP)\n• 고큐브: 270cm (40ft HC)\n\n💡 적재 단수를 ' + Math.floor((240-pallet.height)/box.height) + '단으로 줄이세요.' 
+                };
+            }
+        }
+
+        // 🔍 총 CBM 합리성 검증
+        const totalCBM = totalQuantity * boxCBM;
+        if (totalCBM > 100) {
+            return { 
+                valid: false, 
+                message: '📦 총 CBM이 너무 큽니다! (현재: ' + totalCBM.toFixed(1) + 'CBM)\n\n📝 컨테이너 용량:\n• 20ft GP: 33 CBM\n• 40ft GP: 67 CBM\n• 40ft HC: 76 CBM\n\n💡 수량이나 박스 크기를 다시 확인해주세요.' 
+            };
         }
 
         return { valid: true };
@@ -343,127 +414,48 @@ class CBMCalculator {
         const { box, pallet, usePallet } = input;
         
         if (usePallet) {
-            return this.optimizePalletLayout(box, pallet, input.palletLoadingType);
+            return this.optimizePalletLayout(box, pallet);
         } else {
             return this.optimizeDirectLayout(box);
         }
     }
 
     /**
-     * 팔레트 레이아웃 최적화 - 최대 적재량 우선
+     * 팔레트 레이아웃 최적화
      */
-    optimizePalletLayout(box, pallet, palletLoadingType = 'standard') {
-        let bestResult = null;
+    optimizePalletLayout(box, pallet) {
+        // 박스의 가로/세로 방향별 적재 수량 계산
+        const orientations = [
+            { boxL: box.length, boxW: box.width, name: '정방향' },
+            { boxL: box.width, boxW: box.length, name: '90도 회전' }
+        ];
+
+        let bestOrientation = null;
         let maxBoxesPerLayer = 0;
-        
-        if (palletLoadingType === 'standard') {
-            // 표준 적재: 팔레트 110×110cm 안에서만
-            const orientations = [
-                { 
-                    boxL: box.length, 
-                    boxW: box.width, 
-                    name: '정방향',
-                    effectiveLength: pallet.length,
-                    effectiveWidth: pallet.width
-                },
-                { 
-                    boxL: box.width, 
-                    boxW: box.length, 
-                    name: '90도 회전',
-                    effectiveLength: pallet.length,
-                    effectiveWidth: pallet.width
-                }
-            ];
 
-            orientations.forEach(orientation => {
-                const boxesX = Math.floor(orientation.effectiveLength / orientation.boxL);
-                const boxesY = Math.floor(orientation.effectiveWidth / orientation.boxW);
-                const boxesPerLayer = boxesX * boxesY;
+        orientations.forEach(orientation => {
+            const boxesX = Math.floor(pallet.length / orientation.boxL);
+            const boxesY = Math.floor(pallet.width / orientation.boxW);
+            const boxesPerLayer = boxesX * boxesY;
 
-                if (boxesPerLayer > maxBoxesPerLayer) {
-                    maxBoxesPerLayer = boxesPerLayer;
-                    bestResult = {
-                        ...orientation,
-                        boxesX,
-                        boxesY,
-                        boxesPerLayer,
-                        usedLength: boxesX * orientation.boxL,
-                        usedWidth: boxesY * orientation.boxW
-                    };
-                }
-            });
-            
-        } else if (palletLoadingType === 'oversize') {
-            // 오버 적재: 컨테이너 제약 고려한 최대 적재
-            const maxWidth = 114;   // 가로 제한 (컨테이너 폭 235cm ÷ 2 - 팔레트간 여유 3cm)
-            const maxDepth = 120;   // 세로 제한 (실용적 한계)
-            
-            const orientations = [
-                {
-                    boxL: box.length,
-                    boxW: box.width,
-                    name: '정방향 (오버사이즈)',
-                    effectiveLength: maxWidth,
-                    effectiveWidth: maxDepth
-                },
-                {
-                    boxL: box.width,
-                    boxW: box.length,
-                    name: '90도 회전 (오버사이즈)',
-                    effectiveLength: maxWidth,
-                    effectiveWidth: maxDepth
-                }
-            ];
+            if (boxesPerLayer > maxBoxesPerLayer) {
+                maxBoxesPerLayer = boxesPerLayer;
+                bestOrientation = {
+                    ...orientation,
+                    boxesX,
+                    boxesY,
+                    boxesPerLayer
+                };
+            }
+        });
 
-            orientations.forEach(orientation => {
-                // 박스 간 간격 없이 빽빽하게 적재
-                const boxesX = Math.floor(orientation.effectiveLength / orientation.boxL);
-                const boxesY = Math.floor(orientation.effectiveWidth / orientation.boxW);
-                const boxesPerLayer = boxesX * boxesY;
-                
-                // 실제 사용 공간 계산
-                const usedLength = boxesX * orientation.boxL;
-                const usedWidth = boxesY * orientation.boxW;
-                
-                // 제약 조건 확인 후 최대 적재량 선택
-                if (usedLength <= maxWidth && usedWidth <= maxDepth && boxesPerLayer > maxBoxesPerLayer) {
-                    maxBoxesPerLayer = boxesPerLayer;
-                    bestResult = {
-                        ...orientation,
-                        boxesX,
-                        boxesY,
-                        boxesPerLayer,
-                        usedLength,
-                        usedWidth
-                    };
-                }
-            });
-        }
-
-        // 결과가 없으면 기본값 설정
-        if (!bestResult) {
-            bestResult = {
-                boxL: box.length,
-                boxW: box.width,
-                name: '정방향',
-                effectiveLength: pallet.length,
-                effectiveWidth: pallet.width,
-                boxesX: Math.floor(pallet.length / box.length),
-                boxesY: Math.floor(pallet.width / box.width),
-                boxesPerLayer: Math.floor(pallet.length / box.length) * Math.floor(pallet.width / box.width),
-                usedLength: Math.floor(pallet.length / box.length) * box.length,
-                usedWidth: Math.floor(pallet.width / box.width) * box.width
-            };
-            maxBoxesPerLayer = bestResult.boxesPerLayer;
-        }
-
-        // 최종 결과 반환
+        // 최대 적재 단수 계산
         const actualLayers = pallet.layers;
         const actualBoxesPerPallet = maxBoxesPerLayer * actualLayers;
 
         return {
             type: 'pallet',
-            orientation: bestResult,
+            orientation: bestOrientation,
             boxesPerLayer: maxBoxesPerLayer,
             maxLayers: actualLayers,
             boxesPerPallet: actualBoxesPerPallet,
@@ -471,15 +463,6 @@ class CBMCalculator {
                 length: pallet.length,
                 width: pallet.width,
                 height: pallet.height + (actualLayers * box.height)
-            },
-            effectiveDimensions: {
-                length: bestResult.effectiveLength,
-                width: bestResult.effectiveWidth
-            },
-            loadingType: palletLoadingType,
-            actualUsage: {
-                length: bestResult.usedLength,
-                width: bestResult.usedWidth
             }
         };
     }
@@ -843,17 +826,6 @@ class CBMCalculator {
 
         const { input, recommendation, containerResults } = result;
 
-        // 팔레트 적재 방식 표시 텍스트 생성
-        let loadingTypeText = '';
-        if (input.usePallet && input.palletLoadingType) {
-            const loadingTypeMap = {
-                'standard': '📏 규격 준수 (표준)',
-                'compact': '📦 작게 적재 (안전)',
-                'oversize': '📈 크게 적재 (효율)'
-            };
-            loadingTypeText = `<p class="text-sm text-blue-600 mt-1">적재 방식: ${loadingTypeMap[input.palletLoadingType] || '표준'}</p>`;
-        }
-
         resultsContainer.innerHTML = `
             <div class="space-y-6">
                 <!-- 요약 정보 -->
@@ -874,7 +846,6 @@ class CBMCalculator {
                     <p><strong>${recommendation.shippingMethod === 'LCL' ? 'LCL' : recommendation.containerType + ' ' + recommendation.shippingMethod}</strong></p>
                     <p class="text-sm mt-1">${recommendation.reason}</p>
                     <p class="text-sm">효율성: ${recommendation.efficiency}%</p>
-                    ${loadingTypeText}
                 </div>
 
                 <!-- 상세 결과 테이블 -->
@@ -1229,10 +1200,7 @@ class CBMCalculator {
             const boxWidth = layout.orientation.name === '90도 회전' ? box.width : box.length;
             const boxDepth = layout.orientation.name === '90도 회전' ? box.length : box.width;
             const boxGeometry = new THREE.BoxGeometry(boxWidth, box.height, boxDepth);
-            
-            // 박스 재질 - 기본(파란색)과 오버사이즈(빨간색)
-            const normalBoxMaterial = new THREE.MeshStandardMaterial({ color: 0x90CAF9 }); // 파란색
-            const oversizeBoxMaterial = new THREE.MeshStandardMaterial({ color: 0xFF4444 }); // 빨간색
+            const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x90CAF9 });
             const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
 
             // 팔레트에 실제로 올릴 박스 수 계산
@@ -1248,61 +1216,7 @@ class CBMCalculator {
                         
                         const boxGroup = new THREE.Group();
                         
-                        // 팔레트 위 박스들을 실제 사용 공간 기준으로 배치
-                        const actualUsedWidth = layout.actualUsage ? layout.actualUsage.length : layout.orientation.boxesX * boxWidth;
-                        const actualUsedDepth = layout.actualUsage ? layout.actualUsage.width : layout.orientation.boxesY * boxDepth;
-                        const xOffset = -actualUsedWidth / 2;
-                        const zOffset = -actualUsedDepth / 2;
-                        
-                        const xPos = xOffset + boxWidth * (x + 0.5);
-                        const zPos = zOffset + boxDepth * (y + 0.5);
-                        const yPos = pallet.height + box.height * (layer + 0.5);
-                        
-                        // 박스가 팔레트 경계를 벗어나는지 확인
-                        const boxLeft = xPos - boxWidth / 2;
-                        const boxRight = xPos + boxWidth / 2;
-                        const boxFront = zPos - boxDepth / 2;
-                        const boxBack = zPos + boxDepth / 2;
-                        
-                        const palletLeft = -pallet.length / 2;
-                        const palletRight = pallet.length / 2;
-                        const palletFront = -pallet.width / 2;
-                        const palletBack = pallet.width / 2;
-                        
-                        // 오버사이즈 여부 판단
-                        let isOversize = (boxLeft < palletLeft || boxRight > palletRight || 
-                                        boxFront < palletFront || boxBack > palletBack);
-                        
-                        // 오버사이즈 적재 시 강제로 일부 박스를 빨간색으로 표시
-                        if (input.palletLoadingType === 'oversize' && !isOversize) {
-                            // 실제 사용 공간이 팔레트보다 크면 가장자리 박스들을 오버사이즈로 처리
-                            const isEdgeBox = (x === 0 || x === layout.orientation.boxesX - 1 || 
-                                             y === 0 || y === layout.orientation.boxesY - 1);
-                            
-                            // 실제 사용 공간이 팔레트보다 큰 경우에만 가장자리 박스를 빨간색으로
-                            if (isEdgeBox && (actualUsedWidth > pallet.length || actualUsedDepth > pallet.width)) {
-                                isOversize = true;
-                            }
-                        }
-                        
-                        // 디버깅용 로그 (첫 번째 박스만)
-                        if (boxCount === 0 && input.palletLoadingType === 'oversize') {
-                            console.log('🔍 오버사이즈 적재 디버깅:', {
-                                loadingType: input.palletLoadingType,
-                                boxPosition: { xPos, zPos },
-                                boxBounds: { boxLeft, boxRight, boxFront, boxBack },
-                                palletBounds: { palletLeft, palletRight, palletFront, palletBack },
-                                actualUsage: layout.actualUsage,
-                                actualUsedWidth, actualUsedDepth,
-                                palletSize: { length: pallet.length, width: pallet.width },
-                                isOversize: isOversize
-                            });
-                        }
-                        
-                        // 적절한 재질 선택
-                        const selectedMaterial = isOversize ? oversizeBoxMaterial : normalBoxMaterial;
-                        
-                        const boxMesh = new THREE.Mesh(boxGeometry, selectedMaterial);
+                        const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
                         boxMesh.castShadow = true;
                         boxMesh.receiveShadow = true;
                         boxGroup.add(boxMesh);
@@ -1311,9 +1225,18 @@ class CBMCalculator {
                         const boxLine = new THREE.LineSegments(boxEdges, lineMaterial);
                         boxGroup.add(boxLine);
                         
+                        // 팔레트 위 박스들을 중앙에 배치
+                        const totalWidthUsed = layout.orientation.boxesX * boxWidth;
+                        const totalDepthUsed = layout.orientation.boxesY * boxDepth;
+                        const xOffset = -totalWidthUsed / 2;
+                        const zOffset = -totalDepthUsed / 2;
+                        
+                        const xPos = xOffset + boxWidth * (x + 0.5);
+                        const zPos = zOffset + boxDepth * (y + 0.5);
+                        const yPos = pallet.height + box.height * (layer + 0.5);
+                        
                         boxGroup.position.set(xPos, yPos, zPos);
                         boxGroup.userData.isBox = true;
-                        boxGroup.userData.isOversize = isOversize; // 오버사이즈 정보 저장
                         this.scene.add(boxGroup);
                         
                         boxCount++;
@@ -1472,10 +1395,7 @@ class CBMCalculator {
                         const boxWidth = palletLayout.orientation.name === '90도 회전' ? box.width : box.length;
                         const boxDepth = palletLayout.orientation.name === '90도 회전' ? box.length : box.width;
                         const boxGeometry = new THREE.BoxGeometry(boxWidth, box.height, boxDepth);
-                        
-                        // 박스 재질 - 기본(파란색)과 오버사이즈(빨간색)
-                        const normalBoxMaterial = new THREE.MeshStandardMaterial({ color: 0x90CAF9 }); // 파란색
-                        const oversizeBoxMaterial = new THREE.MeshStandardMaterial({ color: 0xFF4444 }); // 빨간색
+                        const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x90CAF9 });
                         
                         // 이 팔레트에 올릴 박스 수 계산
                         const remainingBoxes = input.totalQuantity - (palletCount * palletLayout.boxesPerPallet);
@@ -1489,48 +1409,7 @@ class CBMCalculator {
                                     
                                     const boxGroup = new THREE.Group();
                                     
-                                    // 박스를 실제 사용 공간 기준으로 배치
-                                    const actualUsedWidth = palletLayout.actualUsage ? palletLayout.actualUsage.length : palletLayout.orientation.boxesX * boxWidth;
-                                    const actualUsedDepth = palletLayout.actualUsage ? palletLayout.actualUsage.width : palletLayout.orientation.boxesY * boxDepth;
-                                    const boxXOffset = -actualUsedWidth / 2 + boxWidth * (bx + 0.5);
-                                    const boxZOffset = -actualUsedDepth / 2 + boxDepth * (by + 0.5);
-                                    const boxYOffset = pallet.height + box.height * (layer + 0.5);
-                                    
-                                    // 절대 좌표로 박스 위치 계산
-                                    const absoluteBoxX = palletX + boxXOffset;
-                                    const absoluteBoxZ = palletZ + boxZOffset;
-                                    
-                                    // 박스가 팔레트 경계를 벗어나는지 확인
-                                    const boxLeft = absoluteBoxX - boxWidth / 2;
-                                    const boxRight = absoluteBoxX + boxWidth / 2;
-                                    const boxFront = absoluteBoxZ - boxDepth / 2;
-                                    const boxBack = absoluteBoxZ + boxDepth / 2;
-                                    
-                                    const palletLeft = palletX - pallet.length / 2;
-                                    const palletRight = palletX + pallet.length / 2;
-                                    const palletFront = palletZ - pallet.width / 2;
-                                    const palletBack = palletZ + pallet.width / 2;
-                                    
-                                    // 오버사이즈 여부 판단
-                                    let isOversize = (boxLeft < palletLeft || boxRight > palletRight || 
-                                                    boxFront < palletFront || boxBack > palletBack);
-                                    
-                                    // 오버사이즈 적재 시 강제로 일부 박스를 빨간색으로 표시
-                                    if (input.palletLoadingType === 'oversize' && !isOversize) {
-                                        // 실제 사용 공간이 팔레트보다 크면 가장자리 박스들을 오버사이즈로 처리
-                                        const isEdgeBox = (bx === 0 || bx === palletLayout.orientation.boxesX - 1 || 
-                                                         by === 0 || by === palletLayout.orientation.boxesY - 1);
-                                        
-                                        // 실제 사용 공간이 팔레트보다 큰 경우에만 가장자리 박스를 빨간색으로
-                                        if (isEdgeBox && (actualUsedWidth > pallet.length || actualUsedDepth > pallet.width)) {
-                                            isOversize = true;
-                                        }
-                                    }
-                                    
-                                    // 적절한 재질 선택
-                                    const selectedMaterial = isOversize ? oversizeBoxMaterial : normalBoxMaterial;
-                                    
-                                    const boxMesh = new THREE.Mesh(boxGeometry, selectedMaterial);
+                                    const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
                                     boxMesh.castShadow = true;
                                     boxMesh.receiveShadow = true;
                                     boxGroup.add(boxMesh);
@@ -1542,13 +1421,19 @@ class CBMCalculator {
                                     );
                                     boxGroup.add(boxLine);
                                     
+                                    // 박스를 팔레트 중앙에 배치
+                                    const totalWidthUsed = palletLayout.orientation.boxesX * boxWidth;
+                                    const totalDepthUsed = palletLayout.orientation.boxesY * boxDepth;
+                                    const boxXOffset = -totalWidthUsed / 2 + boxWidth * (bx + 0.5);
+                                    const boxZOffset = -totalDepthUsed / 2 + boxDepth * (by + 0.5);
+                                    const boxYOffset = pallet.height + box.height * (layer + 0.5);
+                                    
                                     boxGroup.position.set(
-                                        absoluteBoxX,
+                                        palletX + boxXOffset,
                                         palletY - palletLayout.dimensions.height / 2 + boxYOffset,
-                                        absoluteBoxZ
+                                        palletZ + boxZOffset
                                     );
                                     boxGroup.userData.isBox = true;
-                                    boxGroup.userData.isOversize = isOversize; // 오버사이즈 정보 저장
                                     this.scene.add(boxGroup);
                                     
                                     boxCount++;
@@ -1677,14 +1562,6 @@ class CBMCalculator {
         const usePalletCheckbox = document.getElementById('usePallet');
         if (usePalletCheckbox && input.usePallet !== undefined) {
             usePalletCheckbox.checked = input.usePallet;
-        }
-
-        // 팔레트 적재 방식 복원
-        if (input.palletLoadingType) {
-            const palletLoadingTypeInput = document.querySelector(`input[name="palletLoadingType"][value="${input.palletLoadingType}"]`);
-            if (palletLoadingTypeInput) {
-                palletLoadingTypeInput.checked = true;
-            }
         }
     }
 }

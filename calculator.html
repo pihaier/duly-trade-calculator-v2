@@ -177,27 +177,6 @@
                             </div>
                             
                             <div id="palletSettings" class="space-y-4 hidden">
-                                <!-- 팔레트 적재 방식 선택 -->
-                                <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                                    <h4 class="text-sm font-semibold mb-3 text-gray-700">📦 팔레트 적재 방식</h4>
-                                    <div class="grid grid-cols-1 gap-3">
-                                        <label class="flex items-center space-x-3 cursor-pointer">
-                                            <input type="radio" name="palletLoadingType" value="standard" class="w-4 h-4 text-blue-600" checked>
-                                            <div>
-                                                <span class="text-sm font-medium">📏 표준 적재</span>
-                                                <p class="text-xs text-gray-500">팔레트 110×110cm 안에서만 적재</p>
-                                            </div>
-                                        </label>
-                                        <label class="flex items-center space-x-3 cursor-pointer">
-                                            <input type="radio" name="palletLoadingType" value="oversize" class="w-4 h-4 text-blue-600">
-                                            <div>
-                                                <span class="text-sm font-medium">📈 오버사이즈 적재</span>
-                                                <p class="text-xs text-gray-500">컨테이너 폭 제약 고려 (가로 114cm, 세로 120cm 한계)</p>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
                                 <div class="grid grid-cols-3 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium mb-2">팔레트 가로 (cm)</label>
@@ -282,23 +261,9 @@
                         </div>
                     </div>
                     
-                    <!-- 3D 컨트롤 안내 및 범례 -->
-                    <div class="mt-4 space-y-3">
-                        <div class="text-sm text-gray-600 text-center">
-                            🖱️ 마우스: 회전 | 🖱️ + Shift: 이동 | 휠: 확대/축소
-                        </div>
-                        
-                        <!-- 박스 색상 범례 -->
-                        <div class="flex justify-center items-center space-x-6 text-sm">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-4 h-4 bg-blue-400 rounded border border-gray-300"></div>
-                                <span class="text-gray-700">표준 적재 (팔레트 내)</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-4 h-4 bg-red-500 rounded border border-gray-300"></div>
-                                <span class="text-gray-700">오버사이즈 적재 (팔레트 밖)</span>
-                            </div>
-                        </div>
+                    <!-- 3D 컨트롤 안내 -->
+                    <div class="mt-4 text-sm text-gray-600 text-center">
+                        🖱️ 마우스: 회전 | 🖱️ + Shift: 이동 | 휠: 확대/축소
                     </div>
                 </div>
             </div>

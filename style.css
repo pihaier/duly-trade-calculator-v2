@@ -247,8 +247,34 @@ body {
 /* 알림 메시지 */
 .alert {
     margin-bottom: 0.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid;
+    font-size: 0.875rem;
+    max-width: 350px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     /* 애니메이션 제거 */
     transition: none;
+}
+
+/* 큰 알림창 스타일 ✅ */
+.alert-large {
+    max-width: 450px !important;
+    padding: 1.5rem !important;
+    font-size: 0.9rem !important;
+    line-height: 1.6 !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.alert-large .alert-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.alert-large .alert-content {
+    opacity: 0.9;
 }
 
 .alert-info {

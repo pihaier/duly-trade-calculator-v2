@@ -693,25 +693,76 @@ class TotalCostCalculator {
     }
 
     /**
-     * 입력값 검증
+     * 입력값 검증 - 친절한 안내 메시지 포함 ✅
      */
     validateInput(input) {
-        const { unitPrice, quantity, shippingCost } = input;
+        const { unitPrice, quantity, shippingCost, productCurrency, shippingCurrency } = input;
 
+        // 🔍 제품 단가 검증
         if (!unitPrice || unitPrice <= 0) {
-            return { valid: false, message: '⚠️ 제품 단가를 입력해주세요.' };
+            return { 
+                valid: false, 
+                message: '💰 제품 단가를 입력해주세요!\n\n📝 예시:\n• 스마트폰: $150\n• 의류: $25\n• 전자제품: $80\n\n💡 팁: 공장에서 제공한 FOB 가격을 입력하세요.' 
+            };
         }
 
+        // 🔍 수량 검증
         if (!quantity || quantity <= 0) {
-            return { valid: false, message: '⚠️ 수량을 입력해주세요.' };
+            return { 
+                valid: false, 
+                message: '📦 주문 수량을 입력해주세요!\n\n📝 예시:\n• 소량 주문: 100개\n• 일반 주문: 1,000개\n• 대량 주문: 10,000개\n\n💡 팁: MOQ(최소 주문량)를 확인하세요.' 
+            };
         }
 
+        // 🔍 운송비 검증
         if (shippingCost < 0) {
-            return { valid: false, message: '⚠️ 운송비는 0 이상이어야 합니다.' };
+            return { 
+                valid: false, 
+                message: '🚢 운송비는 0원 이상이어야 합니다!\n\n📝 참고:\n• 무료 배송인 경우: 0 입력\n• 해상 운송: $1,500~$3,000\n• 항공 운송: $5~$15/kg\n\n💡 팁: 포워더에게 견적을 받아보세요.' 
+            };
         }
 
+        // 🔍 운송비가 0이고 제품 가격이 높은 경우 안내
+        if (shippingCost === 0 && unitPrice * quantity > 10000) {
+            return { 
+                valid: false, 
+                message: '🚢 고가 제품의 운송비가 0원인지 확인해주세요!\n\n📝 일반적인 운송비:\n• 중국→한국 해상: $1,500~$2,500\n• 중국→한국 항공: $5~$10/kg\n• 유럽→한국: $3,000~$5,000\n\n💡 FOB 조건인지 EXW 조건인지 확인하세요.' 
+            };
+        }
+
+        // 🔍 HS Code 검증 (선택사항이지만 입력했다면 정확해야 함)
         if (input.hsCode && input.hsCode.length > 0 && input.hsCode.length !== 10) {
-            return { valid: false, message: '⚠️ HS Code는 10자리 숫자여야 합니다.' };
+            return { 
+                valid: false, 
+                message: '📋 HS Code는 10자리 숫자여야 합니다!\n\n📝 예시:\n• 스마트폰: 8517120000\n• 노트북: 8471300000\n• 의류: 6109100000\n\n💡 팁: 관세청 HS Code 검색 사이트에서 확인하세요.\n🔗 https://unipass.customs.go.kr' 
+            };
+        }
+
+        // 🔍 환율 입력 확인 (USD, CNY가 아닌 경우)
+        const usdRate = parseFloat(document.getElementById('usdRate')?.value?.replace(/,/g, '') || '0');
+        const cnyRate = parseFloat(document.getElementById('cnyRate')?.value?.replace(/,/g, '') || '0');
+        
+        if ((productCurrency === 'USD' || shippingCurrency === 'USD') && usdRate <= 0) {
+            return { 
+                valid: false, 
+                message: '💱 USD 환율을 입력해주세요!\n\n📝 현재 환율 (참고):\n• USD: 약 1,350원\n• 최근 범위: 1,300~1,400원\n\n💡 팁: "환율 조회" 버튼을 눌러 실시간 환율을 가져오세요!' 
+            };
+        }
+
+        if ((productCurrency === 'CNY' || shippingCurrency === 'CNY') && cnyRate <= 0) {
+            return { 
+                valid: false, 
+                message: '💱 CNY 환율을 입력해주세요!\n\n📝 현재 환율 (참고):\n• CNY: 약 190원\n• 최근 범위: 180~200원\n\n💡 팁: "환율 조회" 버튼을 눌러 실시간 환율을 가져오세요!' 
+            };
+        }
+
+        // 🔍 관세율 확인 (HS Code가 있는데 관세율이 기본값인 경우)
+        const appliedTariffRate = parseFloat(document.getElementById('appliedTariffRate')?.value || '8');
+        if (input.hsCode && input.hsCode.length === 10 && appliedTariffRate === 8) {
+            return { 
+                valid: false, 
+                message: '📋 HS Code를 입력했는데 관세율이 기본값(8%)입니다!\n\n💡 다음 중 하나를 선택하세요:\n\n1️⃣ "관세율 조회" 버튼을 눌러 정확한 관세율 확인\n2️⃣ HS Code를 지우고 기본 관세율로 계산\n3️⃣ 알고 있는 관세율을 직접 입력\n\n📝 일반적인 관세율:\n• 전자제품: 0~8%\n• 의류: 8~13%\n• 기계류: 0~8%' 
+            };
         }
 
         return { valid: true };
