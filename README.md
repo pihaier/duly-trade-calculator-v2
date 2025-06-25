@@ -46,6 +46,14 @@
 
 - **메인 URL**: https://duly-trade-calculator.vercel.app
 - **계산기 URL**: https://duly-trade-calculator.vercel.app/calculator
+- **GitHub 저장소**: https://github.com/pihaier/duly-trade-calculator-v2
+- **자동 배포**: Git 푸시 시 Vercel 자동 배포 활성화 ✅
+
+### 🔄 배포 프로세스
+1. 로컬에서 코드 수정
+2. Git 커밋 및 푸시
+3. Vercel 자동 감지 및 배포
+4. 실시간 업데이트 완료
 
 ## 🛠️ 문제 해결 기록
 
