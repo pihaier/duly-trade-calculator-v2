@@ -520,6 +520,16 @@ class CBMCalculator {
         
         let bestRecommendation = null;
         
+        // 컨테이너 이름 간소화 함수
+        const getSimpleContainerName = (type) => {
+            const nameMap = {
+                '20ft': '20ft GP',
+                '40ft': '40ft GP', 
+                '40hc': '40ft HG'
+            };
+            return nameMap[type] || type;
+        };
+        
         // 박스 수량 기준으로 컨테이너 선택
         if (totalQuantity >= container20ft.boxesPerContainer * 0.6) {
             // 20ft GP 60% 이상
@@ -529,7 +539,7 @@ class CBMCalculator {
                 if (totalCBM >= 15 || container20ft.efficiency >= 70) {
                     bestRecommendation = {
                         containerType: '20ft',
-                        shippingMethod: `${this.containers['20ft'].name} 컨테이너 * 1개 FCL`,
+                        shippingMethod: `${getSimpleContainerName('20ft')} * 1개 FCL`,
                         reason: totalCBM >= 15 ? 
                             `총 CBM ${Math.round(totalCBM * 10) / 10} ≥ 15이므로 FCL 권장` : 
                             `컨테이너 효율 ${Math.round(container20ft.efficiency)}% ≥ 70%이므로 FCL 권장`,
@@ -553,7 +563,7 @@ class CBMCalculator {
                 // 40ft GP 추천
                 bestRecommendation = {
                     containerType: '40ft',
-                    shippingMethod: `${this.containers['40ft'].name} 컨테이너 * 1개 FCL`,
+                    shippingMethod: `${getSimpleContainerName('40ft')} * 1개 FCL`,
                     reason: `박스 수량 ${totalQuantity}개는 40ft GP 적재 가능`,
                     efficiency: container40ft.efficiency,
                     containersNeeded: 1,
@@ -564,8 +574,8 @@ class CBMCalculator {
                 // 40ft HC 추천
                 bestRecommendation = {
                     containerType: '40hc',
-                    shippingMethod: `${this.containers['40hc'].name} 컨테이너 * 1개 FCL`,
-                    reason: `박스 수량 ${totalQuantity}개는 40ft HC 적재 가능`,
+                    shippingMethod: `${getSimpleContainerName('40hc')} * 1개 FCL`,
+                    reason: `박스 수량 ${totalQuantity}개는 40ft HG 적재 가능`,
                     efficiency: container40hc.efficiency,
                     containersNeeded: 1,
                     boxesPerContainer: container40hc.boxesPerContainer,
@@ -598,7 +608,7 @@ class CBMCalculator {
                         // 15 CBM 미만은 LCL
                         bestRecommendation = {
                             containerType: bestOption.type,
-                            shippingMethod: `${this.containers[bestOption.type].name} 컨테이너 * ${bestOption.result.containersNeeded - 1}개 FCL + LCL * 1개`,
+                            shippingMethod: `${getSimpleContainerName(bestOption.type)} * ${bestOption.result.containersNeeded - 1}개 FCL + LCL * 1개`,
                             reason: `마지막 컨테이너는 LCL 권장 (${Math.round(remainingCBM * 10) / 10}CBM)`,
                             efficiency: bestOption.result.efficiency,
                             containersNeeded: bestOption.result.containersNeeded,
@@ -613,7 +623,7 @@ class CBMCalculator {
                         
                         bestRecommendation = {
                             containerType: bestOption.type,
-                            shippingMethod: `${this.containers[bestOption.type].name} 컨테이너 * ${bestOption.result.containersNeeded - 1}개 FCL + ${remainderContainer} 컨테이너 * 1개 FCL`,
+                            shippingMethod: `${getSimpleContainerName(bestOption.type)} * ${bestOption.result.containersNeeded - 1}개 FCL + ${remainderContainer} * 1개 FCL`,
                             reason: remainderReason,
                             efficiency: bestOption.result.efficiency,
                             containersNeeded: bestOption.result.containersNeeded,
@@ -625,7 +635,7 @@ class CBMCalculator {
                     // 나머지 없음
                     bestRecommendation = {
                         containerType: bestOption.type,
-                        shippingMethod: `${this.containers[bestOption.type].name} 컨테이너 * ${bestOption.result.containersNeeded}개 FCL`,
+                        shippingMethod: `${getSimpleContainerName(bestOption.type)} * ${bestOption.result.containersNeeded}개 FCL`,
                         reason: `효율성: ${Math.round(bestOption.result.efficiency)}%`,
                         efficiency: bestOption.result.efficiency,
                         containersNeeded: bestOption.result.containersNeeded,
@@ -668,7 +678,7 @@ class CBMCalculator {
         if (container20ft.boxesPerContainer >= remainingBoxes) {
             containerOptions.push({
                 type: '20ft',
-                name: this.containers['20ft'].name,
+                name: '20ft GP',  // 간단한 이름으로 변경
                 capacity: container20ft.boxesPerContainer
             });
         }
@@ -684,7 +694,7 @@ class CBMCalculator {
         if (container40ft.boxesPerContainer >= remainingBoxes) {
             containerOptions.push({
                 type: '40ft',
-                name: this.containers['40ft'].name,
+                name: '40ft GP',  // 간단한 이름으로 변경
                 capacity: container40ft.boxesPerContainer
             });
         }
@@ -700,7 +710,7 @@ class CBMCalculator {
         if (container40hc.boxesPerContainer >= remainingBoxes) {
             containerOptions.push({
                 type: '40hc',
-                name: this.containers['40hc'].name,
+                name: '40ft HG',  // 간단한 이름으로 변경 (HG = High-Cube)
                 capacity: container40hc.boxesPerContainer
             });
         }
