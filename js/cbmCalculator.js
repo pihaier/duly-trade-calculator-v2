@@ -1229,7 +1229,10 @@ class CBMCalculator {
             const boxWidth = layout.orientation.name === '90도 회전' ? box.width : box.length;
             const boxDepth = layout.orientation.name === '90도 회전' ? box.length : box.width;
             const boxGeometry = new THREE.BoxGeometry(boxWidth, box.height, boxDepth);
-            const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x90CAF9 });
+            
+            // 박스 재질 - 기본(파란색)과 오버사이즈(빨간색)
+            const normalBoxMaterial = new THREE.MeshStandardMaterial({ color: 0x90CAF9 }); // 파란색
+            const oversizeBoxMaterial = new THREE.MeshStandardMaterial({ color: 0xFF4444 }); // 빨간색
             const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
 
             // 팔레트에 실제로 올릴 박스 수 계산
@@ -1245,15 +1248,6 @@ class CBMCalculator {
                         
                         const boxGroup = new THREE.Group();
                         
-                        const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
-                        boxMesh.castShadow = true;
-                        boxMesh.receiveShadow = true;
-                        boxGroup.add(boxMesh);
-                        
-                        const boxEdges = new THREE.EdgesGeometry(boxGeometry);
-                        const boxLine = new THREE.LineSegments(boxEdges, lineMaterial);
-                        boxGroup.add(boxLine);
-                        
                         // 팔레트 위 박스들을 실제 사용 공간 기준으로 배치
                         const actualUsedWidth = layout.actualUsage ? layout.actualUsage.length : layout.orientation.boxesX * boxWidth;
                         const actualUsedDepth = layout.actualUsage ? layout.actualUsage.width : layout.orientation.boxesY * boxDepth;
@@ -1264,8 +1258,36 @@ class CBMCalculator {
                         const zPos = zOffset + boxDepth * (y + 0.5);
                         const yPos = pallet.height + box.height * (layer + 0.5);
                         
+                        // 박스가 팔레트 경계를 벗어나는지 확인
+                        const boxLeft = xPos - boxWidth / 2;
+                        const boxRight = xPos + boxWidth / 2;
+                        const boxFront = zPos - boxDepth / 2;
+                        const boxBack = zPos + boxDepth / 2;
+                        
+                        const palletLeft = -pallet.length / 2;
+                        const palletRight = pallet.length / 2;
+                        const palletFront = -pallet.width / 2;
+                        const palletBack = pallet.width / 2;
+                        
+                        // 오버사이즈 여부 판단
+                        const isOversize = (boxLeft < palletLeft || boxRight > palletRight || 
+                                          boxFront < palletFront || boxBack > palletBack);
+                        
+                        // 적절한 재질 선택
+                        const selectedMaterial = isOversize ? oversizeBoxMaterial : normalBoxMaterial;
+                        
+                        const boxMesh = new THREE.Mesh(boxGeometry, selectedMaterial);
+                        boxMesh.castShadow = true;
+                        boxMesh.receiveShadow = true;
+                        boxGroup.add(boxMesh);
+                        
+                        const boxEdges = new THREE.EdgesGeometry(boxGeometry);
+                        const boxLine = new THREE.LineSegments(boxEdges, lineMaterial);
+                        boxGroup.add(boxLine);
+                        
                         boxGroup.position.set(xPos, yPos, zPos);
                         boxGroup.userData.isBox = true;
+                        boxGroup.userData.isOversize = isOversize; // 오버사이즈 정보 저장
                         this.scene.add(boxGroup);
                         
                         boxCount++;
@@ -1424,7 +1446,10 @@ class CBMCalculator {
                         const boxWidth = palletLayout.orientation.name === '90도 회전' ? box.width : box.length;
                         const boxDepth = palletLayout.orientation.name === '90도 회전' ? box.length : box.width;
                         const boxGeometry = new THREE.BoxGeometry(boxWidth, box.height, boxDepth);
-                        const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x90CAF9 });
+                        
+                        // 박스 재질 - 기본(파란색)과 오버사이즈(빨간색)
+                        const normalBoxMaterial = new THREE.MeshStandardMaterial({ color: 0x90CAF9 }); // 파란색
+                        const oversizeBoxMaterial = new THREE.MeshStandardMaterial({ color: 0xFF4444 }); // 빨간색
                         
                         // 이 팔레트에 올릴 박스 수 계산
                         const remainingBoxes = input.totalQuantity - (palletCount * palletLayout.boxesPerPallet);
@@ -1438,7 +1463,36 @@ class CBMCalculator {
                                     
                                     const boxGroup = new THREE.Group();
                                     
-                                    const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+                                    // 박스를 실제 사용 공간 기준으로 배치
+                                    const actualUsedWidth = palletLayout.actualUsage ? palletLayout.actualUsage.length : palletLayout.orientation.boxesX * boxWidth;
+                                    const actualUsedDepth = palletLayout.actualUsage ? palletLayout.actualUsage.width : palletLayout.orientation.boxesY * boxDepth;
+                                    const boxXOffset = -actualUsedWidth / 2 + boxWidth * (bx + 0.5);
+                                    const boxZOffset = -actualUsedDepth / 2 + boxDepth * (by + 0.5);
+                                    const boxYOffset = pallet.height + box.height * (layer + 0.5);
+                                    
+                                    // 절대 좌표로 박스 위치 계산
+                                    const absoluteBoxX = palletX + boxXOffset;
+                                    const absoluteBoxZ = palletZ + boxZOffset;
+                                    
+                                    // 박스가 팔레트 경계를 벗어나는지 확인
+                                    const boxLeft = absoluteBoxX - boxWidth / 2;
+                                    const boxRight = absoluteBoxX + boxWidth / 2;
+                                    const boxFront = absoluteBoxZ - boxDepth / 2;
+                                    const boxBack = absoluteBoxZ + boxDepth / 2;
+                                    
+                                    const palletLeft = palletX - pallet.length / 2;
+                                    const palletRight = palletX + pallet.length / 2;
+                                    const palletFront = palletZ - pallet.width / 2;
+                                    const palletBack = palletZ + pallet.width / 2;
+                                    
+                                    // 오버사이즈 여부 판단
+                                    const isOversize = (boxLeft < palletLeft || boxRight > palletRight || 
+                                                      boxFront < palletFront || boxBack > palletBack);
+                                    
+                                    // 적절한 재질 선택
+                                    const selectedMaterial = isOversize ? oversizeBoxMaterial : normalBoxMaterial;
+                                    
+                                    const boxMesh = new THREE.Mesh(boxGeometry, selectedMaterial);
                                     boxMesh.castShadow = true;
                                     boxMesh.receiveShadow = true;
                                     boxGroup.add(boxMesh);
@@ -1450,19 +1504,13 @@ class CBMCalculator {
                                     );
                                     boxGroup.add(boxLine);
                                     
-                                    // 박스를 실제 사용 공간 기준으로 배치
-                                    const actualUsedWidth = palletLayout.actualUsage ? palletLayout.actualUsage.length : palletLayout.orientation.boxesX * boxWidth;
-                                    const actualUsedDepth = palletLayout.actualUsage ? palletLayout.actualUsage.width : palletLayout.orientation.boxesY * boxDepth;
-                                    const boxXOffset = -actualUsedWidth / 2 + boxWidth * (bx + 0.5);
-                                    const boxZOffset = -actualUsedDepth / 2 + boxDepth * (by + 0.5);
-                                    const boxYOffset = pallet.height + box.height * (layer + 0.5);
-                                    
                                     boxGroup.position.set(
-                                        palletX + boxXOffset,
+                                        absoluteBoxX,
                                         palletY - palletLayout.dimensions.height / 2 + boxYOffset,
-                                        palletZ + boxZOffset
+                                        absoluteBoxZ
                                     );
                                     boxGroup.userData.isBox = true;
+                                    boxGroup.userData.isOversize = isOversize; // 오버사이즈 정보 저장
                                     this.scene.add(boxGroup);
                                     
                                     boxCount++;
