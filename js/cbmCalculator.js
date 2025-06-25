@@ -124,6 +124,12 @@ class CBMCalculator {
                 element.addEventListener('change', () => this.saveCurrentInput());
             }
         });
+
+        // 팔레트 적재 방식 라디오 버튼도 자동 저장 대상에 추가
+        const palletLoadingTypeInputs = document.querySelectorAll('input[name="palletLoadingType"]');
+        palletLoadingTypeInputs.forEach(input => {
+            input.addEventListener('change', () => this.saveCurrentInput());
+        });
     }
 
     /**
@@ -253,6 +259,10 @@ class CBMCalculator {
      * 입력값 수집
      */
     collectInput() {
+        // 팔레트 적재 방식 수집
+        const palletLoadingTypeElement = document.querySelector('input[name="palletLoadingType"]:checked');
+        const palletLoadingType = palletLoadingTypeElement ? palletLoadingTypeElement.value : 'standard';
+
         return {
             box: {
                 length: parseFloat(document.getElementById('boxLength').value) || 0,
@@ -268,7 +278,8 @@ class CBMCalculator {
                 width: parseFloat(document.getElementById('palletWidth').value) || 110,
                 height: parseFloat(document.getElementById('palletHeight').value) || 15,
                 layers: parseInt(document.getElementById('palletLayers').value) || 1
-            }
+            },
+            palletLoadingType: palletLoadingType
         };
     }
 
@@ -332,7 +343,7 @@ class CBMCalculator {
         const { box, pallet, usePallet } = input;
         
         if (usePallet) {
-            return this.optimizePalletLayout(box, pallet);
+            return this.optimizePalletLayout(box, pallet, input.palletLoadingType);
         } else {
             return this.optimizeDirectLayout(box);
         }
@@ -341,7 +352,27 @@ class CBMCalculator {
     /**
      * 팔레트 레이아웃 최적화
      */
-    optimizePalletLayout(box, pallet) {
+    optimizePalletLayout(box, pallet, palletLoadingType = 'standard') {
+        // 팔레트 적재 방식에 따른 유효 적재 공간 계산
+        let effectiveLength = pallet.length;
+        let effectiveWidth = pallet.width;
+        
+        switch (palletLoadingType) {
+            case 'compact': // 작게 적재 (안전)
+                effectiveLength = Math.max(pallet.length - 10, 50); // 양쪽 5cm씩 줄임
+                effectiveWidth = Math.max(pallet.width - 10, 50);   // 양쪽 5cm씩 줄임
+                break;
+            case 'oversize': // 크게 적재 (효율)
+                effectiveLength = pallet.length + 20; // 양쪽 10cm씩 늘림
+                effectiveWidth = pallet.width + 20;   // 양쪽 10cm씩 늘림
+                break;
+            case 'standard': // 규격 준수 (표준)
+            default:
+                effectiveLength = pallet.length;
+                effectiveWidth = pallet.width;
+                break;
+        }
+
         // 박스의 가로/세로 방향별 적재 수량 계산
         const orientations = [
             { boxL: box.length, boxW: box.width, name: '정방향' },
@@ -352,8 +383,8 @@ class CBMCalculator {
         let maxBoxesPerLayer = 0;
 
         orientations.forEach(orientation => {
-            const boxesX = Math.floor(pallet.length / orientation.boxL);
-            const boxesY = Math.floor(pallet.width / orientation.boxW);
+            const boxesX = Math.floor(effectiveLength / orientation.boxL);
+            const boxesY = Math.floor(effectiveWidth / orientation.boxW);
             const boxesPerLayer = boxesX * boxesY;
 
             if (boxesPerLayer > maxBoxesPerLayer) {
@@ -381,7 +412,12 @@ class CBMCalculator {
                 length: pallet.length,
                 width: pallet.width,
                 height: pallet.height + (actualLayers * box.height)
-            }
+            },
+            effectiveDimensions: {
+                length: effectiveLength,
+                width: effectiveWidth
+            },
+            loadingType: palletLoadingType
         };
     }
 
@@ -744,6 +780,17 @@ class CBMCalculator {
 
         const { input, recommendation, containerResults } = result;
 
+        // 팔레트 적재 방식 표시 텍스트 생성
+        let loadingTypeText = '';
+        if (input.usePallet && input.palletLoadingType) {
+            const loadingTypeMap = {
+                'standard': '📏 규격 준수 (표준)',
+                'compact': '📦 작게 적재 (안전)',
+                'oversize': '📈 크게 적재 (효율)'
+            };
+            loadingTypeText = `<p class="text-sm text-blue-600 mt-1">적재 방식: ${loadingTypeMap[input.palletLoadingType] || '표준'}</p>`;
+        }
+
         resultsContainer.innerHTML = `
             <div class="space-y-6">
                 <!-- 요약 정보 -->
@@ -764,6 +811,7 @@ class CBMCalculator {
                     <p><strong>${recommendation.shippingMethod === 'LCL' ? 'LCL' : recommendation.containerType + ' ' + recommendation.shippingMethod}</strong></p>
                     <p class="text-sm mt-1">${recommendation.reason}</p>
                     <p class="text-sm">효율성: ${recommendation.efficiency}%</p>
+                    ${loadingTypeText}
                 </div>
 
                 <!-- 상세 결과 테이블 -->
@@ -1480,6 +1528,14 @@ class CBMCalculator {
         const usePalletCheckbox = document.getElementById('usePallet');
         if (usePalletCheckbox && input.usePallet !== undefined) {
             usePalletCheckbox.checked = input.usePallet;
+        }
+
+        // 팔레트 적재 방식 복원
+        if (input.palletLoadingType) {
+            const palletLoadingTypeInput = document.querySelector(`input[name="palletLoadingType"][value="${input.palletLoadingType}"]`);
+            if (palletLoadingTypeInput) {
+                palletLoadingTypeInput.checked = true;
+            }
         }
     }
 }

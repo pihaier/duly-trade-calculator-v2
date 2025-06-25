@@ -177,6 +177,34 @@
                             </div>
                             
                             <div id="palletSettings" class="space-y-4 hidden">
+                                <!-- 팔레트 적재 방식 선택 -->
+                                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                    <h4 class="text-sm font-semibold mb-3 text-gray-700">📦 팔레트 적재 방식</h4>
+                                    <div class="grid grid-cols-1 gap-3">
+                                        <label class="flex items-center space-x-3 cursor-pointer">
+                                            <input type="radio" name="palletLoadingType" value="standard" class="w-4 h-4 text-blue-600" checked>
+                                            <div>
+                                                <span class="text-sm font-medium">📏 규격 준수 (표준)</span>
+                                                <p class="text-xs text-gray-500">팔레트 규격 내에서만 적재</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center space-x-3 cursor-pointer">
+                                            <input type="radio" name="palletLoadingType" value="compact" class="w-4 h-4 text-blue-600">
+                                            <div>
+                                                <span class="text-sm font-medium">📦 작게 적재 (안전)</span>
+                                                <p class="text-xs text-gray-500">팔레트보다 5cm씩 작게 적재 (운송 안전성 증대)</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center space-x-3 cursor-pointer">
+                                            <input type="radio" name="palletLoadingType" value="oversize" class="w-4 h-4 text-blue-600">
+                                            <div>
+                                                <span class="text-sm font-medium">📈 크게 적재 (효율)</span>
+                                                <p class="text-xs text-gray-500">팔레트보다 10cm씩 크게 적재 (적재 효율성 증대)</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="grid grid-cols-3 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium mb-2">팔레트 가로 (cm)</label>
