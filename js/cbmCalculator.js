@@ -350,61 +350,151 @@ class CBMCalculator {
     }
 
     /**
-     * 팔레트 레이아웃 최적화
+     * 팔레트 레이아웃 최적화 - 최대 적재량 우선
      */
     optimizePalletLayout(box, pallet, palletLoadingType = 'standard') {
-        // 팔레트 적재 방식에 따른 유효 적재 공간 계산
-        let effectiveLength = pallet.length;
-        let effectiveWidth = pallet.width;
+        let bestResult = null;
+        let maxBoxesPerLayer = 0;
         
-        switch (palletLoadingType) {
-            case 'compact': // 작게 적재 (안전)
-                effectiveLength = Math.max(pallet.length - 10, 50); // 양쪽 5cm씩 줄임
-                effectiveWidth = Math.max(pallet.width - 10, 50);   // 양쪽 5cm씩 줄임
-                break;
-            case 'oversize': // 크게 적재 (효율)
-                effectiveLength = pallet.length + 20; // 양쪽 10cm씩 늘림
-                effectiveWidth = pallet.width + 20;   // 양쪽 10cm씩 늘림
-                break;
-            case 'standard': // 규격 준수 (표준)
-            default:
-                effectiveLength = pallet.length;
-                effectiveWidth = pallet.width;
-                break;
+        if (palletLoadingType === 'standard') {
+            // 표준 적재: 팔레트 110×110cm 안에서만
+            const orientations = [
+                { 
+                    boxL: box.length, 
+                    boxW: box.width, 
+                    name: '정방향',
+                    effectiveLength: pallet.length,
+                    effectiveWidth: pallet.width
+                },
+                { 
+                    boxL: box.width, 
+                    boxW: box.length, 
+                    name: '90도 회전',
+                    effectiveLength: pallet.length,
+                    effectiveWidth: pallet.width
+                }
+            ];
+
+            orientations.forEach(orientation => {
+                const boxesX = Math.floor(orientation.effectiveLength / orientation.boxL);
+                const boxesY = Math.floor(orientation.effectiveWidth / orientation.boxW);
+                const boxesPerLayer = boxesX * boxesY;
+
+                if (boxesPerLayer > maxBoxesPerLayer) {
+                    maxBoxesPerLayer = boxesPerLayer;
+                    bestResult = {
+                        ...orientation,
+                        boxesX,
+                        boxesY,
+                        boxesPerLayer,
+                        usedLength: boxesX * orientation.boxL,
+                        usedWidth: boxesY * orientation.boxW
+                    };
+                }
+            });
+            
+        } else if (palletLoadingType === 'oversize') {
+            // 오버 적재: 컨테이너 제약 고려한 최대 적재
+            const maxWidth = 114;   // 가로 제한 (컨테이너 폭 235cm ÷ 2 - 여유)
+            const maxDepth = 120;   // 세로 제한 (실용적 한계)
+            const spacing = 3;      // 박스 간 여유공간
+            
+            const orientations = [
+                {
+                    boxL: box.length,
+                    boxW: box.width,
+                    name: '정방향 (오버사이즈)',
+                    effectiveLength: maxWidth,
+                    effectiveWidth: maxDepth
+                },
+                {
+                    boxL: box.width,
+                    boxW: box.length,
+                    name: '90도 회전 (오버사이즈)',
+                    effectiveLength: maxWidth,
+                    effectiveWidth: maxDepth
+                }
+            ];
+
+            orientations.forEach(orientation => {
+                // 박스 간 여유공간 고려한 계산
+                const boxesX = Math.floor((orientation.effectiveLength + spacing) / (orientation.boxL + spacing));
+                const boxesY = Math.floor((orientation.effectiveWidth + spacing) / (orientation.boxW + spacing));
+                const boxesPerLayer = boxesX * boxesY;
+                
+                // 실제 사용 공간 계산
+                const usedLength = boxesX * orientation.boxL + Math.max(0, boxesX - 1) * spacing;
+                const usedWidth = boxesY * orientation.boxW + Math.max(0, boxesY - 1) * spacing;
+                
+                // 제약 조건 확인
+                if (usedLength <= maxWidth && usedWidth <= maxDepth && boxesPerLayer > maxBoxesPerLayer) {
+                    maxBoxesPerLayer = boxesPerLayer;
+                    bestResult = {
+                        ...orientation,
+                        boxesX,
+                        boxesY,
+                        boxesPerLayer,
+                        usedLength,
+                        usedWidth,
+                        spacing
+                    };
+                }
+            });
+        } else {
+            // compact 모드는 기존 로직 유지
+            let effectiveLength = Math.max(pallet.length - 10, 50);
+            let effectiveWidth = Math.max(pallet.width - 10, 50);
+            
+            const orientations = [
+                { boxL: box.length, boxW: box.width, name: '정방향' },
+                { boxL: box.width, boxW: box.length, name: '90도 회전' }
+            ];
+
+            orientations.forEach(orientation => {
+                const boxesX = Math.floor(effectiveLength / orientation.boxL);
+                const boxesY = Math.floor(effectiveWidth / orientation.boxW);
+                const boxesPerLayer = boxesX * boxesY;
+
+                if (boxesPerLayer > maxBoxesPerLayer) {
+                    maxBoxesPerLayer = boxesPerLayer;
+                    bestResult = {
+                        ...orientation,
+                        boxesX,
+                        boxesY,
+                        boxesPerLayer,
+                        effectiveLength,
+                        effectiveWidth,
+                        usedLength: boxesX * orientation.boxL,
+                        usedWidth: boxesY * orientation.boxW
+                    };
+                }
+            });
         }
 
-        // 박스의 가로/세로 방향별 적재 수량 계산
-        const orientations = [
-            { boxL: box.length, boxW: box.width, name: '정방향' },
-            { boxL: box.width, boxW: box.length, name: '90도 회전' }
-        ];
+        // 결과가 없으면 기본값 설정
+        if (!bestResult) {
+            bestResult = {
+                boxL: box.length,
+                boxW: box.width,
+                name: '정방향',
+                boxesX: 1,
+                boxesY: 1,
+                boxesPerLayer: 1,
+                effectiveLength: pallet.length,
+                effectiveWidth: pallet.width,
+                usedLength: box.length,
+                usedWidth: box.width
+            };
+            maxBoxesPerLayer = 1;
+        }
 
-        let bestOrientation = null;
-        let maxBoxesPerLayer = 0;
-
-        orientations.forEach(orientation => {
-            const boxesX = Math.floor(effectiveLength / orientation.boxL);
-            const boxesY = Math.floor(effectiveWidth / orientation.boxW);
-            const boxesPerLayer = boxesX * boxesY;
-
-            if (boxesPerLayer > maxBoxesPerLayer) {
-                maxBoxesPerLayer = boxesPerLayer;
-                bestOrientation = {
-                    ...orientation,
-                    boxesX,
-                    boxesY,
-                    boxesPerLayer
-                };
-            }
-        });
-
-        // 최대 적재 단수 계산
+        // 최종 결과 반환
         const actualLayers = pallet.layers;
         const actualBoxesPerPallet = maxBoxesPerLayer * actualLayers;
 
         return {
             type: 'pallet',
-            orientation: bestOrientation,
+            orientation: bestResult,
             boxesPerLayer: maxBoxesPerLayer,
             maxLayers: actualLayers,
             boxesPerPallet: actualBoxesPerPallet,
@@ -414,10 +504,14 @@ class CBMCalculator {
                 height: pallet.height + (actualLayers * box.height)
             },
             effectiveDimensions: {
-                length: effectiveLength,
-                width: effectiveWidth
+                length: bestResult.effectiveLength || pallet.length,
+                width: bestResult.effectiveWidth || pallet.width
             },
-            loadingType: palletLoadingType
+            loadingType: palletLoadingType,
+            actualUsage: {
+                length: bestResult.usedLength,
+                width: bestResult.usedWidth
+            }
         };
     }
 
@@ -436,7 +530,7 @@ class CBMCalculator {
     }
 
     /**
-     * 컨테이너별 계산 결과 - 스마트 적재 로직 적용
+     * 컨테이너별 계산 결과
      */
     calculateContainerResult(input, containerSpec, layout, containerType) {
         const { totalQuantity, box } = input;
@@ -446,13 +540,37 @@ class CBMCalculator {
         let bestLayout = null;
 
         if (layout.type === 'pallet') {
-            // 🚀 스마트 팔레트 적재 로직 - 컨테이너 제약 고려
-            const smartPalletResult = this.calculateSmartPalletLoading(input, containerSpec);
+            // 팔레트 기반 계산 - 컨테이너별 최적 단수 계산
+            const palletsX = Math.floor(containerSpec.length / input.pallet.length);
+            const palletsY = Math.floor(containerSpec.width / input.pallet.width);
             
-            boxesInContainer = smartPalletResult.totalBoxes;
-            efficiency = smartPalletResult.efficiency;
-            bestLayout = smartPalletResult.layout;
+            // 컨테이너별 최적 단수 계산
+            const maxLayersForContainer = Math.floor((containerSpec.height - input.pallet.height) / box.height);
+            const actualLayers = Math.min(maxLayersForContainer, input.pallet.layers);
             
+            // 팔레트당 박스 수 (컨테이너별 최적 단수 적용)
+            const boxesPerLayer = layout.orientation.boxesX * layout.orientation.boxesY;
+            const boxesPerPallet = boxesPerLayer * actualLayers;
+            
+            // 팔레트 높이 (컨테이너별 최적 단수 적용)
+            const palletTotalHeight = input.pallet.height + (actualLayers * box.height);
+            const palletsZ = Math.floor(containerSpec.height / palletTotalHeight);
+            
+            const palletsPerContainer = palletsX * palletsY * palletsZ;
+            boxesInContainer = palletsPerContainer * boxesPerPallet;
+            
+            // 팔레트 전체 부피 계산
+            const usedVolume = palletsPerContainer * (
+                input.pallet.length * input.pallet.width * palletTotalHeight
+            ) / 1000000; // cm³ to m³
+            
+            efficiency = (usedVolume / containerSpec.cbm) * 100;
+            bestLayout = {
+                boxesX: layout.orientation.boxesX,
+                boxesY: layout.orientation.boxesY,
+                boxesZ: actualLayers, // 컨테이너별 최적 단수
+                rotated: layout.orientation.name === '90도 회전'
+            };
         } else {
             // 직접 적재 계산 - 박스 회전 최적화
             const orientations = [
@@ -465,6 +583,8 @@ class CBMCalculator {
                 const boxesX = Math.floor(containerSpec.length / orientation.boxL);
                 const boxesY = Math.floor(containerSpec.width / orientation.boxW);
                 let boxesZ = Math.floor(containerSpec.height / box.height);
+                
+                // 하중 제한 제거 - 높이만 고려
                 
                 const totalBoxes = boxesX * boxesY * boxesZ;
                 if (totalBoxes > maxBoxes) {
@@ -489,9 +609,11 @@ class CBMCalculator {
         const weightLimited = totalBoxWeight > containerSpec.maxWeight;
         
         if (weightLimited) {
+            // 무게 제한으로 인해 박스 수 조정
             const maxBoxesByWeight = Math.floor(containerSpec.maxWeight / box.weight);
             boxesInContainer = Math.min(boxesInContainer, maxBoxesByWeight);
             
+            // 효율성 재계산 (무게 제한 적용 후)
             const actualBoxes = Math.min(totalQuantity, boxesInContainer);
             const usedVolume = actualBoxes * this.calculateBoxCBM(box);
             efficiency = (usedVolume / containerSpec.cbm) * 100;
@@ -510,190 +632,6 @@ class CBMCalculator {
             layout: bestLayout,
             weightLimited: weightLimited,
             maxWeight: containerSpec.maxWeight
-        };
-    }
-
-    /**
-     * 🚀 스마트 팔레트 적재 계산 - 컨테이너 제약 고려
-     */
-    calculateSmartPalletLoading(input, containerSpec) {
-        const { box, pallet, palletLoadingType } = input;
-        
-        // 1단계: 컨테이너 실용적 공간 계산 (앞뒤 10cm 여유)
-        const containerUsableLength = containerSpec.length - 20; // 앞뒤 10cm씩 여유
-        const containerUsableWidth = containerSpec.width - 20;   // 좌우 10cm씩 여유
-        const containerUsableHeight = containerSpec.height - 5;  // 상부 5cm 여유
-        
-        // 2단계: 컨테이너별 최적 팔레트 크기 결정
-        const optimalPalletSize = this.calculateOptimalPalletSize(
-            containerUsableLength, 
-            containerUsableWidth, 
-            pallet
-        );
-        
-        // 3단계: 최적 팔레트에서의 박스 적재 계산
-        const boxLayoutOnPallet = this.calculateBoxLayoutOnPallet(
-            box, 
-            optimalPalletSize, 
-            palletLoadingType
-        );
-        
-        // 4단계: 컨테이너에 팔레트 배치 계산
-        const palletArrangement = this.calculatePalletArrangementInContainer(
-            optimalPalletSize,
-            containerUsableLength,
-            containerUsableWidth,
-            containerUsableHeight,
-            box.height
-        );
-        
-        // 5단계: 최종 결과 계산
-        const totalBoxes = boxLayoutOnPallet.boxesPerLayer * palletArrangement.layersPerPallet * palletArrangement.totalPallets;
-        const usedVolume = totalBoxes * this.calculateBoxCBM(box);
-        const efficiency = (usedVolume / containerSpec.cbm) * 100;
-        
-        return {
-            totalBoxes,
-            efficiency,
-            layout: {
-                boxesX: boxLayoutOnPallet.boxesX,
-                boxesY: boxLayoutOnPallet.boxesY,
-                boxesZ: palletArrangement.layersPerPallet,
-                rotated: boxLayoutOnPallet.rotated,
-                palletInfo: {
-                    palletsX: palletArrangement.palletsX,
-                    palletsY: palletArrangement.palletsY,
-                    palletsZ: palletArrangement.palletsZ,
-                    optimalSize: optimalPalletSize
-                }
-            }
-        };
-    }
-    
-    /**
-     * 컨테이너별 최적 팔레트 크기 계산
-     */
-    calculateOptimalPalletSize(containerLength, containerWidth, originalPallet) {
-        // 컨테이너 넓이의 절반을 기준으로 최적 팔레트 크기 결정
-        const halfWidth = containerWidth / 2;
-        
-        // 여러 팔레트 크기 옵션 검토
-        const palletOptions = [
-            // 원본 팔레트 크기
-            { length: originalPallet.length, width: originalPallet.width, type: 'original' },
-            // 컨테이너 넓이 절반 기준 옵션
-            { length: Math.min(originalPallet.length, containerLength), width: Math.min(halfWidth - 5, originalPallet.width), type: 'half-width' },
-            // 최대 활용 옵션
-            { length: Math.min(containerLength, originalPallet.length * 1.2), width: Math.min(containerWidth, originalPallet.width * 1.2), type: 'max-utilization' }
-        ];
-        
-        // 가장 효율적인 팔레트 크기 선택
-        let bestOption = palletOptions[0];
-        let bestEfficiency = 0;
-        
-        palletOptions.forEach(option => {
-            if (option.length > 0 && option.width > 0) {
-                const palletsX = Math.floor(containerLength / option.length);
-                const palletsY = Math.floor(containerWidth / option.width);
-                const totalPallets = palletsX * palletsY;
-                const utilization = (totalPallets * option.length * option.width) / (containerLength * containerWidth);
-                
-                if (utilization > bestEfficiency && totalPallets > 0) {
-                    bestEfficiency = utilization;
-                    bestOption = option;
-                }
-            }
-        });
-        
-        return {
-            length: Math.max(bestOption.length, 80), // 최소 80cm
-            width: Math.max(bestOption.width, 60),   // 최소 60cm
-            height: originalPallet.height,
-            type: bestOption.type
-        };
-    }
-    
-    /**
-     * 팔레트에서의 박스 적재 레이아웃 계산
-     */
-    calculateBoxLayoutOnPallet(box, palletSize, palletLoadingType) {
-        // 팔레트 적재 방식에 따른 유효 공간
-        let effectiveLength = palletSize.length;
-        let effectiveWidth = palletSize.width;
-        
-        switch (palletLoadingType) {
-            case 'compact':
-                effectiveLength = Math.max(palletSize.length - 10, 50);
-                effectiveWidth = Math.max(palletSize.width - 10, 50);
-                break;
-            case 'oversize':
-                effectiveLength = palletSize.length + 20;
-                effectiveWidth = palletSize.width + 20;
-                break;
-            default: // standard
-                effectiveLength = palletSize.length;
-                effectiveWidth = palletSize.width;
-                break;
-        }
-        
-        // 박스 배치 최적화
-        const orientations = [
-            { boxL: box.length, boxW: box.width, rotated: false },
-            { boxL: box.width, boxW: box.length, rotated: true }
-        ];
-        
-        let bestLayout = null;
-        let maxBoxesPerLayer = 0;
-        
-        orientations.forEach(orientation => {
-            const boxesX = Math.floor(effectiveLength / orientation.boxL);
-            const boxesY = Math.floor(effectiveWidth / orientation.boxW);
-            const boxesPerLayer = boxesX * boxesY;
-            
-            if (boxesPerLayer > maxBoxesPerLayer) {
-                maxBoxesPerLayer = boxesPerLayer;
-                bestLayout = {
-                    boxesX,
-                    boxesY,
-                    boxesPerLayer,
-                    rotated: orientation.rotated
-                };
-            }
-        });
-        
-        return {
-            boxesX: bestLayout.boxesX,
-            boxesY: bestLayout.boxesY,
-            boxesPerLayer: maxBoxesPerLayer,
-            rotated: bestLayout.rotated
-        };
-    }
-    
-    /**
-     * 컨테이너 내 팔레트 배치 계산
-     */
-    calculatePalletArrangementInContainer(palletSize, containerLength, containerWidth, containerHeight, boxHeight) {
-        // 팔레트 배치 수량 계산
-        const palletsX = Math.floor(containerLength / palletSize.length);
-        const palletsY = Math.floor(containerWidth / palletSize.width);
-        
-        // 단수 계산 (팔레트 높이 + 박스 높이들 고려)
-        const availableHeightForBoxes = containerHeight - palletSize.height;
-        const layersPerPallet = Math.floor(availableHeightForBoxes / boxHeight);
-        
-        // 팔레트 전체 높이 (팔레트 + 박스들)
-        const totalPalletHeight = palletSize.height + (layersPerPallet * boxHeight);
-        const palletsZ = Math.floor(containerHeight / totalPalletHeight);
-        
-        const totalPallets = palletsX * palletsY * palletsZ;
-        
-        return {
-            palletsX,
-            palletsY,
-            palletsZ,
-            layersPerPallet,
-            totalPallets,
-            totalPalletHeight
         };
     }
 
@@ -928,7 +866,7 @@ class CBMCalculator {
     }
 
     /**
-     * 결과 표시 - 스마트 팔레트 정보 포함
+     * 결과 표시
      */
     displayResults(result) {
         const resultsContainer = document.getElementById('cbmResults');
@@ -945,23 +883,6 @@ class CBMCalculator {
                 'oversize': '📈 크게 적재 (효율)'
             };
             loadingTypeText = `<p class="text-sm text-blue-600 mt-1">적재 방식: ${loadingTypeMap[input.palletLoadingType] || '표준'}</p>`;
-        }
-
-        // 스마트 팔레트 정보 표시
-        let smartPalletInfo = '';
-        if (input.usePallet && containerResults[recommendation.containerType].layout.palletInfo) {
-            const palletInfo = containerResults[recommendation.containerType].layout.palletInfo;
-            smartPalletInfo = `
-                <div class="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                    <h5 class="font-semibold text-blue-800 mb-2">🧠 스마트 팔레트 최적화</h5>
-                    <div class="grid grid-cols-2 gap-2 text-sm text-blue-700">
-                        <div>최적 팔레트: ${Math.round(palletInfo.optimalSize.length)}×${Math.round(palletInfo.optimalSize.width)}cm</div>
-                        <div>팔레트 배치: ${palletInfo.palletsX}×${palletInfo.palletsY}×${palletInfo.palletsZ}</div>
-                        <div>컨테이너 여유: 앞뒤 10cm, 좌우 10cm</div>
-                        <div>최적화 타입: ${palletInfo.optimalSize.type === 'half-width' ? '절반 너비 기준' : palletInfo.optimalSize.type === 'max-utilization' ? '최대 활용' : '원본 크기'}</div>
-                    </div>
-                </div>
-            `;
         }
 
         resultsContainer.innerHTML = `
@@ -985,7 +906,6 @@ class CBMCalculator {
                     <p class="text-sm mt-1">${recommendation.reason}</p>
                     <p class="text-sm">효율성: ${recommendation.efficiency}%</p>
                     ${loadingTypeText}
-                    ${smartPalletInfo}
                 </div>
 
                 <!-- 상세 결과 테이블 -->
@@ -998,33 +918,20 @@ class CBMCalculator {
                                 <th>박스/컨테이너</th>
                                 <th>필요 컨테이너</th>
                                 <th>효율성</th>
-                                ${input.usePallet ? '<th>팔레트 정보</th>' : ''}
                             </tr>
                         </thead>
                         <tbody>
-                            ${Object.entries(containerResults).map(([type, result]) => {
-                                let palletInfoCell = '';
-                                if (input.usePallet && result.layout.palletInfo) {
-                                    const pInfo = result.layout.palletInfo;
-                                    palletInfoCell = `<td class="text-xs">
-                                        <div>팔레트: ${pInfo.palletsX}×${pInfo.palletsY}×${pInfo.palletsZ}</div>
-                                        <div>크기: ${Math.round(pInfo.optimalSize.length)}×${Math.round(pInfo.optimalSize.width)}</div>
-                                    </td>`;
-                                }
-                                
-                                return `
-                                    <tr>
-                                        <td class="font-medium">${this.containers[type].name}</td>
-                                        <td>${result.layout.boxesX} × ${result.layout.boxesY} × ${result.layout.boxesZ}</td>
-                                        <td>${formatNumber(result.boxesPerContainer)}</td>
-                                        <td>${result.containersNeeded}</td>
-                                        <td class="status-${result.efficiency > 70 ? 'success' : result.efficiency > 50 ? 'warning' : 'error'}">
-                                            ${result.efficiency}%
-                                        </td>
-                                        ${palletInfoCell}
-                                    </tr>
-                                `;
-                            }).join('')}
+                            ${Object.entries(containerResults).map(([type, result]) => `
+                                <tr>
+                                    <td class="font-medium">${this.containers[type].name}</td>
+                                    <td>${result.layout.boxesX} × ${result.layout.boxesY} × ${result.layout.boxesZ}</td>
+                                    <td>${formatNumber(result.boxesPerContainer)}</td>
+                                    <td>${result.containersNeeded}</td>
+                                    <td class="status-${result.efficiency > 70 ? 'success' : result.efficiency > 50 ? 'warning' : 'error'}">
+                                        ${result.efficiency}%
+                                    </td>
+                                </tr>
+                            `).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -1378,14 +1285,16 @@ class CBMCalculator {
                         const boxLine = new THREE.LineSegments(boxEdges, lineMaterial);
                         boxGroup.add(boxLine);
                         
-                        // 팔레트 위 박스들을 중앙에 배치
-                        const totalWidthUsed = layout.orientation.boxesX * boxWidth;
-                        const totalDepthUsed = layout.orientation.boxesY * boxDepth;
-                        const xOffset = -totalWidthUsed / 2;
-                        const zOffset = -totalDepthUsed / 2;
+                        // 팔레트 위 박스들을 실제 사용 공간에 맞춰 배치
+                        const actualUsageLength = layout.actualUsage ? layout.actualUsage.length : (layout.orientation.boxesX * boxWidth);
+                        const actualUsageWidth = layout.actualUsage ? layout.actualUsage.width : (layout.orientation.boxesY * boxDepth);
+                        const xOffset = -actualUsageLength / 2;
+                        const zOffset = -actualUsageWidth / 2;
                         
-                        const xPos = xOffset + boxWidth * (x + 0.5);
-                        const zPos = zOffset + boxDepth * (y + 0.5);
+                        // 박스 간 간격 고려 (오버사이즈 모드일 때)
+                        const spacing = layout.orientation.spacing || 0;
+                        const xPos = xOffset + boxWidth * (x + 0.5) + spacing * x;
+                        const zPos = zOffset + boxDepth * (y + 0.5) + spacing * y;
                         const yPos = pallet.height + box.height * (layer + 0.5);
                         
                         boxGroup.position.set(xPos, yPos, zPos);
@@ -1574,11 +1483,12 @@ class CBMCalculator {
                                     );
                                     boxGroup.add(boxLine);
                                     
-                                    // 박스를 팔레트 중앙에 배치
-                                    const totalWidthUsed = palletLayout.orientation.boxesX * boxWidth;
-                                    const totalDepthUsed = palletLayout.orientation.boxesY * boxDepth;
-                                    const boxXOffset = -totalWidthUsed / 2 + boxWidth * (bx + 0.5);
-                                    const boxZOffset = -totalDepthUsed / 2 + boxDepth * (by + 0.5);
+                                    // 박스를 실제 사용 공간에 맞춰 배치
+                                    const actualUsageLength = palletLayout.actualUsage ? palletLayout.actualUsage.length : (palletLayout.orientation.boxesX * boxWidth);
+                                    const actualUsageWidth = palletLayout.actualUsage ? palletLayout.actualUsage.width : (palletLayout.orientation.boxesY * boxDepth);
+                                    const spacing = palletLayout.orientation.spacing || 0;
+                                    const boxXOffset = -actualUsageLength / 2 + boxWidth * (bx + 0.5) + spacing * bx;
+                                    const boxZOffset = -actualUsageWidth / 2 + boxDepth * (by + 0.5) + spacing * by;
                                     const boxYOffset = pallet.height + box.height * (layer + 0.5);
                                     
                                     boxGroup.position.set(
