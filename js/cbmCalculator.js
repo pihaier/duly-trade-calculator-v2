@@ -1270,8 +1270,34 @@ class CBMCalculator {
                         const palletBack = pallet.width / 2;
                         
                         // 오버사이즈 여부 판단
-                        const isOversize = (boxLeft < palletLeft || boxRight > palletRight || 
-                                          boxFront < palletFront || boxBack > palletBack);
+                        let isOversize = (boxLeft < palletLeft || boxRight > palletRight || 
+                                        boxFront < palletFront || boxBack > palletBack);
+                        
+                        // 오버사이즈 적재 시 강제로 일부 박스를 빨간색으로 표시
+                        if (input.palletLoadingType === 'oversize' && !isOversize) {
+                            // 실제 사용 공간이 팔레트보다 크면 가장자리 박스들을 오버사이즈로 처리
+                            const isEdgeBox = (x === 0 || x === layout.orientation.boxesX - 1 || 
+                                             y === 0 || y === layout.orientation.boxesY - 1);
+                            
+                            // 실제 사용 공간이 팔레트보다 큰 경우에만 가장자리 박스를 빨간색으로
+                            if (isEdgeBox && (actualUsedWidth > pallet.length || actualUsedDepth > pallet.width)) {
+                                isOversize = true;
+                            }
+                        }
+                        
+                        // 디버깅용 로그 (첫 번째 박스만)
+                        if (boxCount === 0 && input.palletLoadingType === 'oversize') {
+                            console.log('🔍 오버사이즈 적재 디버깅:', {
+                                loadingType: input.palletLoadingType,
+                                boxPosition: { xPos, zPos },
+                                boxBounds: { boxLeft, boxRight, boxFront, boxBack },
+                                palletBounds: { palletLeft, palletRight, palletFront, palletBack },
+                                actualUsage: layout.actualUsage,
+                                actualUsedWidth, actualUsedDepth,
+                                palletSize: { length: pallet.length, width: pallet.width },
+                                isOversize: isOversize
+                            });
+                        }
                         
                         // 적절한 재질 선택
                         const selectedMaterial = isOversize ? oversizeBoxMaterial : normalBoxMaterial;
@@ -1486,8 +1512,20 @@ class CBMCalculator {
                                     const palletBack = palletZ + pallet.width / 2;
                                     
                                     // 오버사이즈 여부 판단
-                                    const isOversize = (boxLeft < palletLeft || boxRight > palletRight || 
-                                                      boxFront < palletFront || boxBack > palletBack);
+                                    let isOversize = (boxLeft < palletLeft || boxRight > palletRight || 
+                                                    boxFront < palletFront || boxBack > palletBack);
+                                    
+                                    // 오버사이즈 적재 시 강제로 일부 박스를 빨간색으로 표시
+                                    if (input.palletLoadingType === 'oversize' && !isOversize) {
+                                        // 실제 사용 공간이 팔레트보다 크면 가장자리 박스들을 오버사이즈로 처리
+                                        const isEdgeBox = (bx === 0 || bx === palletLayout.orientation.boxesX - 1 || 
+                                                         by === 0 || by === palletLayout.orientation.boxesY - 1);
+                                        
+                                        // 실제 사용 공간이 팔레트보다 큰 경우에만 가장자리 박스를 빨간색으로
+                                        if (isEdgeBox && (actualUsedWidth > pallet.length || actualUsedDepth > pallet.width)) {
+                                            isOversize = true;
+                                        }
+                                    }
                                     
                                     // 적절한 재질 선택
                                     const selectedMaterial = isOversize ? oversizeBoxMaterial : normalBoxMaterial;
