@@ -239,11 +239,11 @@ class TotalCostCalculator {
                     // 캐시에서 CNY 환율 확인 (USD 호출 시 함께 캐시됨)
                     const updatedCache = window.apiService.cache.get('exchangeRates');
                     const cnyRate = updatedCache?.CNY || await this.getExchangeRate('CNY');
-                    
-                    usdInput.value = this.addCommas(usdRate);
-                    cnyInput.value = this.addCommas(cnyRate);
-                    
-                    showAlert(`✅ 환율 조회 완료! USD: ${this.addCommas(usdRate)}원, CNY: ${this.addCommas(cnyRate)}원`, 'success');
+            
+            usdInput.value = this.addCommas(usdRate);
+            cnyInput.value = this.addCommas(cnyRate);
+            
+            showAlert(`✅ 환율 조회 완료! USD: ${this.addCommas(usdRate)}원, CNY: ${this.addCommas(cnyRate)}원`, 'success');
                     
                 } catch (apiError) {
                     // API 실패 시 기본값 사용
@@ -357,30 +357,33 @@ class TotalCostCalculator {
         if (!tariffResult) return;
 
         // 🔍 DEBUG: API 응답 데이터 로깅
-    
+        console.log('🔍 관세율 API 응답 데이터:', tariffInfo);
 
         // API 응답에서 관세율 정보 추출
         const data = tariffInfo.data || tariffInfo;
         const rates = data.rates || {};
         
-    
+        console.log('🔍 추출된 rates 데이터:', rates);
         
         // 기본 관세율들 추출 (0값 안전 처리)
         const basicRate = rates.basic?.rate !== undefined ? rates.basic.rate : (rates.기본세율 !== undefined ? rates.기본세율 : 8);
         const wtoRate = rates.wto?.rate !== undefined ? rates.wto.rate : (rates.WTO협정세율 !== undefined ? rates.WTO협정세율 : basicRate);
         const ftaRate = rates.preferential?.rate !== undefined ? rates.preferential.rate : (rates.특혜세율 !== undefined ? rates.특혜세율 : null);
         
-
+        console.log('🔍 추출된 관세율들:', { basicRate, wtoRate, ftaRate });
         
         // 가장 낮은 세율 찾기
         const availableRates = [basicRate, wtoRate];
         if (ftaRate !== null && ftaRate !== undefined) {
             availableRates.push(ftaRate);
+            console.log('🔍 FTA 세율 포함:', availableRates);
             } else {
-            
+            console.log('🔍 FTA 세율 없음:', availableRates);
         }
         
         const bestRate = Math.min(...availableRates);
+        console.log('🔍 최적 세율:', bestRate);
+        
         // 적용 관세율 자동 입력
         const appliedRateInput = document.getElementById('appliedTariffRate');
         const tariffTypeInput = document.getElementById('tariffType');
@@ -1198,10 +1201,10 @@ class TotalCostCalculator {
 
         try {
             showAlert('📄 PDF 생성 중입니다...', 'info');
-
+            
             const result = this.lastCalculationResult;
             const { input, calculation, breakdown, requirementsInfo } = result;
-
+            
             // PDF용 HTML 생성
             const pdfContent = this.generatePDFContent(result);
             
@@ -1237,9 +1240,9 @@ class TotalCostCalculator {
         });
 
         // 문서번호 생성
-        const now = new Date();
-        const docNumber = `DT-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
-
+            const now = new Date();
+            const docNumber = `DT-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+            
         return `
         <!DOCTYPE html>
         <html lang="ko">
@@ -1249,7 +1252,7 @@ class TotalCostCalculator {
             <title>총 비용 계산 결과 - 두리무역</title>
             <style>
                 @page {
-                    margin: 15mm;
+                    margin: 20mm 15mm 25mm 15mm;
                     size: A4;
                 }
                 
@@ -1264,6 +1267,7 @@ class TotalCostCalculator {
                     font-size: 12px;
                     line-height: 1.4;
                     color: #333;
+                    padding-bottom: 40px;
                 }
                 
                 .header {
@@ -1290,11 +1294,12 @@ class TotalCostCalculator {
                     left: 0;
                     right: 0;
                     text-align: center;
-                    padding: 15px;
+                    padding: 12px;
                     background: linear-gradient(135deg, #8b5cf6, #7c3aed);
                     color: white;
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: bold;
+                    z-index: 1000;
                 }
                 
                 .section {
@@ -1409,10 +1414,11 @@ class TotalCostCalculator {
 
                 .requirements-section {
                     background: #fef3c7;
-                    border: 1px solid #fbbf24;
+                    border: 2px solid #fbbf24;
                     border-radius: 8px;
                     padding: 15px;
                     margin-bottom: 20px;
+                    page-break-inside: avoid;
                 }
 
                 .requirement-item {
@@ -1427,6 +1433,7 @@ class TotalCostCalculator {
                     color: #92400e;
                     font-size: 13px;
                     margin-bottom: 5px;
+                    font-weight: bold;
                 }
 
                 .requirement-item p {
@@ -1434,27 +1441,69 @@ class TotalCostCalculator {
                     margin-bottom: 3px;
                     color: #374151;
                 }
+                
+                .warning-box {
+                    background: #fef2f2;
+                    border: 2px solid #ef4444;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin: 20px 0;
+                }
+                
+                .warning-box h3 {
+                    color: #dc2626;
+                    font-size: 16px;
+                    margin-bottom: 10px;
+                    font-weight: bold;
+                }
+                
+                .warning-box ul {
+                    margin-left: 20px;
+                    color: #7f1d1d;
+                }
+                
+                .warning-box li {
+                    margin-bottom: 8px;
+                    font-size: 12px;
+                    line-height: 1.5;
+                }
 
                 @media print {
                     .footer {
                         position: fixed;
                         bottom: 0;
                     }
+                    
+                    .page-break {
+                        page-break-before: always;
+                    }
                 }
             </style>
         </head>
         <body>
-            <!-- 헤더 -->
+                    <!-- 헤더 -->
             <div class="header">
-                <h1>🚢 두리무역 무료 통합 무역 계산 시스템</h1>
+                <h1><a href="https://www.duly.co.kr/calculator" target="_blank" style="color: #8b5cf6; text-decoration: none;">🚢 두리무역 무료 통합 무역 계산 시스템</a></h1>
                 <p>총 수입 비용 계산 및 관세 분석 결과</p>
-            </div>
+                        </div>
 
             <!-- 날짜 정보 -->
             <div class="date-info">
                 생성일: ${currentDate} | 계산 시간: ${new Date().toLocaleTimeString('ko-KR')} | 문서번호: ${docNumber}
-            </div>
-
+                    </div>
+                    
+            <!-- 중요 안내사항 -->
+            <div class="warning-box">
+                <h3>⚠️ 중요: 예측 계산 결과입니다</h3>
+                <ul>
+                    <li><strong>본 계산서는 예측/참고용</strong>이며, 실제 통관 시 차이가 발생할 수 있습니다.</li>
+                    <li><strong>환율 변동:</strong> 실시간 환율 변화로 인해 최종 비용이 달라질 수 있습니다.</li>
+                    <li><strong>관세율 변경:</strong> 정부 정책 변화, FTA 협정 변경 등으로 관세율이 달라질 수 있습니다.</li>
+                    <li><strong>추가 비용:</strong> 통관 수수료, 보관료, 검사비용 등이 별도로 발생할 수 있습니다.</li>
+                    <li><strong>정확한 비용 확인:</strong> 통관 전 관세사 또는 세관에 최종 확인을 받으시기 바랍니다.</li>
+                </ul>
+                    </div>
+                    
             <!-- 입력 정보 -->
             <div class="section">
                 <h2>📦 입력 정보</h2>
@@ -1468,12 +1517,12 @@ class TotalCostCalculator {
                         <div class="info-item">
                             <span class="label">주문 수량:</span>
                             <span class="value">${input.quantity.toLocaleString()}개</span>
-                        </div>
+                    </div>
                         <div class="info-item">
                             <span class="label">총 제품 가격:</span>
                             <span class="value">${this.formatForeignCurrency(input.unitPrice * input.quantity, input.productCurrency)}</span>
-                        </div>
-                        ${input.hsCode ? `
+                    </div>
+                            ${input.hsCode ? `
                         <div class="info-item">
                             <span class="label">HS Code:</span>
                             <span class="value">${input.hsCode}</span>
@@ -1487,13 +1536,13 @@ class TotalCostCalculator {
                             <span class="label">운송비:</span>
                             <span class="value">${this.formatForeignCurrency(input.shippingCost, input.shippingCurrency)}</span>
                         </div>
-                        ${input.importCountry ? `
+                            ${input.importCountry ? `
                         <div class="info-item">
                             <span class="label">수입 국가:</span>
                             <span class="value">${this.getCountryName(input.importCountry)}</span>
                         </div>
                         ` : ''}
-                        ${input.otherCosts > 0 ? `
+                            ${input.otherCosts > 0 ? `
                         <div class="info-item">
                             <span class="label">기타 비용:</span>
                             <span class="value">${(input.otherCosts).toLocaleString()}원</span>
@@ -1505,11 +1554,11 @@ class TotalCostCalculator {
                         </div>
                     </div>
                 </div>
-            </div>
-
+                    </div>
+                    
             <!-- 최종 결과 -->
             <div class="highlight-box">
-                <h3>💎 최종 계산 결과</h3>
+                <h3>💎 최종 계산 결과 (예측)</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
                         <div class="main-value">${(calculation.totalCost).toLocaleString()}원</div>
@@ -1520,6 +1569,7 @@ class TotalCostCalculator {
                         <div class="sub-value">개당 원가 (부가세 포함)</div>
                     </div>
                 </div>
+                <p style="margin-top: 15px; font-size: 12px; color: #7c3aed; font-weight: bold;">※ 실제 통관 시 환율 변동, 관세율 변경 등으로 차이가 발생할 수 있습니다.</p>
             </div>
 
             <!-- 상세 계산 내역 -->
@@ -1533,7 +1583,7 @@ class TotalCostCalculator {
                             <th>환율</th>
                             <th>원화 금액</th>
                             <th>비고</th>
-                        </tr>
+                            </tr>
                     </thead>
                     <tbody>
                         <tr>
@@ -1549,29 +1599,29 @@ class TotalCostCalculator {
                             <td>${input.shippingCurrency !== 'KRW' ? `1 ${input.shippingCurrency} = ${result.shippingExchangeRate.toLocaleString()}원` : '-'}</td>
                             <td><strong>${breakdown.shippingCost.toLocaleString()}원</strong></td>
                             <td>물류비</td>
-                        </tr>
-                        <tr style="background: #fef3c7;">
+                            </tr>
+                            <tr style="background: #fef3c7;">
                             <td><strong>CIF (과세가격)</strong></td>
                             <td>-</td>
                             <td>-</td>
                             <td><strong>${calculation.cifKRW.toLocaleString()}원</strong></td>
                             <td>관세 과세표준</td>
-                        </tr>
-                        <tr>
+                            </tr>
+                            <tr>
                             <td><strong>관세</strong></td>
                             <td>-</td>
                             <td>${(calculation.appliedTariffRate * 100).toFixed(2)}%</td>
                             <td><strong>${calculation.tariffAmount.toLocaleString()}원</strong></td>
                             <td>${this.getTariffTypeName(calculation.tariffType)}</td>
-                        </tr>
-                        ${calculation.coCost > 0 ? `
-                        <tr>
+                            </tr>
+                            ${calculation.coCost > 0 ? `
+                            <tr>
                             <td><strong>C/O 발급비</strong></td>
                             <td>-</td>
                             <td>-</td>
                             <td><strong>${calculation.coCost.toLocaleString()}원</strong></td>
                             <td>원산지증명서</td>
-                        </tr>
+                            </tr>
                         ` : ''}
                         <tr>
                             <td><strong>부가세</strong></td>
@@ -1579,7 +1629,7 @@ class TotalCostCalculator {
                             <td>10%</td>
                             <td><strong>${calculation.vatAmount.toLocaleString()}원</strong></td>
                             <td>과세표준: ${calculation.vatBase.toLocaleString()}원</td>
-                        </tr>
+                            </tr>
                         ${input.otherCosts > 0 ? `
                         <tr>
                             <td><strong>기타 비용</strong></td>
@@ -1590,12 +1640,12 @@ class TotalCostCalculator {
                         </tr>
                         ` : ''}
                     </tbody>
-                </table>
-            </div>
-
-            ${requirementsInfo && requirementsInfo.length > 0 ? `
+                        </table>
+                    </div>
+                    
+                    ${requirementsInfo && requirementsInfo.length > 0 ? `
             <!-- 수입요건 정보 -->
-            <div class="section">
+            <div class="section page-break">
                 <h2>📋 세관장 확인 사항 (수입요건)</h2>
                 <div class="requirements-section">
                     <h3 style="color: #92400e; font-size: 14px; margin-bottom: 15px;">⚠️ 해당 제품의 수입 시 필요한 인증 및 요건</h3>
@@ -1606,59 +1656,94 @@ class TotalCostCalculator {
                         ${req.requirementDoc ? `<p><strong>필요 서류:</strong> ${req.requirementDoc}</p>` : ''}
                         ${req.description ? `<p><strong>설명:</strong> ${req.description}</p>` : ''}
                         ${req.agency ? `<p><strong>인증 기관:</strong> ${req.agency}</p>` : ''}
-                        ${req.agencies && Array.isArray(req.agencies) && req.agencies.length > 0 ? 
+                                ${req.agencies && Array.isArray(req.agencies) && req.agencies.length > 0 ? 
                             `<p><strong>관련 기관:</strong> ${req.agencies.map(a => a.name || a).join(', ')}</p>` : ''}
                         ${req.validUntil || req.endDate ? `<p><strong>유효기간:</strong> ${req.validUntil || req.endDate}까지</p>` : ''}
                         ${req.contact ? `<p><strong>연락처:</strong> ${req.contact}</p>` : ''}
+                            </div>
+                            `).join('')}
+                            
+                    <div style="background: #fbbf24; color: white; padding: 12px; border-radius: 6px; margin-top: 15px;">
+                        <p style="font-weight: bold; margin-bottom: 8px;">💡 중요 안내사항</p>
+                        <ul style="margin-left: 15px; font-size: 11px; line-height: 1.6;">
+                            <li>위 요건들을 충족하기 위한 <strong>추가 비용이 발생</strong>할 수 있습니다.</li>
+                            <li>인증 절차는 통상 <strong>2-8주 정도 소요</strong>됩니다.</li>
+                            <li><strong>예상 인증 비용:</strong> KC인증 100-300만원, 전파인증 50-150만원 수준</li>
+                            <li>정확한 비용과 절차는 관련 기관에 직접 문의하시기 바랍니다.</li>
+                            <li><strong>미충족 시:</strong> 통관 지연 또는 반송될 수 있습니다.</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                    `).join('')}
+                    ` : ''}
                     
-                    <div style="background: #fbbf24; color: white; padding: 10px; border-radius: 6px; margin-top: 15px;">
-                        <p style="font-weight: bold; margin-bottom: 5px;">💡 중요 안내사항</p>
-                        <ul style="margin-left: 15px; font-size: 11px;">
-                            <li>위 요건들을 충족하기 위한 추가 비용이 발생할 수 있습니다.</li>
-                            <li>인증 절차는 통상 2-8주 정도 소요됩니다.</li>
-                            <li>KC인증: 100-300만원, 전파인증: 50-150만원 수준</li>
-                            <li>정확한 비용은 관련 기관에 직접 문의하시기 바랍니다.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
             <!-- 비용 구성 분석 -->
             <div class="section">
                 <h2>📈 비용 구성 분석</h2>
                 <div class="info-box">
                     ${this.generateCostBreakdownForPDF(result)}
                 </div>
-            </div>
-
-            <!-- 참고사항 -->
+                    </div>
+                    
+                    <!-- 예측 차이 발생 가능성 안내 -->
+            <div class="section">
+                <h2>⚠️ 실제 비용과 차이 발생 가능성</h2>
+                <div class="warning-box">
+                    <h3>🔍 CBM 계산기와 총 비용 계산기의 차이점</h3>
+                    <ul>
+                        <li><strong>CBM 계산기:</strong> 물리적 부피와 컨테이너 적재만 고려 (운송비, 관세, 세금 제외)</li>
+                        <li><strong>총 비용 계산기:</strong> 모든 수입 비용 포함 (제품비 + 운송비 + 관세 + 부가세 + 기타비용)</li>
+                        <li><strong>목적의 차이:</strong> CBM은 물류 계획용, 총 비용은 최종 사업성 검토용</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 15px;">📊 실제 통관 시 차이 발생 요인</h3>
+                    <ul>
+                        <li><strong>환율 변동:</strong> 계산 시점과 실제 통관 시점의 환율 차이 (±3-5% 변동 가능)</li>
+                        <li><strong>관세율 변경:</strong> 정부 정책, FTA 협정 변화로 관세율 변동 가능</li>
+                        <li><strong>과세가격 조정:</strong> 세관에서 CIF 가격을 조정할 수 있음</li>
+                        <li><strong>추가 비용:</strong> 통관 수수료(5-10만원), 보관료, 검사비용 등</li>
+                        <li><strong>원산지 증명:</strong> FTA 혜택 적용 시 원산지증명서 발급비용 (5-20만원)</li>
+                        <li><strong>인증 비용:</strong> KC인증, 전파인증 등 제품별 필수 인증 비용</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 15px;">💡 정확한 비용 확인 방법</h3>
+                    <ul>
+                        <li><strong>관세사 상담:</strong> 통관 전 전문 관세사에게 정확한 비용 문의</li>
+                        <li><strong>세관 확인:</strong> 관할 세관에 HS Code 및 관세율 재확인</li>
+                        <li><strong>환율 모니터링:</strong> 통관 직전 실시간 환율 확인</li>
+                        <li><strong>인증 기관 문의:</strong> 제품별 필수 인증 비용 및 기간 확인</li>
+                    </ul>
+                    </div>
+                </div>
+                    
+                    <!-- 참고사항 -->
             <div class="section">
                 <h2>💡 참고사항</h2>
                 <div class="info-box">
                     <div style="line-height: 1.6;">
                         <p><strong>환율 정보:</strong></p>
                         <p style="margin-left: 15px; margin-bottom: 10px;">• 계산 시점: ${new Date().toLocaleString('ko-KR')}</p>
-                        ${input.productCurrency !== 'KRW' ? `<p style="margin-left: 15px; margin-bottom: 10px;">• ${input.productCurrency} 환율: ${result.productExchangeRate.toLocaleString()}원</p>` : ''}
-                        ${input.shippingCurrency !== 'KRW' ? `<p style="margin-left: 15px; margin-bottom: 10px;">• ${input.shippingCurrency} 환율: ${result.shippingExchangeRate.toLocaleString()}원</p>` : ''}
+                        ${input.productCurrency !== 'KRW' ? `<p style="margin-left: 15px; margin-bottom: 10px;">• ${input.productCurrency} 환율: ${result.productExchangeRate.toLocaleString()}원 (관세청 기준)</p>` : ''}
+                        ${input.shippingCurrency !== 'KRW' ? `<p style="margin-left: 15px; margin-bottom: 10px;">• ${input.shippingCurrency} 환율: ${result.shippingExchangeRate.toLocaleString()}원 (관세청 기준)</p>` : ''}
                         
                         <p><strong>계산 기준:</strong></p>
-                        <p style="margin-left: 15px; margin-bottom: 10px;">• 관세: CIF × ${(calculation.appliedTariffRate * 100).toFixed(2)}%</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 관세: CIF × ${(calculation.appliedTariffRate * 100).toFixed(2)}% (${this.getTariffTypeName(calculation.tariffType)})</p>
                         <p style="margin-left: 15px; margin-bottom: 10px;">• 부가세: (CIF + 관세 + 기타비용) × 10%</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• CIF = FOB + 운송비 + 보험료</p>
                         
-                        <p><strong>주의사항:</strong></p>
-                        <p style="margin-left: 15px;">• 본 계산서는 참고용이며, 실제 통관 시 차이가 있을 수 있습니다</p>
-                        <p style="margin-left: 15px;">• 환율 변동, 관세율 변경 등으로 실제 비용이 달라질 수 있습니다</p>
+                        <p><strong>면책 사항:</strong></p>
+                        <p style="margin-left: 15px; margin-bottom: 5px;">• 본 계산서는 <strong>예측/참고용</strong>이며, 실제 통관 시 차이가 있을 수 있습니다</p>
+                        <p style="margin-left: 15px; margin-bottom: 5px;">• 환율 변동, 관세율 변경 등으로 실제 비용이 달라질 수 있습니다</p>
+                        <p style="margin-left: 15px; margin-bottom: 5px;">• 통관 전 반드시 관세사 또는 세관에 최종 확인을 받으시기 바랍니다</p>
+                        <p style="margin-left: 15px;">• 두리무역은 본 계산서로 인한 손실에 대해 책임지지 않습니다</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- 푸터 -->
+                    </div>
+                    
+                    <!-- 푸터 -->
             <div class="footer">
-                🏢 두리무역 - 중국 출장 품질 관리 전문 업체 | 📞 전문 상담: www.duly.co.kr
-            </div>
+                🏢 두리무역 - 중국 출장 품질 관리 전문 업체 | 📞 전문 상담: 031-699-8781 | 🌐 www.duly.co.kr
+                    </div>
         </body>
         </html>
         `;

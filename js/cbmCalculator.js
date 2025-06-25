@@ -1621,7 +1621,7 @@ class CBMCalculator {
             <title>CBM 계산 결과 - 두리무역</title>
             <style>
                 @page {
-                    margin: 15mm;
+                    margin: 20mm 15mm 25mm 15mm;
                     size: A4;
                 }
                 
@@ -1636,6 +1636,7 @@ class CBMCalculator {
                     font-size: 12px;
                     line-height: 1.4;
                     color: #333;
+                    padding-bottom: 40px;
                 }
                 
                 .header {
@@ -1662,11 +1663,12 @@ class CBMCalculator {
                     left: 0;
                     right: 0;
                     text-align: center;
-                    padding: 15px;
+                    padding: 12px;
                     background: linear-gradient(135deg, #8b5cf6, #7c3aed);
                     color: white;
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: bold;
+                    z-index: 1000;
                 }
                 
                 .section {
@@ -1786,6 +1788,32 @@ class CBMCalculator {
                     font-size: 11px;
                     margin-bottom: 20px;
                 }
+                
+                .warning-box {
+                    background: #fef2f2;
+                    border: 2px solid #ef4444;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin: 20px 0;
+                }
+                
+                .warning-box h3 {
+                    color: #dc2626;
+                    font-size: 16px;
+                    margin-bottom: 10px;
+                    font-weight: bold;
+                }
+                
+                .warning-box ul {
+                    margin-left: 20px;
+                    color: #7f1d1d;
+                }
+                
+                .warning-box li {
+                    margin-bottom: 8px;
+                    font-size: 12px;
+                    line-height: 1.5;
+                }
 
                 @media print {
                     .footer {
@@ -1798,13 +1826,25 @@ class CBMCalculator {
         <body>
             <!-- 헤더 -->
             <div class="header">
-                <h1>🚢 두리무역 무료 통합 무역 계산 시스템</h1>
+                <h1><a href="https://www.duly.co.kr/calculator" target="_blank" style="color: #8b5cf6; text-decoration: none;">🚢 두리무역 무료 통합 무역 계산 시스템</a></h1>
                 <p>CBM 계산 및 컨테이너 최적화 분석 결과</p>
             </div>
 
             <!-- 날짜 정보 -->
             <div class="date-info">
                 생성일: ${currentDate} | 계산 시간: ${new Date().toLocaleTimeString('ko-KR')}
+            </div>
+            
+            <!-- 중요 안내사항 -->
+            <div class="warning-box">
+                <h3>⚠️ 중요: CBM 계산 참고사항</h3>
+                <ul>
+                    <li><strong>본 계산서는 물리적 적재량 계산용</strong>이며, 실제 운송비용은 별도입니다.</li>
+                    <li><strong>실제 적재 시:</strong> 포장재, 고정장치 등으로 적재량이 줄어들 수 있습니다.</li>
+                    <li><strong>무게 제한:</strong> CBM이 충분해도 무게 제한으로 적재 불가할 수 있습니다.</li>
+                    <li><strong>컨테이너 규격:</strong> 실제 컨테이너 내부 치수는 약간 다를 수 있습니다.</li>
+                    <li><strong>최종 확인:</strong> 포워더 또는 운송업체에 실제 적재 가능량을 확인하세요.</li>
+                </ul>
             </div>
 
             <!-- 입력 정보 -->
@@ -1961,29 +2001,66 @@ class CBMCalculator {
             </div>
             ` : ''}
 
+            <!-- CBM과 총비용 계산기 차이점 -->
+            <div class="section">
+                <h2>🔍 CBM 계산기 vs 총 비용 계산기</h2>
+                <div class="warning-box">
+                    <h3>📦 CBM 계산기 (현재 문서)</h3>
+                    <ul>
+                        <li><strong>목적:</strong> 물리적 적재량과 컨테이너 선택 최적화</li>
+                        <li><strong>계산 범위:</strong> 박스 규격, CBM, 컨테이너 효율성만 계산</li>
+                        <li><strong>제외 항목:</strong> 제품 가격, 관세, 부가세, 환율, 운송비</li>
+                        <li><strong>활용:</strong> 물류 계획 수립, 컨테이너 예약, 포장 최적화</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 15px;">💰 총 비용 계산기</h3>
+                    <ul>
+                        <li><strong>목적:</strong> 수입 총 비용 계산 및 사업성 검토</li>
+                        <li><strong>계산 범위:</strong> 제품비 + 운송비 + 관세 + 부가세 + 기타비용</li>
+                        <li><strong>포함 항목:</strong> 환율, 관세율, 수입요건, 인증비용 등</li>
+                        <li><strong>활용:</strong> 최종 수입 비용 산정, 판매가 결정, 수익성 분석</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 15px;">💡 두 계산기를 함께 사용하는 이유</h3>
+                    <ul>
+                        <li><strong>1단계 (CBM):</strong> 물리적 적재 계획 수립</li>
+                        <li><strong>2단계 (총비용):</strong> 실제 수입 비용 계산</li>
+                        <li><strong>완전한 계획:</strong> 물류 + 비용 모두 고려한 최적 수입 전략</li>
+                    </ul>
+                </div>
+            </div>
+
             <!-- 비용 절약 팁 -->
             <div class="section">
-                <h2>💡 비용 절약 팁</h2>
+                <h2>💡 물류 최적화 팁</h2>
                 <div class="info-box">
                     <div style="line-height: 1.6;">
                         <p><strong>1. 컨테이너 효율성 개선:</strong></p>
-                        <p style="margin-left: 15px; margin-bottom: 10px;">• 박스 크기 조정으로 적재 효율 향상 가능</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 박스 크기 조정으로 적재 효율 향상 가능 (5-15% 절약)</p>
                         <p style="margin-left: 15px; margin-bottom: 10px;">• 팔레트 사용 시 적재 단수 최적화 권장</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 효율성 80% 이상 달성 시 운송비 대폭 절약</p>
                         
                         <p><strong>2. 운송 방식 선택:</strong></p>
-                        <p style="margin-left: 15px; margin-bottom: 10px;">• 15 CBM 이상: FCL 운송 권장</p>
-                        <p style="margin-left: 15px; margin-bottom: 10px;">• 15 CBM 미만: LCL 운송 고려</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 15 CBM 이상: FCL(컨테이너) 운송 권장</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 15 CBM 미만: LCL(혼재) 운송 고려</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 무게/CBM 비율 확인하여 최적 운송방식 선택</p>
                         
-                        <p><strong>3. 품질관리:</strong></p>
-                        <p style="margin-left: 15px;">• 출하 전 전문 검품으로 클레임 예방</p>
-                        <p style="margin-left: 15px;">• 두리무역 검품 서비스로 안전한 수입</p>
+                        <p><strong>3. 품질 관리 (중요!):</strong></p>
+                        <p style="margin-left: 15px; margin-bottom: 5px;">• 출하 전 전문 검품으로 클레임 예방</p>
+                        <p style="margin-left: 15px; margin-bottom: 5px;">• 불량품 재작업 시 추가 운송비 발생</p>
+                        <p style="margin-left: 15px;">• 두리무역 검품 서비스로 안전한 수입 보장</p>
+                        
+                        <p><strong>4. 실제 적재 시 주의사항:</strong></p>
+                        <p style="margin-left: 15px; margin-bottom: 5px;">• 포장재 두께, 고정 장치 공간 고려 필요</p>
+                        <p style="margin-left: 15px; margin-bottom: 5px;">• 실제 적재량은 계산값의 85-95% 수준</p>
+                        <p style="margin-left: 15px;">• 포워더와 사전 협의로 정확한 적재량 확인</p>
                     </div>
                 </div>
             </div>
 
             <!-- 푸터 -->
             <div class="footer">
-                🏢 두리무역 - 중국 출장 품질 관리 전문 업체 | 📞 전문 상담: www.duly.co.kr
+                🏢 두리무역 - 중국 출장 품질 관리 전문 업체 | 📞 전문 상담: 031-699-8781 | 🌐 www.duly.co.kr
             </div>
         </body>
         </html>
