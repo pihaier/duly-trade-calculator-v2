@@ -1197,25 +1197,23 @@ class TotalCostCalculator {
         }
 
         try {
-            showAlert('📄 PDF 생성 중입니다...', 'info');
+            showAlert('📄 PDF 생성 중입니다...', 'info', 2000);
             
-            const result = this.lastCalculationResult;
-            const htmlContent = this.generatePDFHTML(result);
+            // PDF용 HTML 창 생성
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            const pdfContent = this.generatePDFContent(this.lastCalculationResult);
             
-            // 새 창에서 PDF 미리보기 열기
-            const printWindow = window.open('', '_blank', 'width=900,height=1000,scrollbars=yes');
-            printWindow.document.write(htmlContent);
+            printWindow.document.write(pdfContent);
             printWindow.document.close();
             
-            // 페이지 로드 완료 후 인쇄 대화상자 자동 호출
-            printWindow.onload = () => {
+            // 스타일이 로드된 후 인쇄 대화상자 열기
+            printWindow.onload = function() {
                 setTimeout(() => {
-                    printWindow.focus();
                     printWindow.print();
                 }, 500);
             };
             
-            showAlert('✅ PDF 미리보기가 열렸습니다! 인쇄 버튼을 눌러주세요.', 'success');
+            showAlert('✅ PDF 인쇄 창이 열렸습니다!', 'success');
             
         } catch (error) {
             console.error('PDF 생성 오류:', error);
@@ -1224,9 +1222,9 @@ class TotalCostCalculator {
     }
 
     /**
-     * PDF용 HTML 생성 - 수입 요건 포함 ✅
+     * PDF용 HTML 컨텐츠 생성 - 수입요건 포함 ✅
      */
-    generatePDFHTML(result) {
+    generatePDFContent(result) {
         const { input, calculation, breakdown, requirementsInfo } = result;
         const currentDate = new Date().toLocaleDateString('ko-KR', {
             year: 'numeric',
@@ -1244,18 +1242,20 @@ class TotalCostCalculator {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>총 수입 비용 계산 결과 - 두리무역</title>
     <style>
-        @media print {
-            @page {
-                margin: 20mm;
-                size: A4;
+        @page {
+            margin: 20mm;
+            @top-center {
+                content: "두리무역 무료 통합 무역 계산 시스템";
+                font-weight: bold;
+                font-size: 14px;
+                color: #8b5cf6;
             }
-            
-            .no-print {
-                display: none !important;
-            }
-            
-            .page-break {
-                page-break-before: always;
+            @bottom-center {
+                content: "두리무역 - 중국 출장 품질 관리 전문 업체 | 문의: trade@duly.co.kr";
+                font-size: 10px;
+                color: #666;
+                border-top: 1px solid #ddd;
+                padding-top: 5mm;
             }
         }
         
@@ -1266,7 +1266,7 @@ class TotalCostCalculator {
         }
         
         body {
-            font-family: 'Malgun Gothic', Arial, sans-serif;
+            font-family: 'Malgun Gothic', sans-serif;
             line-height: 1.6;
             color: #333;
             background: white;
@@ -1274,560 +1274,410 @@ class TotalCostCalculator {
         
         .header {
             text-align: center;
-            padding: 20px 0;
-            border-bottom: 3px solid #8b5cf6;
             margin-bottom: 30px;
+            padding: 20px;
+            border-bottom: 3px solid #8b5cf6;
         }
         
         .header h1 {
             color: #8b5cf6;
             font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
         
-        .header p {
+        .header .subtitle {
             color: #666;
             font-size: 14px;
         }
         
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            text-align: center;
-            padding: 15px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
-        .content {
-            margin-bottom: 100px;
-        }
-        
         .section {
-            margin-bottom: 30px;
-            padding: 20px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            margin-bottom: 25px;
+            break-inside: avoid;
         }
         
-        .section h2 {
-            color: #8b5cf6;
-            font-size: 18px;
+        .section-title {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-left: 4px solid #8b5cf6;
+            font-weight: bold;
+            font-size: 16px;
             margin-bottom: 15px;
-            border-bottom: 2px solid #f3f4f6;
-            padding-bottom: 8px;
         }
         
-        .info-grid {
+        .summary-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 20px;
             margin-bottom: 20px;
         }
         
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: #f9fafb;
-            border-radius: 6px;
+        .summary-card {
+            border: 2px solid #8b5cf6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9ff;
         }
         
-        .info-label {
-            font-weight: 600;
-            color: #374151;
-        }
-        
-        .info-value {
+        .summary-card h3 {
             color: #8b5cf6;
-            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .table {
+        .summary-card .value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-bottom: 20px;
         }
         
-        .table th,
-        .table td {
-            border: 1px solid #d1d5db;
-            padding: 12px;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
             text-align: left;
         }
         
-        .table th {
-            background: #f9fafb;
-            font-weight: 600;
-            color: #374151;
-        }
-        
-        .table td {
-            color: #111827;
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #555;
         }
         
         .highlight {
-            background: #eff6ff;
-            border-left: 4px solid #3b82f6;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        
-        .warning-box {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        
-        .warning-box h3 {
-            color: #d97706;
-            margin-bottom: 10px;
-        }
-        
-        .print-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #8b5cf6;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
+            background: #fff3cd;
             font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
         
-        .print-button:hover {
-            background: #7c3aed;
-        }
-        
-        .cost-summary {
-            background: #f0f9ff;
-            border: 2px solid #3b82f6;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .cost-summary h3 {
-            color: #1e40af;
-            font-size: 20px;
+        .calculation-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
             margin-bottom: 15px;
         }
         
-        .cost-summary .total-cost {
-            font-size: 28px;
-            font-weight: bold;
-            color: #1e40af;
+        .calculation-section h4 {
+            color: #8b5cf6;
             margin-bottom: 10px;
         }
         
-        .cost-summary .unit-cost {
-            font-size: 18px;
-            color: #059669;
-            font-weight: 600;
+        .cost-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        .cost-breakdown .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
         }
         
         .requirements-section {
-            background: #fef7cd;
-            border: 1px solid #f59e0b;
+            background: #fff8dc;
+            border: 2px solid #ffd700;
             border-radius: 8px;
             padding: 15px;
-            margin: 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        .requirements-section h4 {
+            color: #b8860b;
+            margin-bottom: 10px;
         }
         
         .requirement-item {
             background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 12px;
-            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
         }
         
-        .requirement-item h4 {
-            color: #d97706;
+        .requirement-item h5 {
+            color: #8b5cf6;
+            margin-bottom: 5px;
+        }
+        
+        .footer-ad {
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            break-inside: avoid;
+        }
+        
+        .footer-ad h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .footer-ad p {
             font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 8px;
+            opacity: 0.9;
         }
         
-        .requirement-item p {
-            font-size: 12px;
-            color: #374151;
-            margin: 4px 0;
+        @media print {
+            .header {
+                margin-top: 0;
+            }
+            
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
 <body>
-    <button class="print-button no-print" onclick="window.print()">🖨️ 인쇄하기</button>
-    
     <div class="header">
-        <h1>💰 두리무역 무료 통합 무역 계산 시스템</h1>
-        <p>총 수입 비용 계산 및 관세 분석 결과</p>
-        <p style="margin-top: 10px; font-size: 12px;">생성일시: ${currentDate}</p>
+        <h1>💰 총 수입 비용 계산 결과 보고서</h1>
+        <div class="subtitle">생성일: ${currentDate}</div>
     </div>
-    
-    <div class="content">
-        <!-- 총 비용 요약 -->
-        <div class="cost-summary">
-            <h3>💎 총 수입 비용</h3>
-            <div class="total-cost">${this.formatCurrency(calculation.totalCost)}</div>
-            <div class="unit-cost">개당 원가: ${this.formatCurrency(calculation.costPerUnit)}</div>
-        </div>
-        
-        <!-- 입력 정보 -->
-        <div class="section">
-            <h2>📦 제품 정보</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">제품 단가</span>
-                    <span class="info-value">${this.formatForeignCurrency(input.unitPrice, input.productCurrency)}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">주문 수량</span>
-                    <span class="info-value">${input.quantity.toLocaleString()}개</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">운송비</span>
-                    <span class="info-value">${this.formatForeignCurrency(input.shippingCost, input.shippingCurrency)}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">수입 국가</span>
-                    <span class="info-value">${this.getCountryName(input.importCountry)}</span>
-                </div>
-                ${input.hsCode ? `
-                <div class="info-item">
-                    <span class="info-label">HS Code</span>
-                    <span class="info-value">${input.hsCode}</span>
-                </div>
-                ` : ''}
-                ${input.otherCosts > 0 ? `
-                <div class="info-item">
-                    <span class="info-label">기타 비용</span>
-                    <span class="info-value">${this.formatCurrency(input.otherCosts)}</span>
-                </div>
-                ` : ''}
+
+    <!-- 계산 결과 요약 -->
+    <div class="section">
+        <div class="section-title">📊 계산 결과 요약</div>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>총 수입 비용</h3>
+                <div class="value">${this.formatCurrency(calculation.totalCost)}</div>
+            </div>
+            <div class="summary-card">
+                <h3>개당 원가</h3>
+                <div class="value">${this.formatCurrency(calculation.costPerUnit)}</div>
             </div>
         </div>
+    </div>
+
+    <!-- 입력 정보 -->
+    <div class="section">
+        <div class="section-title">📋 입력 정보</div>
+        <table>
+            <tr>
+                <th>항목</th>
+                <th>값</th>
+                <th>항목</th>
+                <th>값</th>
+            </tr>
+            <tr>
+                <td>제품 단가</td>
+                <td>${this.formatForeignCurrency(input.unitPrice, input.productCurrency)}</td>
+                <td>수량</td>
+                <td>${input.quantity.toLocaleString()}개</td>
+            </tr>
+            <tr>
+                <td>운송비</td>
+                <td>${this.formatForeignCurrency(input.shippingCost, input.shippingCurrency)}</td>
+                <td>기타 비용</td>
+                <td>${this.formatCurrency(input.otherCosts || 0)}</td>
+            </tr>
+            <tr>
+                <td>HS Code</td>
+                <td>${input.hsCode || '미입력'}</td>
+                <td>수입 국가</td>
+                <td>${this.getCountryName(input.importCountry) || '미입력'}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 상세 계산 과정 -->
+    <div class="section">
+        <div class="section-title">🧮 상세 계산 과정</div>
         
-        <!-- 환율 정보 -->
-        <div class="section">
-            <h2>💱 환율 정보</h2>
-            <div class="info-grid">
-                ${input.productCurrency !== 'KRW' ? `
-                <div class="info-item">
-                    <span class="info-label">${input.productCurrency} 환율</span>
-                    <span class="info-value">1 ${input.productCurrency} = ${result.productExchangeRate.toLocaleString()}원</span>
+        <!-- CIF 계산 -->
+        <div class="calculation-section">
+            <h4>1️⃣ CIF 계산 (과세가격)</h4>
+            <div class="cost-breakdown">
+                <div class="item">
+                    <span>제품 가격 (${input.productCurrency}):</span>
+                    <span>${this.formatForeignCurrency(calculation.productValue, input.productCurrency)}</span>
                 </div>
-                ` : ''}
-                ${input.shippingCurrency !== 'KRW' && input.shippingCurrency !== input.productCurrency ? `
-                <div class="info-item">
-                    <span class="info-label">${input.shippingCurrency} 환율</span>
-                    <span class="info-value">1 ${input.shippingCurrency} = ${result.shippingExchangeRate.toLocaleString()}원</span>
+                <div class="item">
+                    <span>제품 가격 (원화):</span>
+                    <span>${this.formatCurrency(calculation.productValueKRW)}</span>
                 </div>
-                ` : ''}
+                <div class="item">
+                    <span>운송비 (${input.shippingCurrency}):</span>
+                    <span>${this.formatForeignCurrency(input.shippingCost, input.shippingCurrency)}</span>
+                </div>
+                <div class="item">
+                    <span>운송비 (원화):</span>
+                    <span>${this.formatCurrency(calculation.shippingCostKRW)}</span>
+                </div>
+                <div class="item highlight">
+                    <span><strong>CIF 총액:</strong></span>
+                    <span><strong>${this.formatCurrency(calculation.cifKRW)}</strong></span>
+                </div>
             </div>
-            <p style="font-size: 12px; color: #6b7280; margin-top: 10px;">
-                📅 환율 기준일: ${currentDate} (서울 시간)
-            </p>
+            ${input.productCurrency !== 'KRW' || input.shippingCurrency !== 'KRW' ? `
+            <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                <p>📅 적용 환율 기준일: ${currentDate}</p>
+                ${input.productCurrency !== 'KRW' ? `<p>• ${input.productCurrency} 환율: 1 ${input.productCurrency} = ${result.productExchangeRate.toLocaleString()}원</p>` : ''}
+                ${input.shippingCurrency !== 'KRW' ? `<p>• ${input.shippingCurrency} 환율: 1 ${input.shippingCurrency} = ${result.shippingExchangeRate.toLocaleString()}원</p>` : ''}
+            </div>
+            ` : ''}
         </div>
-        
-        <!-- 상세 계산 내역 -->
-        <div class="section">
-            <h2>📊 상세 계산 내역</h2>
-            
-            <!-- CIF 계산 -->
-            <div class="highlight">
-                <h3>1️⃣ CIF 계산 (과세가격)</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">제품 비용 (원화 환산)</span>
-                        <span class="info-value">${this.formatCurrency(calculation.productValueKRW)}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">운송비 (원화 환산)</span>
-                        <span class="info-value">${this.formatCurrency(calculation.shippingCostKRW)}</span>
-                    </div>
+
+        <!-- 세금 계산 -->
+        <div class="calculation-section">
+            <h4>2️⃣ 세금 계산</h4>
+            <div class="cost-breakdown">
+                <div class="item">
+                    <span>관세 (${(calculation.appliedTariffRate * 100).toFixed(2)}%):</span>
+                    <span>${this.formatCurrency(calculation.tariffAmount)}</span>
                 </div>
-                <div style="border-top: 1px solid #d1d5db; margin-top: 10px; padding-top: 10px;">
-                    <div class="info-item">
-                        <span class="info-label"><strong>CIF 총액</strong></span>
-                        <span class="info-value"><strong>${this.formatCurrency(calculation.cifKRW)}</strong></span>
-                    </div>
+                ${calculation.needsCO ? `
+                <div class="item">
+                    <span>C/O 발급비:</span>
+                    <span>${this.formatCurrency(calculation.coCost)}</span>
                 </div>
-            </div>
-            
-            <!-- 세금 계산 -->
-            <div class="highlight">
-                <h3>2️⃣ 세금 계산</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">관세 (${(calculation.appliedTariffRate * 100).toFixed(2)}%)</span>
-                        <span class="info-value">${this.formatCurrency(calculation.tariffAmount)}</span>
-                    </div>
-                    ${calculation.needsCO ? `
-                    <div class="info-item">
-                        <span class="info-label">C/O 발급비</span>
-                        <span class="info-value">${this.formatCurrency(calculation.coCost)}</span>
-                    </div>
-                    ` : ''}
-                    <div class="info-item">
-                        <span class="info-label">부가세 (10%)</span>
-                        <span class="info-value">${this.formatCurrency(calculation.vatAmount)}</span>
-                    </div>
+                ` : ''}
+                <div class="item">
+                    <span>부가세 (10%):</span>
+                    <span>${this.formatCurrency(calculation.vatAmount)}</span>
                 </div>
-                <p style="font-size: 12px; color: #6b7280; margin-top: 10px;">
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
                     부가세 과세표준: ${this.formatCurrency(calculation.vatBase)}
+                </div>
+            </div>
+        </div>
+
+        <!-- 최종 합계 -->
+        <div class="calculation-section" style="background: #e8f5e8; border: 2px solid #4caf50;">
+            <h4>💎 최종 합계</h4>
+            <div class="cost-breakdown">
+                <div class="item highlight">
+                    <span><strong>총 수입 비용:</strong></span>
+                    <span><strong>${this.formatCurrency(calculation.totalCost)}</strong></span>
+                </div>
+                <div class="item highlight">
+                    <span><strong>개당 원가:</strong></span>
+                    <span><strong>${this.formatCurrency(calculation.costPerUnit)}</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 비용 구성 분석 -->
+    <div class="section">
+        <div class="section-title">📈 비용 구성 분석</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>구성 요소</th>
+                    <th>금액</th>
+                    <th>비율</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${this.generateCostBreakdownTableRows(result)}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 수입 요건 정보 -->
+    ${requirementsInfo && requirementsInfo.length > 0 ? `
+    <div class="section">
+        <div class="section-title">📋 수입 요건 정보</div>
+        <div class="requirements-section">
+            <h4>⚠️ 필수 확인 사항</h4>
+            <p style="margin-bottom: 15px;">다음 수입 요건들을 반드시 확인하시고 필요한 인증을 받으시기 바랍니다.</p>
+            
+            ${requirementsInfo.map(req => `
+                <div class="requirement-item">
+                    <h5>${req.lawName || req.name || req.requirementType || '수입요건'}</h5>
+                    ${req.requirementDoc ? `<p><strong>필요 서류:</strong> ${req.requirementDoc}</p>` : ''}
+                    ${req.description ? `<p><strong>설명:</strong> ${req.description}</p>` : ''}
+                    ${req.agency ? `<p><strong>인증 기관:</strong> ${req.agency}</p>` : ''}
+                    ${req.agencies && Array.isArray(req.agencies) && req.agencies.length > 0 ? `
+                        <p><strong>인증 가능 기관:</strong></p>
+                        <ul style="margin-left: 20px;">
+                            ${req.agencies.map(a => `<li>${a.name || a} ${a.code ? `(${a.code})` : ''}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+                    ${req.validUntil || req.endDate ? `<p><strong>유효기간:</strong> ${req.validUntil || req.endDate}까지</p>` : ''}
+                    ${req.contact ? `<p><strong>연락처:</strong> ${req.contact}</p>` : ''}
+                </div>
+            `).join('')}
+            
+            <div style="background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin-top: 15px;">
+                <h5 style="color: #d32f2f; margin-bottom: 5px;">💰 추가 비용 안내</h5>
+                <p style="font-size: 14px;">위 요건들을 충족하기 위한 인증/시험 비용이 추가로 발생합니다:</p>
+                <ul style="margin-left: 20px; font-size: 14px;">
+                    <li>KC 안전인증: 약 100-300만원</li>
+                    <li>전파인증: 약 50-150만원</li>
+                    <li>식품 안전확인: 약 30-100만원</li>
+                </ul>
+                <p style="font-size: 14px; color: #8b5cf6; font-weight: bold; margin-top: 10px;">
+                    💡 정확한 비용은 관련 기관에 문의하여 '기타 비용' 항목에 추가하시기 바랍니다.
                 </p>
             </div>
         </div>
-        
-        <!-- 관세율 정보 -->
-        ${this.generatePDFTariffHTML(result)}
-        
-        <!-- 비용 구성 분석 -->
-        <div class="section">
-            <h2>📈 비용 구성 분석</h2>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>항목</th>
-                        <th>금액</th>
-                        <th>비율</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>제품 비용</td>
-                        <td>${this.formatCurrency(breakdown.productCost)}</td>
-                        <td>${((breakdown.productCost / calculation.totalCost) * 100).toFixed(1)}%</td>
-                    </tr>
-                    <tr>
-                        <td>운송비</td>
-                        <td>${this.formatCurrency(breakdown.shippingCost)}</td>
-                        <td>${((breakdown.shippingCost / calculation.totalCost) * 100).toFixed(1)}%</td>
-                    </tr>
-                    <tr>
-                        <td>관세</td>
-                        <td>${this.formatCurrency(breakdown.tariffCost)}</td>
-                        <td>${((breakdown.tariffCost / calculation.totalCost) * 100).toFixed(1)}%</td>
-                    </tr>
-                    <tr>
-                        <td>부가세</td>
-                        <td>${this.formatCurrency(breakdown.vatCost)}</td>
-                        <td>${((breakdown.vatCost / calculation.totalCost) * 100).toFixed(1)}%</td>
-                    </tr>
-                    ${breakdown.coCost > 0 ? `
-                    <tr>
-                        <td>C/O 발급비</td>
-                        <td>${this.formatCurrency(breakdown.coCost)}</td>
-                        <td>${((breakdown.coCost / calculation.totalCost) * 100).toFixed(1)}%</td>
-                    </tr>
-                    ` : ''}
-                    ${breakdown.otherCosts > 0 ? `
-                    <tr>
-                        <td>기타 비용</td>
-                        <td>${this.formatCurrency(breakdown.otherCosts)}</td>
-                        <td>${((breakdown.otherCosts / calculation.totalCost) * 100).toFixed(1)}%</td>
-                    </tr>
-                    ` : ''}
-                    <tr style="background: #f3f4f6; font-weight: bold;">
-                        <td><strong>총 합계</strong></td>
-                        <td><strong>${this.formatCurrency(calculation.totalCost)}</strong></td>
-                        <td><strong>100.0%</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- 수입 요건 정보 -->
-        ${this.generatePDFRequirementsHTML(requirementsInfo)}
-        
-        <!-- 비용 절약 팁 -->
-        <div class="section page-break">
-            <h2>💡 수입 비용 절약 팁</h2>
-            <div style="line-height: 1.8;">
-                <p><strong>🚢 운송 최적화:</strong> FCL과 LCL 비교하여 더 경제적인 방식을 선택하세요.</p>
-                <p><strong>💱 환율 관리:</strong> 환율 변동을 고려하여 적절한 시점에 주문하세요.</p>
-                <p><strong>📄 FTA 활용:</strong> 원산지 증명서(C/O) 발급으로 관세를 절약할 수 있습니다.</p>
-                <p><strong>📦 포장 최적화:</strong> 부피와 무게를 줄여 운송비를 절약하세요.</p>
-                <p><strong>🏭 현지 검수:</strong> 품질 문제로 인한 추가 비용을 예방하세요.</p>
-                <p><strong>📅 성수기 피하기:</strong> 성수기(9-11월)를 피하면 운송비를 20-30% 절약할 수 있습니다.</p>
-            </div>
-        </div>
-        
-        <!-- 주의사항 -->
-        <div class="warning-box">
-            <h3>⚠️ 중요 주의사항</h3>
-            <div style="line-height: 1.6; font-size: 14px;">
-                <p>• 본 계산 결과는 참고용이며, 실제 비용과 차이가 있을 수 있습니다.</p>
-                <p>• 환율은 매일 변동되므로 실제 수입 시점의 환율을 확인하세요.</p>
-                <p>• 관세율은 정책 변경에 따라 달라질 수 있습니다.</p>
-                <p>• 수입 요건은 제품별로 다르므로 관세청에 정확히 확인하세요.</p>
-                <p>• 추가 인증비용이나 검사비용이 발생할 수 있습니다.</p>
-            </div>
-        </div>
     </div>
-    
-    <div class="footer">
-        🌟 두리무역 - 중국 출장 품질 관리 전문 업체 | 무료 상담: 1588-0000 | www.duly-trade.com 🌟
+    ` : ''}
+
+    <!-- 광고 -->
+    <div class="footer-ad">
+        <h3>🌟 두리무역 - 중국 출장 품질 관리 전문 업체</h3>
+        <p>✓ 공장 검수 및 품질 관리 ✓ 중국 현지 조달 지원 ✓ 무역 컨설팅</p>
+        <p>✓ 수입 통관 대행 ✓ 관세 최적화 컨설팅 ✓ 수입 요건 확인 서비스</p>
+        <p>📧 trade@duly.co.kr | 📞 1588-0000 | 🌐 www.duly.co.kr</p>
     </div>
-    
-    <script>
-        // 페이지 로드 완료 후 포커스
-        window.onload = function() {
-            window.focus();
-        };
-        
-        // ESC 키로 창 닫기
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                window.close();
-            }
-        });
-    </script>
 </body>
-</html>
-        `;
+</html>`;
     }
 
     /**
-     * PDF용 관세율 정보 HTML 생성 ✅
+     * 비용 구성 분석 테이블 행 생성
      */
-    generatePDFTariffHTML(result) {
-        const { calculation, tariffInfo } = result;
+    generateCostBreakdownTableRows(result) {
+        const { breakdown } = result;
         
-        return `
-            <div class="section">
-                <h2>📋 관세율 정보</h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">적용 관세율</span>
-                        <span class="info-value">${(calculation.appliedTariffRate * 100).toFixed(2)}%</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">관세율 유형</span>
-                        <span class="info-value">${this.getTariffTypeName(calculation.tariffType)}</span>
-                    </div>
-                    ${calculation.needsCO ? `
-                    <div class="info-item">
-                        <span class="info-label">원산지 증명서</span>
-                        <span class="info-value">필요 (${calculation.coCountry})</span>
-                    </div>
-                    ` : ''}
-                </div>
-                
-                ${tariffInfo?.tariffData ? `
-                    <div class="highlight">
-                        <h3>🔍 조회된 관세율 정보</h3>
-                        <div style="font-size: 14px; line-height: 1.6;">
-                            ${tariffInfo.tariffData.basicRate !== undefined ? `<p>• 기본 관세율: ${(tariffInfo.tariffData.basicRate * 100).toFixed(2)}%</p>` : ''}
-                            ${tariffInfo.tariffData.wtoRate !== undefined ? `<p>• WTO 관세율: ${(tariffInfo.tariffData.wtoRate * 100).toFixed(2)}%</p>` : ''}
-                            ${tariffInfo.tariffData.ftaRate !== undefined ? `<p>• FTA 관세율: ${(tariffInfo.tariffData.ftaRate * 100).toFixed(2)}% (${tariffInfo.tariffData.ftaCountry})</p>` : ''}
-                        </div>
-                    </div>
-                ` : ''}
-                
-                ${calculation.tariffType === 'DEFAULT' ? `
-                    <div class="warning-box">
-                        <h3>⚠️ 기본 관세율 적용</h3>
-                        <p>HS Code 또는 수입국가 정보가 없어 기본 관세율(8%)을 적용했습니다.</p>
-                        <p>정확한 관세율 확인을 위해 HS Code와 수입국가를 입력하고 다시 계산해보세요.</p>
-                    </div>
-                ` : ''}
-            </div>
-        `;
+        const total = breakdown.productCost + breakdown.shippingCost + 
+                     breakdown.tariffCost + breakdown.coCost + 
+                     breakdown.vatCost + breakdown.otherCosts;
+
+        const items = [
+            { label: '제품 비용', value: breakdown.productCost },
+            { label: '운송비', value: breakdown.shippingCost },
+            { label: '관세', value: breakdown.tariffCost },
+            { label: '부가세', value: breakdown.vatCost },
+            { label: 'C/O 비용', value: breakdown.coCost },
+            { label: '기타 비용', value: breakdown.otherCosts }
+        ].filter(item => item.value > 0);
+
+        return items.map(item => {
+            const percentage = ((item.value / total) * 100).toFixed(1);
+            return `
+                <tr>
+                    <td>${item.label}</td>
+                    <td>${this.formatCurrency(item.value)}</td>
+                    <td>${percentage}%</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     /**
-     * PDF용 수입 요건 HTML 생성 ✅
-     */
-    generatePDFRequirementsHTML(requirementsInfo) {
-        if (!requirementsInfo || (Array.isArray(requirementsInfo) && requirementsInfo.length === 0)) {
-            return `
-                <div class="section">
-                    <h2>📋 수입 요건</h2>
-                    <div class="warning-box">
-                        <h3>ℹ️ 수입 요건 정보 없음</h3>
-                        <p>HS Code가 입력되지 않았거나 해당 제품에 대한 특별한 수입 요건이 조회되지 않았습니다.</p>
-                        <p>정확한 수입 요건 확인을 위해 관세청(125)에 문의하시기 바랍니다.</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        const requirements = Array.isArray(requirementsInfo) ? requirementsInfo : 
-                           (requirementsInfo.data?.requirements || []);
-
-        if (requirements.length === 0) {
-            return `
-                <div class="section">
-                    <h2>📋 수입 요건</h2>
-                    <div class="highlight">
-                        <h3>✅ 특별 수입 요건 없음</h3>
-                        <p>해당 제품에 대한 특별한 수입 요건이 없는 것으로 조회되었습니다.</p>
-                        <p>단, 일반적인 통관 절차는 진행해야 합니다.</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        return `
-            <div class="section page-break">
-                <h2>📋 수입 요건 안내</h2>
-                <div class="requirements-section">
-                    <h3 style="color: #d97706; margin-bottom: 15px;">⚠️ 필수 수입 요건 (${requirements.length}개)</h3>
-                    
-                    ${requirements.map(req => `
-                        <div class="requirement-item">
-                            <h4>${req.lawName || req.name || req.requirementType || '수입요건'}</h4>
-                            ${req.requirementDoc ? `<p><strong>필요 서류:</strong> ${req.requirementDoc}</p>` : ''}
-                            ${req.description ? `<p><strong>설명:</strong> ${req.description}</p>` : ''}
-                            ${req.agency ? `<p><strong>인증 기관:</strong> ${req.agency}</p>` : ''}
-                            ${req.agencies && Array.isArray(req.agencies) && req.agencies.length > 0 ? 
-                                `<p><strong>인증 가능 기관:</strong> ${req.agencies.map(a => a.name || a).join(', ')}</p>` : ''}
-                            ${req.validUntil || req.endDate ? `<p><strong>유효기간:</strong> ${req.validUntil || req.endDate}까지</p>` : ''}
-                            ${req.contact ? `<p><strong>연락처:</strong> ${req.contact}</p>` : ''}
-                        </div>
-                    `).join('')}
-                    
-                    <div class="warning-box" style="margin-top: 20px;">
-                        <h3>💰 추가 비용 예상</h3>
-                        <div style="line-height: 1.6;">
-                            <p><strong>인증 비용:</strong> 위 요건들을 충족하기 위한 추가 비용이 발생합니다.</p>
-                            <p><strong>일반적인 인증 비용:</strong></p>
-                            <ul style="margin-left: 20px; margin-top: 8px;">
-                                <li>KC 안전인증: 100~300만원</li>
-                                <li>전파인증 (KCC): 50~150만원</li>
-                                <li>식품 안전확인: 30~100만원</li>
-                                <li>의료기기 허가: 200~500만원</li>
-                            </ul>
-                            <p><strong>소요 시간:</strong> 일반적으로 2~8주 소요</p>
-                            <p style="color: #d97706; font-weight: bold;">💡 정확한 비용은 관련 기관에 직접 문의하여 확인하시기 바랍니다.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    /**
-     * 통화 포맷팅 (PDF용)
+     * 통화 포맷팅
      */
     formatCurrency(amount) {
         return '₩ ' + Math.round(amount).toLocaleString();
     }
+
+    // CSV 내보내기 기능 제거됨 (PDF 출력 기능으로 대체)
 
     /**
      * 현재 입력값 저장
