@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚢 통합 무역 비용 계산기</title>
+    
+    <!-- Tailwind CSS - 로컬 최적화 -->
+    <link href="/lib/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Three.js CDN - 로컬 최적화 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/lib/OrbitControls.js"></script>
+    
+    <!-- Three.js 초기화 확인 스크립트 -->
+    <script>
+        // Three.js 로딩 확인
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Three.js 로딩 상태:', typeof window.THREE);
+            if (typeof window.THREE !== 'undefined') {
+                console.log('✅ Three.js 성공적으로 로드됨');
+                console.log('OrbitControls 로딩 상태:', typeof window.THREE.OrbitControls);
+            } else {
+                console.error('❌ Three.js 로딩 실패');
+            }
+        });
+    </script>
+    
+    <!-- Chart.js CDN - 로컬 최적화 -->
+    <script src="/lib/chart.js"></script>
+    
+    <!-- Lucide 아이콘 라이브러리 -->
+    <script src="/lib/lucide.js"></script>
+    
+    <!-- 커스텀 스타일 -->
+    <link rel="stylesheet" href="/calculator.css">
+    
+    <!-- 메인 페이지와 동일한 스타일 추가 -->
+    <style>
+      /* 기본 설정 */
+      body {
+        font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-display: swap;
+      }
+      
+      /* 그라데이션 최적화 */
+      .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      /* 스크롤바 스타일링 */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+      }
+    </style>
+    
+
+
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 antialiased">
+    <!-- Fixed Navigation -->
+    <nav id="main-nav" class="fixed top-0 w-full z-40 transition-all duration-300 bg-white/95 backdrop-blur-md shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-20">
+                <a href="/" class="text-2xl font-black gradient-text">두리무역</a>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <div class="text-center">
+                        <h1 class="text-xl font-bold text-gray-900">통합 무역 비용 계산기</h1>
+                        <p class="text-sm text-gray-600">중국 수입 검품 및 품질관리 전문</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-600">
+                        <span id="currentTime"></span>
+                    </div>
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse" title="시스템 정상"></div>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-xl transition-all hover:scale-105 hover:shadow-purple-500/25">
+                        무료 상담
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 컨테이너 -->
+    <main class="max-w-7xl mx-auto px-4 py-6 pt-24">
+        <!-- 상단 광고 배너 -->
+        <div id="topAdBanner" class="mb-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white text-center shadow-xl">
+            <h3 class="text-lg font-bold mb-2">🎯 중국 수입 검품 전문 서비스</h3>
+            <p class="text-sm mb-3">품질 불량 리스크를 원천 차단하세요! 8년 경력의 현지 전문가가 도와드립니다.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="https://www.duly.co.kr/" target="_blank" rel="noopener noreferrer" class="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                    🌐 두리무역 홈페이지
+                </a>
+                <a href="tel:031-699-8781" class="bg-blue-500 hover:bg-blue-400 px-6 py-2 rounded-lg font-semibold transition-colors">
+                    📞 무료 상담: 031-699-8781
+                </a>
+            </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="mb-8">
+            <div class="bg-white/90 backdrop-blur-md rounded-2xl p-2 inline-flex space-x-2 shadow-lg border border-gray-200">
+                <button id="cbmTab" class="tab-button active px-6 py-3 rounded-xl transition-all duration-300 flex items-center space-x-2">
+                    <span>📦</span>
+                    <span>CBM 계산기</span>
+                </button>
+                <button id="costTab" class="tab-button px-6 py-3 rounded-xl transition-all duration-300 flex items-center space-x-2">
+                    <span>💰</span>
+                    <span>총 비용 계산기</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- CBM 계산기 탭 -->
+        <div id="cbmSection" class="tab-content active">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- 입력 패널 -->
+                <div class="glass-panel">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <span class="mr-3">📦</span>
+                        박스 정보 입력
+                    </h2>
+                    
+                    <!-- 박스 규격 입력 -->
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">가로 (cm)</label>
+                                <input type="number" id="boxLength" class="input-field" placeholder="30" min="1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">세로 (cm)</label>
+                                <input type="number" id="boxWidth" class="input-field" placeholder="20" min="1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">높이 (cm)</label>
+                                <input type="number" id="boxHeight" class="input-field" placeholder="15" min="1">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">개당 무게 (kg)</label>
+                                <input type="number" id="boxWeight" class="input-field" placeholder="2.5" min="0" step="0.1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">총 수량</label>
+                                <input type="number" id="totalQuantity" class="input-field" placeholder="1000" min="1">
+                            </div>
+                        </div>
+
+                        <!-- 팔레트 설정 -->
+                        <div class="border-t border-gray-700 pt-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <input type="checkbox" id="usePallet" class="w-5 h-5 text-blue-600 rounded">
+                                <label for="usePallet" class="text-lg font-medium">팔레트 사용</label>
+                            </div>
+                            
+                            <div id="palletSettings" class="space-y-4 hidden">
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">팔레트 가로 (cm)</label>
+                                        <input type="number" id="palletLength" class="input-field" value="110" min="50">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">팔레트 세로 (cm)</label>
+                                        <input type="number" id="palletWidth" class="input-field" value="110" min="50">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">팔레트 높이 (cm)</label>
+                                        <input type="number" id="palletHeight" class="input-field" value="15" min="10">
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">팔레트 위 적재 단수</label>
+                                        <input type="number" id="palletLayers" class="input-field" placeholder="10" min="1">
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button id="calculateMax20ft" class="btn-secondary text-sm py-2">
+                                            20ft GP 최대치
+                                        </button>
+                                        <button id="calculateMax40ft" class="btn-secondary text-sm py-2">
+                                            40ft GP 최대치
+                                        </button>
+                                        <button id="calculateMax40hc" class="btn-secondary text-sm py-2">
+                                            40ft HC 최대치
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 계산 버튼 -->
+                        <button id="calculateCBM" class="btn-primary w-full">
+                            <span class="mr-2">⚡</span>
+                            CBM 계산 실행
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 결과 패널 -->
+                <div class="glass-panel">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <span class="mr-3">📊</span>
+                        계산 결과
+                    </h2>
+                    
+                    <div id="cbmResults" class="space-y-6">
+                        <div class="text-center text-gray-600 py-8">
+                            좌측 패널에서 박스 정보를 입력하고<br>
+                            계산 버튼을 클릭해주세요
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D 시뮬레이션 섹션 -->
+            <div id="threeDSection" class="mt-8 hidden">
+                <div class="glass-panel">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <span class="mr-3">🎮</span>
+                        3D 적재 시뮬레이션
+                    </h2>
+                    
+                    <!-- 뷰 전환 버튼 -->
+                    <div class="mb-6">
+                        <div class="flex flex-wrap gap-2">
+                            <button id="view20ft" class="view-button" data-view="20ft">20ft 뷰</button>
+                            <button id="view40ft" class="view-button" data-view="40ft">40ft 뷰</button>
+                            <button id="view40hc" class="view-button" data-view="40hc">40ft HC 뷰</button>
+                            <button id="viewPallet" class="view-button" data-view="pallet">팔레트 뷰</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 3D 렌더링 영역 -->
+                    <div id="threeDContainer" class="w-full h-[600px] bg-gray-50 rounded-xl border border-gray-200 relative">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-600">
+                            3D 뷰어가 여기에 표시됩니다
+                        </div>
+                    </div>
+                    
+                    <!-- 3D 컨트롤 안내 -->
+                    <div class="mt-4 text-sm text-gray-600 text-center">
+                        🖱️ 마우스: 회전 | 🖱️ + Shift: 이동 | 휠: 확대/축소
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 총 비용 계산기 탭 -->
+        <div id="costSection" class="tab-content hidden">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- 입력 패널 -->
+                <div class="glass-panel">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <span class="mr-3">💰</span>
+                        수입 정보 입력
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- 제품 정보 -->
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium mb-2">제품 단가</label>
+                                    <input type="text" id="unitPrice" class="input-field" placeholder="50.00" inputmode="decimal">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">통화</label>
+                                    <select id="productCurrency" class="input-field">
+                                        <option value="USD">USD ($)</option>
+                                        <option value="CNY">CNY (¥)</option>
+                                        <option value="KRW">KRW (₩)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">수량</label>
+                                <input type="text" id="quantity" class="input-field" placeholder="1,000" inputmode="numeric">
+                            </div>
+                        </div>
+
+                        <!-- 환율 정보 -->
+                        <div class="border-t border-gray-700 pt-6">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <span class="mr-2">💱</span>
+                                환율 설정
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">USD 환율</label>
+                                        <input type="text" id="usdRate" class="input-field" placeholder="1,350" value="1,350">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">CNY 환율</label>
+                                        <input type="text" id="cnyRate" class="input-field" placeholder="190" value="190">
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="button" id="fetchAllRates" onclick="window.totalCostCalculator.fetchAllExchangeRates()" 
+                                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                        🔄 환율 조회
+                                    </button>
+                                    <p class="text-xs text-gray-400 mt-2">오늘 관세청 수입 기준</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 물류비 정보 -->
+                        <div class="border-t border-gray-700 pt-6">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium mb-2">총 물류비</label>
+                                    <input type="text" id="shippingCost" class="input-field" placeholder="2,000.00" inputmode="decimal">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">통화</label>
+                                    <select id="shippingCurrency" class="input-field">
+                                        <option value="USD">USD ($)</option>
+                                        <option value="CNY">CNY (¥)</option>
+                                        <option value="KRW">KRW (₩)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 수입 국가 선택 -->
+                        <div class="border-t border-gray-700 pt-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">수입 국가</label>
+                                <select id="importCountry" class="input-field">
+                                    <option value="">국가를 선택하세요</option>
+                                    <option value="CN">중국</option>
+                                    <option value="US">미국</option>
+                                    <option value="JP">일본</option>
+                                    <option value="DE">독일</option>
+                                    <option value="VN">베트남</option>
+                                    <option value="TH">태국</option>
+                                    <option value="IN">인도</option>
+                                    <option value="MY">말레이시아</option>
+                                    <option value="SG">싱가포르</option>
+                                    <option value="OTHER">기타</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 관세율 정보 -->
+                        <div class="border-t border-gray-700 pt-6">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <span class="mr-2">📋</span>
+                                관세율 설정
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">HS Code (10자리)</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="hsCode" class="input-field flex-1" placeholder="8509400000" maxlength="10">
+                                        <button id="fetchTariffRate" class="btn-secondary px-4 py-2 text-sm">
+                                            🔍 관세율 조회
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">적용 관세율 (%)</label>
+                                        <input type="text" id="appliedTariffRate" class="input-field" placeholder="8.0" value="8.0">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">관세율 유형</label>
+                                        <input type="text" id="tariffType" class="input-field" placeholder="기본 관세율" value="기본 관세율" readonly>
+                                    </div>
+                                </div>
+                                <div id="tariffResult" class="text-xs text-gray-400">
+                                    💡 HS Code를 입력하고 조회 버튼을 클릭하면 실제 관세율을 확인할 수 있습니다.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2">기타 비용 (KRW ₩)</label>
+                            <input type="text" id="otherCosts" class="input-field" placeholder="0" inputmode="numeric">
+                            <p class="text-xs text-gray-400 mt-1">인증비, 수수료, 통관비 등 (원화 기준)</p>
+                        </div>
+
+                        <!-- 계산 버튼 -->
+                        <button id="calculateCost" class="btn-primary w-full">
+                            <span class="mr-2">💎</span>
+                            총 비용 계산
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 결과 패널 -->
+                <div class="glass-panel">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <span class="mr-3">📈</span>
+                        비용 분석 결과
+                    </h2>
+                    
+                    <div id="costResults" class="space-y-6">
+                        <div class="text-center text-gray-600 py-8">
+                            좌측 패널에서 수입 정보를 입력하고<br>
+                            계산 버튼을 클릭해주세요
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 수입 요건 정보 섹션 -->
+            <div id="requirementSection" class="mt-8 hidden">
+                <div class="glass-panel">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center">
+                        <span class="mr-3">📋</span>
+                        수입 요건 안내
+                    </h2>
+                    
+                    <div id="requirementResults">
+                        <!-- 동적으로 생성될 수입 요건 정보 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 하단 광고 배너 (총 비용 계산기 전용) -->
+            <div id="bottomAdBanner" class="mt-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-6 text-white shadow-xl cost-only-ad hidden">
+                <div class="text-center">
+                    <h3 class="text-xl font-bold mb-2">🎯 비용 계산 완료! 이제 리스크 관리가 중요합니다</h3>
+                    <p class="text-sm mb-4">
+                        수입 비용을 정확히 계산했다면, 다음은 품질 불량으로 인한 손실을 방지하는 것입니다.<br>
+                        두리무역의 현지 검품 서비스로 성공적인 수입 비즈니스를 완성하세요!
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <a href="https://www.duly.co.kr/" target="_blank" rel="noopener noreferrer" class="bg-white text-purple-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors">
+                            🌐 두리무역 방문하기
+                        </a>
+                        <a href="tel:031-699-8781" class="bg-purple-500 hover:bg-purple-400 px-6 py-3 rounded-lg font-bold transition-colors">
+                            📞 전문가 상담: 031-699-8781
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 py-16">
+        <div class="container mx-auto px-4 text-center">
+            <div class="mb-6 space-y-2">
+                <p class="text-lg">두리무역 | 대표자: 김두호 | 사업자등록번호: 605-29-80697</p>
+                <p>주소: 인천광역시 연수구 센트럴로 313 B2512</p>
+                <p class="flex items-center justify-center gap-4">
+                    <a href="tel:031-699-8781" class="hover:text-white transition-colors inline-flex items-center">
+                        <i data-lucide="phone" class="w-4 h-4 mr-2"></i>031-699-8781
+                    </a>
+                    <span>|</span>
+                    <a href="mailto:duly@duly.co.kr" class="hover:text-white transition-colors">
+                        duly@duly.co.kr
+                    </a>
+                </p>
+                <p class="mt-4 text-blue-400 font-semibold">
+                    🚢 두리무역 통합 무역 비용 계산기 v2.3 | 관세청 API 연동 기반
+                </p>
+                <p class="text-sm text-yellow-400">
+                    ⚠️ 본 계산 결과는 참고용이며, 정확한 세액은 세관에 문의하시기 바랍니다.
+                </p>
+            </div>
+            <p class="text-sm text-gray-500">Copyright © 2018 Duly Trade. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 text-center shadow-2xl">
+            <div class="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-700 font-medium">API 조회 중...</p>
+        </div>
+    </div>
+
+    <!-- Lucide 아이콘 초기화 -->
+    <script>
+        // Lucide 아이콘 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // 현재 시간 표시
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleString('ko-KR', {
+                    timeZone: 'Asia/Seoul',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const timeElement = document.getElementById('currentTime');
+                if (timeElement) {
+                    timeElement.textContent = timeString;
+                }
+            }
+            
+            updateTime();
+            setInterval(updateTime, 60000); // 1분마다 업데이트
+        });
+    </script>
+
+    <!-- JavaScript 모듈 로드 -->
+    <script src="/js/config.js"></script>
+    <script src="/js/apiService.js"></script>
+    <script src="/js/cbmCalculator.js"></script>
+    <script src="/js/totalCostCalculator.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html> 

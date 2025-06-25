@@ -1,0 +1,53 @@
+{
+  "name": "두리무역 - 중국 수입 검품 전문가",
+  "short_name": "두리무역",
+  "description": "중국 수입 검품 및 품질관리 전문 서비스",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/og-image.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "ko",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "무료 상담 신청",
+      "short_name": "상담신청",
+      "description": "무료 견적 및 상담 신청하기",
+      "url": "/#application-inquiry",
+      "icons": [
+        {
+          "src": "/images/favicon.ico",
+          "sizes": "32x32"
+        }
+      ]
+    },
+    {
+      "name": "서비스 안내",
+      "short_name": "서비스",
+      "description": "검품 서비스 상세 안내",
+      "url": "/#detailed-services",
+      "icons": [
+        {
+          "src": "/images/favicon.ico",
+          "sizes": "32x32"
+        }
+      ]
+    }
+  ]
+} 

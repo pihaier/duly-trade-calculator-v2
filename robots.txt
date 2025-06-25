@@ -1,0 +1,33 @@
+User-agent: *
+Allow: /
+
+# Sitemap locations
+Sitemap: https://www.duly.co.kr/sitemap.xml
+Sitemap: https://www.duly.co.kr/naver-sitemap.xml
+
+# 네이버 봇 특별 설정
+User-agent: Yeti
+Allow: /
+
+User-agent: NaverBot
+Allow: /
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Disallow certain file types to save crawl budget
+Disallow: *.pdf$
+Disallow: *.doc$
+Disallow: *.docx$
+Disallow: *.xls$
+Disallow: *.xlsx$
+
+# Allow important directories
+Allow: /css/
+Allow: /js/
+Allow: /images/
+Allow: /videos/
+
+# Block specific bots if needed (uncomment if necessary)
+# User-agent: BadBot
+# Disallow: / 
