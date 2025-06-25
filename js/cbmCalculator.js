@@ -363,13 +363,6 @@ class CBMCalculator {
             }
         }
 
-        // 🔍 총 CBM 합리성 검증 - 제한 제거, 안내만 제공 ✅
-        const totalCBM = totalQuantity * boxCBM;
-        if (totalCBM > 100) {
-            // 경고 메시지만 표시하고 계산은 계속 진행
-            showAlert(`📦 대용량 CBM 안내 (현재: ${totalCBM.toFixed(1)} CBM)\n\n📝 컨테이너 용량 참고:\n• 20ft GP: 33 CBM\n• 40ft GP: 67 CBM\n• 40ft HC: 76 CBM\n\n💡 여러 컨테이너가 필요할 수 있습니다. 계산을 계속 진행합니다.`, 'warning', 8000);
-        }
-
         return { valid: true };
     }
 
@@ -1571,400 +1564,430 @@ class CBMCalculator {
     }
 
     /**
-     * PDF 출력 기능 - HTML 인쇄 방식 ✅
+     * PDF 출력 기능 - CBM 계산 결과 ✅
      */
-    exportToPDF() {
+    async exportToPDF() {
         if (!this.lastCalculationResult) {
-            showAlert('먼저 CBM 계산을 수행해주세요.', 'warning');
+            showAlert('계산 결과가 없습니다.', 'warning');
             return;
         }
 
         try {
-            showAlert('📄 PDF 생성 중입니다...', 'info', 2000);
+            showAlert('📄 PDF 생성 중입니다...', 'info');
+
+            const result = this.lastCalculationResult;
+            const { input, recommendation, containerResults } = result;
+
+            // PDF용 HTML 생성
+            const pdfContent = this.generatePDFContent(result);
             
-            // PDF용 HTML 창 생성
-            const printWindow = window.open('', '_blank', 'width=800,height=600');
-            const pdfContent = this.generatePDFContent(this.lastCalculationResult);
-            
+            // 새 창에서 PDF 열기
+            const printWindow = window.open('', '_blank');
             printWindow.document.write(pdfContent);
             printWindow.document.close();
-            
-            // 스타일이 로드된 후 인쇄 대화상자 열기
+
+            // 인쇄 대화상자 자동 열기
             printWindow.onload = function() {
                 setTimeout(() => {
                     printWindow.print();
                 }, 500);
             };
-            
-            showAlert('✅ PDF 인쇄 창이 열렸습니다!', 'success');
-            
+
+            showAlert('✅ PDF 파일이 생성되었습니다!', 'success');
+
         } catch (error) {
-            console.error('PDF 생성 오류:', error);
             showAlert('❌ PDF 생성 중 오류가 발생했습니다.', 'error');
         }
     }
 
     /**
-     * PDF용 HTML 컨텐츠 생성 ✅
+     * PDF용 HTML 컨텐츠 생성 - CBM 계산 결과 ✅
      */
     generatePDFContent(result) {
-        const { input, optimizedLayout, containerResults } = result;
+        const { input, recommendation, containerResults } = result;
         const currentDate = new Date().toLocaleDateString('ko-KR', {
             year: 'numeric',
-            month: 'long',
+            month: 'long', 
             day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+            weekday: 'long'
         });
 
         return `
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBM 계산 결과 보고서</title>
-    <style>
-        @page {
-            margin: 20mm;
-            @top-center {
-                content: "두리무역 무료 통합 무역 계산 시스템";
-                font-weight: bold;
-                font-size: 14px;
-                color: #8b5cf6;
-            }
-            @bottom-center {
-                content: "두리무역 - 중국 출장 품질 관리 전문 업체 | 문의: trade@duly.co.kr";
-                font-size: 10px;
-                color: #666;
-                border-top: 1px solid #ddd;
-                padding-top: 5mm;
-            }
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Malgun Gothic', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: white;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            border-bottom: 3px solid #8b5cf6;
-        }
-        
-        .header h1 {
-            color: #8b5cf6;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        
-        .header .subtitle {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .section {
-            margin-bottom: 25px;
-            break-inside: avoid;
-        }
-        
-        .section-title {
-            background: #f8f9fa;
-            padding: 10px 15px;
-            border-left: 4px solid #8b5cf6;
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .info-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        
-        .info-card h3 {
-            color: #8b5cf6;
-            font-size: 14px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .info-card .value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .info-card .unit {
-            font-size: 12px;
-            color: #666;
-            margin-left: 5px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            text-align: left;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #555;
-        }
-        
-        .highlight {
-            background: #fff3cd;
-            font-weight: bold;
-        }
-        
-        .container-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .container-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        
-        .container-card h4 {
-            color: #8b5cf6;
-            margin-bottom: 10px;
-        }
-        
-        .container-card .metric {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .footer-ad {
-            margin-top: 40px;
-            padding: 20px;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            text-align: center;
-            border-radius: 10px;
-            break-inside: avoid;
-        }
-        
-        .footer-ad h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        
-        .footer-ad p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        @media print {
-            .header {
-                margin-top: 0;
-            }
-            
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>📦 CBM 계산 결과 보고서</h1>
-        <div class="subtitle">생성일: ${currentDate}</div>
-    </div>
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>CBM 계산 결과 - 두리무역</title>
+            <style>
+                @page {
+                    margin: 15mm;
+                    size: A4;
+                }
+                
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                
+                body {
+                    font-family: 'Malgun Gothic', sans-serif;
+                    font-size: 12px;
+                    line-height: 1.4;
+                    color: #333;
+                }
+                
+                .header {
+                    text-align: center;
+                    padding: 20px 0;
+                    border-bottom: 3px solid #8b5cf6;
+                    margin-bottom: 20px;
+                }
+                
+                .header h1 {
+                    font-size: 24px;
+                    color: #8b5cf6;
+                    margin-bottom: 5px;
+                }
+                
+                .header p {
+                    font-size: 14px;
+                    color: #666;
+                }
+                
+                .footer {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    text-align: center;
+                    padding: 15px;
+                    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                    color: white;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                
+                .section {
+                    margin-bottom: 25px;
+                    page-break-inside: avoid;
+                }
+                
+                .section h2 {
+                    font-size: 16px;
+                    color: #8b5cf6;
+                    border-left: 4px solid #8b5cf6;
+                    padding-left: 10px;
+                    margin-bottom: 15px;
+                }
+                
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 20px;
+                    margin-bottom: 20px;
+                }
+                
+                .info-box {
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    padding: 15px;
+                    background: #f9fafb;
+                }
+                
+                .info-box h3 {
+                    font-size: 14px;
+                    color: #374151;
+                    margin-bottom: 10px;
+                }
+                
+                .info-item {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 5px;
+                }
+                
+                .info-item:last-child {
+                    margin-bottom: 0;
+                }
+                
+                .label {
+                    color: #6b7280;
+                }
+                
+                .value {
+                    font-weight: bold;
+                    color: #111827;
+                }
+                
+                .highlight-box {
+                    background: linear-gradient(135deg, #ddd6fe, #e0e7ff);
+                    border: 2px solid #8b5cf6;
+                    border-radius: 10px;
+                    padding: 20px;
+                    text-align: center;
+                    margin: 20px 0;
+                }
+                
+                .highlight-box h3 {
+                    font-size: 18px;
+                    color: #8b5cf6;
+                    margin-bottom: 10px;
+                }
+                
+                .highlight-box .main-value {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #1f2937;
+                    margin-bottom: 5px;
+                }
+                
+                .highlight-box .sub-value {
+                    font-size: 14px;
+                    color: #6b7280;
+                }
+                
+                .table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 15px;
+                }
+                
+                .table th,
+                .table td {
+                    border: 1px solid #d1d5db;
+                    padding: 8px;
+                    text-align: left;
+                }
+                
+                .table th {
+                    background: #f3f4f6;
+                    font-weight: bold;
+                    color: #374151;
+                    font-size: 11px;
+                }
+                
+                .table td {
+                    font-size: 11px;
+                }
+                
+                .efficiency-good { color: #059669; font-weight: bold; }
+                .efficiency-medium { color: #d97706; font-weight: bold; }
+                .efficiency-poor { color: #dc2626; font-weight: bold; }
+                
+                .page-break {
+                    page-break-before: always;
+                }
+                
+                .date-info {
+                    text-align: right;
+                    color: #6b7280;
+                    font-size: 11px;
+                    margin-bottom: 20px;
+                }
 
-    <!-- 입력 정보 -->
-    <div class="section">
-        <div class="section-title">📋 입력 정보</div>
-        <table>
-            <tr>
-                <th>항목</th>
-                <th>값</th>
-                <th>항목</th>
-                <th>값</th>
-            </tr>
-            <tr>
-                <td>박스 길이</td>
-                <td>${input.box.length} cm</td>
-                <td>박스 너비</td>
-                <td>${input.box.width} cm</td>
-            </tr>
-            <tr>
-                <td>박스 높이</td>
-                <td>${input.box.height} cm</td>
-                <td>박스 무게</td>
-                <td>${input.box.weight} kg</td>
-            </tr>
-            <tr>
-                <td>총 수량</td>
-                <td>${input.totalQuantity.toLocaleString()} 박스</td>
-                <td>팔레트 사용</td>
-                <td>${input.usePallet ? '예' : '아니오'}</td>
-            </tr>
-            ${input.usePallet ? `
-            <tr>
-                <td>팔레트 크기</td>
-                <td>${input.pallet.length}×${input.pallet.width}×${input.pallet.height} cm</td>
-                <td>적재 단수</td>
-                <td>${input.pallet.layers} 단</td>
-            </tr>
-            ` : ''}
-        </table>
-    </div>
+                @media print {
+                    .footer {
+                        position: fixed;
+                        bottom: 0;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <!-- 헤더 -->
+            <div class="header">
+                <h1>🚢 두리무역 무료 통합 무역 계산 시스템</h1>
+                <p>CBM 계산 및 컨테이너 최적화 분석 결과</p>
+            </div>
 
-    <!-- 계산 결과 요약 -->
-    <div class="section">
-        <div class="section-title">📊 계산 결과 요약</div>
-        <div class="info-grid">
-            <div class="info-card">
-                <h3>박스당 CBM</h3>
-                <div class="value">${result.boxCBM.toFixed(4)}<span class="unit">CBM</span></div>
+            <!-- 날짜 정보 -->
+            <div class="date-info">
+                생성일: ${currentDate} | 계산 시간: ${new Date().toLocaleTimeString('ko-KR')}
             </div>
-            <div class="info-card">
-                <h3>총 CBM</h3>
-                <div class="value">${(result.boxCBM * input.totalQuantity).toFixed(2)}<span class="unit">CBM</span></div>
-            </div>
-            <div class="info-card">
-                <h3>총 무게</h3>
-                <div class="value">${(input.box.weight * input.totalQuantity).toLocaleString()}<span class="unit">kg</span></div>
-            </div>
-            <div class="info-card">
-                <h3>최적 컨테이너</h3>
-                <div class="value">${this.getOptimalContainer(containerResults)}</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- 컨테이너별 적재 결과 -->
-    <div class="section">
-        <div class="section-title">🚢 컨테이너별 적재 분석</div>
-        <div class="container-grid">
-            ${Object.entries(containerResults).map(([type, data]) => `
-                <div class="container-card">
-                    <h4>${data.spec.name}</h4>
-                    <div class="metric">
-                        <span>필요 컨테이너:</span>
-                        <strong>${data.containersNeeded}개</strong>
+            <!-- 입력 정보 -->
+            <div class="section">
+                <h2>📦 입력 정보</h2>
+                <div class="info-grid">
+                    <div class="info-box">
+                        <h3>박스 규격</h3>
+                        <div class="info-item">
+                            <span class="label">길이:</span>
+                            <span class="value">${input.box.length}cm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">너비:</span>
+                            <span class="value">${input.box.width}cm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">높이:</span>
+                            <span class="value">${input.box.height}cm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">무게:</span>
+                            <span class="value">${input.box.weight}kg</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">박스당 CBM:</span>
+                            <span class="value">${result.boxCBM.toFixed(4)} CBM</span>
+                        </div>
                     </div>
-                    <div class="metric">
-                        <span>CBM 효율:</span>
-                        <span>${data.efficiency.toFixed(1)}%</span>
-                    </div>
-                    <div class="metric">
-                        <span>무게 효율:</span>
-                        <span>${data.weightEfficiency.toFixed(1)}%</span>
-                    </div>
-                    <div class="metric">
-                        <span>예상 비용:</span>
-                        <strong>$${data.estimatedCost.toLocaleString()}</strong>
+                    
+                    <div class="info-box">
+                        <h3>수량 및 팔레트</h3>
+                        <div class="info-item">
+                            <span class="label">총 박스 수량:</span>
+                            <span class="value">${input.totalQuantity.toLocaleString()}개</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">총 CBM:</span>
+                            <span class="value">${(result.boxCBM * input.totalQuantity).toFixed(2)} CBM</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">팔레트 사용:</span>
+                            <span class="value">${input.usePallet ? '예' : '아니오'}</span>
+                        </div>
+                        ${input.usePallet ? `
+                        <div class="info-item">
+                            <span class="label">팔레트 규격:</span>
+                            <span class="value">${input.pallet.length}×${input.pallet.width}×${input.pallet.height}cm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">적재 단수:</span>
+                            <span class="value">${input.pallet.layers}단</span>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
-            `).join('')}
-        </div>
-    </div>
+            </div>
 
-    <!-- 최적화 권장사항 -->
-    <div class="section">
-        <div class="section-title">💡 최적화 권장사항</div>
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-            ${this.generateOptimizationRecommendations(result)}
-        </div>
-    </div>
+            <!-- 최적 추천 -->
+            <div class="highlight-box">
+                <h3>🎯 최적 컨테이너 추천</h3>
+                <div class="main-value">${recommendation.shippingMethod}</div>
+                <div class="sub-value">${recommendation.reason}</div>
+                <div class="sub-value">효율성: ${recommendation.efficiency}%</div>
+            </div>
 
-    <!-- 광고 -->
-    <div class="footer-ad">
-        <h3>🌟 두리무역 - 중국 출장 품질 관리 전문 업체</h3>
-        <p>✓ 공장 검수 및 품질 관리 ✓ 중국 현지 조달 지원 ✓ 무역 컨설팅</p>
-        <p>📧 trade@duly.co.kr | 📞 1588-0000 | 🌐 www.duly.co.kr</p>
-    </div>
-</body>
-</html>`;
-    }
+            <!-- 상세 분석 결과 -->
+            <div class="section">
+                <h2>📊 상세 분석 결과</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>컨테이너 타입</th>
+                            <th>컨테이너 규격</th>
+                            <th>적재 구성 (가×세×높)</th>
+                            <th>박스/컨테이너</th>
+                            <th>필요 컨테이너</th>
+                            <th>효율성</th>
+                            <th>총 무게</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Object.entries(containerResults).map(([type, result]) => {
+                            const containerSpec = this.containers[type];
+                            const totalWeight = result.boxesPerContainer * input.box.weight;
+                            const efficiencyClass = result.efficiency > 70 ? 'efficiency-good' : 
+                                                   result.efficiency > 50 ? 'efficiency-medium' : 'efficiency-poor';
+                            
+                            return `
+                            <tr>
+                                <td><strong>${containerSpec.name}</strong></td>
+                                <td>${containerSpec.length}×${containerSpec.width}×${containerSpec.height}cm<br/>
+                                    (${containerSpec.cbm}CBM, ${containerSpec.maxWeight}kg)</td>
+                                <td>${result.layout.boxesX} × ${result.layout.boxesY} × ${result.layout.boxesZ}
+                                    ${result.layout.rotated ? '<br/>(90° 회전)' : ''}</td>
+                                <td>${result.boxesPerContainer.toLocaleString()}개</td>
+                                <td>${result.containersNeeded}개
+                                    ${result.remainingBoxes > 0 ? `<br/>(나머지 ${result.remainingBoxes}개)` : ''}</td>
+                                <td class="${efficiencyClass}">${result.efficiency}%</td>
+                                <td>${totalWeight.toLocaleString()}kg
+                                    ${result.weightLimited ? '<br/><span style="color: #dc2626;">(무게제한)</span>' : ''}</td>
+                            </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
 
-    /**
-     * 최적 컨테이너 추천
-     */
-    getOptimalContainer(containerResults) {
-        let bestOption = null;
-        let bestScore = -1;
+            ${input.usePallet ? `
+            <!-- 팔레트 최적화 정보 -->
+            <div class="section">
+                <h2>📚 팔레트 최적화 정보</h2>
+                <div class="info-grid">
+                    <div class="info-box">
+                        <h3>팔레트 적재 방식</h3>
+                        <div class="info-item">
+                            <span class="label">박스 배치:</span>
+                            <span class="value">${result.optimizedLayout.orientation.name}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">단당 박스 수:</span>
+                            <span class="value">${result.optimizedLayout.boxesPerLayer}개 (${result.optimizedLayout.orientation.boxesX}×${result.optimizedLayout.orientation.boxesY})</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">적재 단수:</span>
+                            <span class="value">${result.optimizedLayout.maxLayers}단</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">팔레트당 박스:</span>
+                            <span class="value">${result.optimizedLayout.boxesPerPallet}개</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h3>팔레트 총 치수</h3>
+                        <div class="info-item">
+                            <span class="label">길이:</span>
+                            <span class="value">${result.optimizedLayout.dimensions.length}cm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">너비:</span>
+                            <span class="value">${result.optimizedLayout.dimensions.width}cm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">높이:</span>
+                            <span class="value">${result.optimizedLayout.dimensions.height}cm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">팔레트 무게:</span>
+                            <span class="value">${(result.optimizedLayout.boxesPerPallet * input.box.weight).toLocaleString()}kg</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
 
-        Object.entries(containerResults).forEach(([type, data]) => {
-            // 효율성과 비용을 종합한 점수 계산
-            const score = (data.efficiency + data.weightEfficiency) / 2 - (data.estimatedCost / 10000);
-            if (score > bestScore) {
-                bestScore = score;
-                bestOption = data.spec.name;
-            }
-        });
+            <!-- 비용 절약 팁 -->
+            <div class="section">
+                <h2>💡 비용 절약 팁</h2>
+                <div class="info-box">
+                    <div style="line-height: 1.6;">
+                        <p><strong>1. 컨테이너 효율성 개선:</strong></p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 박스 크기 조정으로 적재 효율 향상 가능</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 팔레트 사용 시 적재 단수 최적화 권장</p>
+                        
+                        <p><strong>2. 운송 방식 선택:</strong></p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 15 CBM 이상: FCL 운송 권장</p>
+                        <p style="margin-left: 15px; margin-bottom: 10px;">• 15 CBM 미만: LCL 운송 고려</p>
+                        
+                        <p><strong>3. 품질관리:</strong></p>
+                        <p style="margin-left: 15px;">• 출하 전 전문 검품으로 클레임 예방</p>
+                        <p style="margin-left: 15px;">• 두리무역 검품 서비스로 안전한 수입</p>
+                    </div>
+                </div>
+            </div>
 
-        return bestOption || '분석 불가';
-    }
-
-    /**
-     * 최적화 권장사항 생성
-     */
-    generateOptimizationRecommendations(result) {
-        const { input, containerResults } = result;
-        const recommendations = [];
-
-        // CBM 효율성 분석
-        const totalCBM = result.boxCBM * input.totalQuantity;
-        if (totalCBM < 20) {
-            recommendations.push('📦 소량 화물로 LCL(혼재) 운송을 권장합니다.');
-        } else if (totalCBM > 60) {
-            recommendations.push('📦 대량 화물로 40ft 컨테이너 사용을 권장합니다.');
-        }
-
-        // 무게 vs CBM 분석
-        const totalWeight = input.box.weight * input.totalQuantity;
-        const density = totalWeight / totalCBM;
-        if (density > 300) {
-            recommendations.push('⚖️ 고중량 화물로 무게 제한에 주의하세요.');
-        } else if (density < 100) {
-            recommendations.push('📦 경량 화물로 CBM 기준으로 계산됩니다.');
-        }
-
-        // 팔레트 사용 권장
-        if (!input.usePallet && input.totalQuantity > 50) {
-            recommendations.push('🏗️ 대량 화물은 팔레트 사용을 권장합니다.');
-        }
-
-        return recommendations.length > 0 
-            ? recommendations.map(rec => `<p style="margin-bottom: 8px;">• ${rec}</p>`).join('')
-            : '<p>현재 설정이 최적화되어 있습니다.</p>';
+            <!-- 푸터 -->
+            <div class="footer">
+                🏢 두리무역 - 중국 출장 품질 관리 전문 업체 | 📞 전문 상담: www.duly.co.kr
+            </div>
+        </body>
+        </html>
+        `;
     }
 }
 
