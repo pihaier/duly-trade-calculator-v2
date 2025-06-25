@@ -395,9 +395,8 @@ class CBMCalculator {
             
         } else if (palletLoadingType === 'oversize') {
             // 오버 적재: 컨테이너 제약 고려한 최대 적재
-            const maxWidth = 114;   // 가로 제한 (컨테이너 폭 235cm ÷ 2 - 여유)
+            const maxWidth = 114;   // 가로 제한 (컨테이너 폭 235cm ÷ 2 - 팔레트간 여유 3cm)
             const maxDepth = 120;   // 세로 제한 (실용적 한계)
-            const spacing = 3;      // 박스 간 여유공간
             
             const orientations = [
                 {
@@ -417,16 +416,16 @@ class CBMCalculator {
             ];
 
             orientations.forEach(orientation => {
-                // 박스 간 여유공간 고려한 계산
-                const boxesX = Math.floor((orientation.effectiveLength + spacing) / (orientation.boxL + spacing));
-                const boxesY = Math.floor((orientation.effectiveWidth + spacing) / (orientation.boxW + spacing));
+                // 박스 간 간격 없이 빽빽하게 적재
+                const boxesX = Math.floor(orientation.effectiveLength / orientation.boxL);
+                const boxesY = Math.floor(orientation.effectiveWidth / orientation.boxW);
                 const boxesPerLayer = boxesX * boxesY;
                 
                 // 실제 사용 공간 계산
-                const usedLength = boxesX * orientation.boxL + Math.max(0, boxesX - 1) * spacing;
-                const usedWidth = boxesY * orientation.boxW + Math.max(0, boxesY - 1) * spacing;
+                const usedLength = boxesX * orientation.boxL;
+                const usedWidth = boxesY * orientation.boxW;
                 
-                // 제약 조건 확인
+                // 제약 조건 확인 후 최대 적재량 선택
                 if (usedLength <= maxWidth && usedWidth <= maxDepth && boxesPerLayer > maxBoxesPerLayer) {
                     maxBoxesPerLayer = boxesPerLayer;
                     bestResult = {
@@ -435,37 +434,7 @@ class CBMCalculator {
                         boxesY,
                         boxesPerLayer,
                         usedLength,
-                        usedWidth,
-                        spacing
-                    };
-                }
-            });
-        } else {
-            // compact 모드는 기존 로직 유지
-            let effectiveLength = Math.max(pallet.length - 10, 50);
-            let effectiveWidth = Math.max(pallet.width - 10, 50);
-            
-            const orientations = [
-                { boxL: box.length, boxW: box.width, name: '정방향' },
-                { boxL: box.width, boxW: box.length, name: '90도 회전' }
-            ];
-
-            orientations.forEach(orientation => {
-                const boxesX = Math.floor(effectiveLength / orientation.boxL);
-                const boxesY = Math.floor(effectiveWidth / orientation.boxW);
-                const boxesPerLayer = boxesX * boxesY;
-
-                if (boxesPerLayer > maxBoxesPerLayer) {
-                    maxBoxesPerLayer = boxesPerLayer;
-                    bestResult = {
-                        ...orientation,
-                        boxesX,
-                        boxesY,
-                        boxesPerLayer,
-                        effectiveLength,
-                        effectiveWidth,
-                        usedLength: boxesX * orientation.boxL,
-                        usedWidth: boxesY * orientation.boxW
+                        usedWidth
                     };
                 }
             });
@@ -477,15 +446,15 @@ class CBMCalculator {
                 boxL: box.length,
                 boxW: box.width,
                 name: '정방향',
-                boxesX: 1,
-                boxesY: 1,
-                boxesPerLayer: 1,
                 effectiveLength: pallet.length,
                 effectiveWidth: pallet.width,
-                usedLength: box.length,
-                usedWidth: box.width
+                boxesX: Math.floor(pallet.length / box.length),
+                boxesY: Math.floor(pallet.width / box.width),
+                boxesPerLayer: Math.floor(pallet.length / box.length) * Math.floor(pallet.width / box.width),
+                usedLength: Math.floor(pallet.length / box.length) * box.length,
+                usedWidth: Math.floor(pallet.width / box.width) * box.width
             };
-            maxBoxesPerLayer = 1;
+            maxBoxesPerLayer = bestResult.boxesPerLayer;
         }
 
         // 최종 결과 반환
@@ -504,8 +473,8 @@ class CBMCalculator {
                 height: pallet.height + (actualLayers * box.height)
             },
             effectiveDimensions: {
-                length: bestResult.effectiveLength || pallet.length,
-                width: bestResult.effectiveWidth || pallet.width
+                length: bestResult.effectiveLength,
+                width: bestResult.effectiveWidth
             },
             loadingType: palletLoadingType,
             actualUsage: {
@@ -1285,16 +1254,14 @@ class CBMCalculator {
                         const boxLine = new THREE.LineSegments(boxEdges, lineMaterial);
                         boxGroup.add(boxLine);
                         
-                        // 팔레트 위 박스들을 실제 사용 공간에 맞춰 배치
-                        const actualUsageLength = layout.actualUsage ? layout.actualUsage.length : (layout.orientation.boxesX * boxWidth);
-                        const actualUsageWidth = layout.actualUsage ? layout.actualUsage.width : (layout.orientation.boxesY * boxDepth);
-                        const xOffset = -actualUsageLength / 2;
-                        const zOffset = -actualUsageWidth / 2;
+                        // 팔레트 위 박스들을 실제 사용 공간 기준으로 배치
+                        const actualUsedWidth = layout.actualUsage ? layout.actualUsage.length : layout.orientation.boxesX * boxWidth;
+                        const actualUsedDepth = layout.actualUsage ? layout.actualUsage.width : layout.orientation.boxesY * boxDepth;
+                        const xOffset = -actualUsedWidth / 2;
+                        const zOffset = -actualUsedDepth / 2;
                         
-                        // 박스 간 간격 고려 (오버사이즈 모드일 때)
-                        const spacing = layout.orientation.spacing || 0;
-                        const xPos = xOffset + boxWidth * (x + 0.5) + spacing * x;
-                        const zPos = zOffset + boxDepth * (y + 0.5) + spacing * y;
+                        const xPos = xOffset + boxWidth * (x + 0.5);
+                        const zPos = zOffset + boxDepth * (y + 0.5);
                         const yPos = pallet.height + box.height * (layer + 0.5);
                         
                         boxGroup.position.set(xPos, yPos, zPos);
@@ -1483,12 +1450,11 @@ class CBMCalculator {
                                     );
                                     boxGroup.add(boxLine);
                                     
-                                    // 박스를 실제 사용 공간에 맞춰 배치
-                                    const actualUsageLength = palletLayout.actualUsage ? palletLayout.actualUsage.length : (palletLayout.orientation.boxesX * boxWidth);
-                                    const actualUsageWidth = palletLayout.actualUsage ? palletLayout.actualUsage.width : (palletLayout.orientation.boxesY * boxDepth);
-                                    const spacing = palletLayout.orientation.spacing || 0;
-                                    const boxXOffset = -actualUsageLength / 2 + boxWidth * (bx + 0.5) + spacing * bx;
-                                    const boxZOffset = -actualUsageWidth / 2 + boxDepth * (by + 0.5) + spacing * by;
+                                    // 박스를 실제 사용 공간 기준으로 배치
+                                    const actualUsedWidth = palletLayout.actualUsage ? palletLayout.actualUsage.length : palletLayout.orientation.boxesX * boxWidth;
+                                    const actualUsedDepth = palletLayout.actualUsage ? palletLayout.actualUsage.width : palletLayout.orientation.boxesY * boxDepth;
+                                    const boxXOffset = -actualUsedWidth / 2 + boxWidth * (bx + 0.5);
+                                    const boxZOffset = -actualUsedDepth / 2 + boxDepth * (by + 0.5);
                                     const boxYOffset = pallet.height + box.height * (layer + 0.5);
                                     
                                     boxGroup.position.set(
