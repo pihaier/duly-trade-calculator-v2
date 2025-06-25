@@ -206,7 +206,7 @@ class TotalCostCalculator {
     }
 
     /**
-     * 모든 환율 조회 (통합)
+     * 모든 환율 조회 (통합) - 중복 호출 방지 최적화 ✅
      */
     async fetchAllExchangeRates() {
         const button = document.getElementById('fetchAllRates');
@@ -219,15 +219,52 @@ class TotalCostCalculator {
             button.disabled = true;
             button.textContent = '🔄 조회중...';
             
-            const [usdRate, cnyRate] = await Promise.all([
-                this.getExchangeRate('USD'),
-                this.getExchangeRate('CNY')
-            ]);
-            
-            usdInput.value = this.addCommas(usdRate);
-            cnyInput.value = this.addCommas(cnyRate);
-            
-            showAlert(`✅ 환율 조회 완료! USD: ${this.addCommas(usdRate)}원, CNY: ${this.addCommas(cnyRate)}원`, 'success');
+            // 🔧 최적화: 한 번의 API 호출로 모든 환율 가져오기
+            if (window.apiService) {
+                try {
+                    // 캐시된 환율이 있는지 먼저 확인
+                    const cachedRates = window.apiService.cache.get('exchangeRates');
+                    
+                    if (cachedRates && cachedRates.USD && cachedRates.CNY) {
+                        // 캐시에서 환율 사용
+                        usdInput.value = this.addCommas(cachedRates.USD);
+                        cnyInput.value = this.addCommas(cachedRates.CNY);
+                        showAlert(`✅ 환율 조회 완료! (캐시) USD: ${this.addCommas(cachedRates.USD)}원, CNY: ${this.addCommas(cachedRates.CNY)}원`, 'success');
+                        return;
+                    }
+                    
+                    // USD 환율 한 번만 호출 (API에서 모든 환율 반환)
+                    const usdRate = await this.getExchangeRate('USD');
+                    
+                    // 캐시에서 CNY 환율 확인 (USD 호출 시 함께 캐시됨)
+                    const updatedCache = window.apiService.cache.get('exchangeRates');
+                    const cnyRate = updatedCache?.CNY || await this.getExchangeRate('CNY');
+                    
+                    usdInput.value = this.addCommas(usdRate);
+                    cnyInput.value = this.addCommas(cnyRate);
+                    
+                    showAlert(`✅ 환율 조회 완료! USD: ${this.addCommas(usdRate)}원, CNY: ${this.addCommas(cnyRate)}원`, 'success');
+                    
+                } catch (apiError) {
+                    // API 실패 시 기본값 사용
+                    const defaultUSD = 1350;
+                    const defaultCNY = 190;
+                    
+                    usdInput.value = this.addCommas(defaultUSD);
+                    cnyInput.value = this.addCommas(defaultCNY);
+                    
+                    showAlert(`⚠️ 환율 API 조회 실패. 기본값 사용: USD ${this.addCommas(defaultUSD)}원, CNY ${this.addCommas(defaultCNY)}원`, 'warning');
+                }
+            } else {
+                // apiService가 없는 경우 기본값 사용
+                const defaultUSD = 1350;
+                const defaultCNY = 190;
+                
+                usdInput.value = this.addCommas(defaultUSD);
+                cnyInput.value = this.addCommas(defaultCNY);
+                
+                showAlert(`⚠️ API 서비스 미사용. 기본값 적용: USD ${this.addCommas(defaultUSD)}원, CNY ${this.addCommas(defaultCNY)}원`, 'info');
+            }
             
         } catch (error) {
             showAlert('❌ 환율 조회 실패. 기본값을 사용합니다.', 'warning');
@@ -1260,12 +1297,14 @@ class TotalCostCalculator {
                                 
                                 <div class="text-xs text-gray-400 space-y-1">
                                     ${req.agency ? `<p><strong>인증 가능 기관:</strong> ${req.agency}</p>` : ''}
-                                ${req.agencies && Array.isArray(req.agencies) && req.agencies.length > 0 ? 
+                                    ${req.agencies && Array.isArray(req.agencies) && req.agencies.length > 0 ? 
                                         `<div class="mt-2 ml-4 space-y-1">
                                         ${req.agencies.map(a => `<p style="margin: 2px 0;">• ${a.name || a} ${a.code ? `(${a.code})` : ''}</p>`).join('')}
                                     </div>` : ''}
-                                ${req.validUntil || req.endDate ? `<p style="margin: 5px 0; font-size: 11px; color: #9ca3af;"><strong>유효기간:</strong> ${req.validUntil || req.endDate}까지</p>` : ''}
-                                ${req.validFrom || req.startDate ? `<p style="margin: 5px 0; font-size: 11px; color: #9ca3af;"><strong>시행일:</strong> ${req.validFrom || req.startDate}부터</p>` : ''}
+                                    ${req.validUntil || req.endDate ? `<p style="margin: 5px 0; font-size: 11px; color: #9ca3af;"><strong>유효기간:</strong> ${req.validUntil || req.endDate}까지</p>` : ''}
+                                    ${req.validFrom || req.startDate ? `<p style="margin: 5px 0; font-size: 11px; color: #9ca3af;"><strong>시행일:</strong> ${req.validFrom || req.startDate}부터</p>` : ''}
+                                    ${req.contact ? `<p><strong>연락처:</strong> ${req.contact}</p>` : ''}
+
                                 </div>
                             </div>
                             `).join('')}

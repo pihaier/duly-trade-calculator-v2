@@ -35,11 +35,13 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { currency = 'USD', date } = req.query;
+        const { currency, date } = req.query;
         const queryDate = date || new Date().toISOString().split('T')[0].replace(/-/g, '');
         
-        // 캐시 확인
-        const cacheKey = `exchange-rate_${currency}_${queryDate}`;
+        // 🔧 최적화: 모든 환율을 조회하도록 캐시 키 변경
+        const isAllCurrencies = !currency || currency === 'ALL';
+        const cacheKey = isAllCurrencies ? `exchange-rate_ALL_${queryDate}` : `exchange-rate_${currency}_${queryDate}`;
+        
         const cachedData = getFromCache(cacheKey);
         
         if (cachedData) {
@@ -104,8 +106,13 @@ module.exports = async (req, res) => {
                     const rateList = result.trifFxrtInfoQryRtnVo.trifFxrtInfoQryRsltVo;
                     const rates = Array.isArray(rateList) ? rateList : [rateList];
                     
+                    // 🔧 최적화: 모든 환율 조회 시 필터링하지 않음
                     exchangeRates = rates
-                        .filter(item => item && item.currSgn && (!currency || item.currSgn === currency))
+                        .filter(item => {
+                            if (!item || !item.currSgn) return false;
+                            // 특정 통화 요청 시에만 필터링
+                            return isAllCurrencies || item.currSgn === currency;
+                        })
                         .map(item => ({
                             currency: item.currSgn,
                             currencyName: item.mtryUtNm || item.currKorNm || item.currSgn,
@@ -123,7 +130,7 @@ module.exports = async (req, res) => {
         }
 
         const responseData = {
-            currency,
+            currency: isAllCurrencies ? 'ALL' : currency,
             date: queryDate,
             rates: exchangeRates,
             timestamp: new Date().toISOString()

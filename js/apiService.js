@@ -228,7 +228,7 @@ class ApiService {
     }
 
     /**
-     * 관세환율 정보 조회 (서버리스 함수 우선, fallback으로 직접 호출)
+     * 관세환율 정보 조회 (서버리스 함수 우선, fallback으로 직접 호출) - 중복 호출 방지 최적화 ✅
      */
     async getExchangeRate(currency = 'USD') {
         try {
@@ -243,25 +243,33 @@ class ApiService {
             // 서버리스 함수 API 우선 시도
             if (this.useBackend) {
                 try {
+                    // 🔧 최적화: 모든 환율을 한 번에 가져오기 (currency 파라미터 제거)
                     const data = await this.callBackendAPI('exchange-rate', {
-                        currency: currency,
                         date: currentDate
+                        // currency 파라미터 제거하여 모든 환율 조회
                     });
 
                     if (data && data.rates && data.rates.length > 0) {
                         const rates = {};
+                        
+                        // 모든 환율을 캐시에 저장
                         data.rates.forEach(item => {
                             rates[item.currency] = item.baseRate;
                         });
 
+                        // 최소한 USD, CNY 기본값 보장
+                        if (!rates.USD) rates.USD = this.CURRENCIES.USD.defaultRate;
+                        if (!rates.CNY) rates.CNY = this.CURRENCIES.CNY.defaultRate;
+
                         this.saveExchangeRateCache(rates);
-                        return rates[currency] || this.CURRENCIES[currency].defaultRate;
+                        
+                        return rates[currency] || this.CURRENCIES[currency]?.defaultRate || 1350;
                     }
                 } catch (serverlessError) {
                     this.useBackend = false;
                     
                     // 서버리스 함수 실패 시 바로 기본값 반환 (CORS 에러 방지)
-                    return this.CURRENCIES[currency].defaultRate;
+                    return this.CURRENCIES[currency]?.defaultRate || 1350;
                 }
             }
 
