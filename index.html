@@ -172,7 +172,7 @@
         font-display: swap;
       }
       
-      /* 로딩 최적화 */
+      /* 로딩 최적화 - 깜박임 제거 */
       .loading-screen {
         position: fixed;
         top: 0;
@@ -180,11 +180,11 @@
         width: 100%;
         height: 100%;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
+        display: none; /* 기본적으로 숨김 */
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        transition: opacity 0.5s ease-out;
+        transition: opacity 0.3s ease-out;
       }
       
       .loading-screen.fade-out {
@@ -192,11 +192,11 @@
         pointer-events: none;
       }
       
-      /* 애니메이션 최적화 */
+      /* 애니메이션 최적화 - 깜박임 제거 */
       .fade-in-section {
-        opacity: 0;
-        transform: translateY(30px);
-        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 1; /* 기본적으로 보이게 설정 */
+        transform: translateY(0);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
       .fade-in-section.is-visible {
@@ -322,14 +322,14 @@
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 antialiased">
-    <!-- 로딩 화면 -->
-    <div id="loading-screen" class="loading-screen">
+    <!-- 로딩 화면 - 깜박임 제거 -->
+    <!-- <div id="loading-screen" class="loading-screen">
         <div class="text-center text-white">
             <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
             <h2 class="text-2xl font-bold">두리무역</h2>
             <p class="text-sm opacity-80">품질 관리 전문가</p>
         </div>
-    </div>
+    </div> -->
 
     <!-- Fixed Navigation -->
     <nav id="main-nav" class="fixed top-0 w-full z-40 transition-all duration-300 bg-white shadow-lg border-b border-gray-300">
@@ -377,19 +377,18 @@
     <!-- Hero Section -->
     <header id="hero-section" class="relative min-h-[75vh] md:h-screen overflow-hidden pt-24 md:pt-0">
         <div class="absolute inset-0 z-0">
-            <!-- 배경 그라데이션 (비디오 로딩 전 표시) -->
-            <div id="hero-background" class="absolute inset-0 hero-loading-bg transition-opacity duration-1000"></div>
+            <!-- 배경 그라데이션 (안정적인 배경) -->
+            <div id="hero-background" class="absolute inset-0 hero-loading-bg"></div>
             
-            <!-- 스마트 배경 비디오 - 모바일에서는 조건부 로딩 -->
+            <!-- 배경 비디오 - 깜박임 제거 -->
             <video 
                 id="hero-video"
-                class="background-video opacity-0 transition-opacity duration-1000 hidden md:block" 
+                class="background-video opacity-60 hidden md:block" 
                 muted 
                 playsinline
                 loop
-                preload="none"
+                preload="metadata"
                 poster="/images/hero-fallback.jpg"
-                style="display: none;"
             >
                 <!-- 현재 사용 가능한 비디오 파일 -->
                 <source src="/video/WeChat_20250625002234.mp4" type="video/mp4">
@@ -424,8 +423,8 @@
           </div>
         </div>
         
-        <!-- 스크롤 인디케이터 -->
-        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+        <!-- 스크롤 인디케이터 - 깜박임 제거 -->
+        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 text-white">
             <i data-lucide="chevron-down" class="w-6 h-6 md:w-8 md:h-8"></i>
         </div>
     </header>
