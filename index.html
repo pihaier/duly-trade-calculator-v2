@@ -192,7 +192,7 @@
         transform: translateY(0);
       }
       
-      /* 배경 비디오 최적화 */
+      /* 배경 비디오 최적화 - 모바일 반응형 */
       .background-video {
         position: absolute;
         top: 50%;
@@ -207,6 +207,25 @@
         /* 원본 색상 유지 - 필터 제거 */
       }
       
+      /* 모바일에서 비디오 최적화 */
+      @media (max-width: 768px) {
+        .background-video {
+          /* 모바일에서 비디오 크기 최적화 */
+          min-width: 120%;
+          min-height: 120%;
+          /* 모바일 성능을 위한 최적화 */
+          will-change: transform;
+        }
+      }
+      
+      /* 모바일 비디오 로딩 최적화 */
+      @media (max-width: 768px) and (max-height: 896px) {
+        .background-video {
+          /* 작은 화면에서 비디오 품질 조정 */
+          filter: brightness(0.8) contrast(1.1);
+        }
+      }
+      
       /* 성능 최적화 */
       * {
         will-change: auto;
@@ -218,6 +237,96 @@
       
       .hover-transform:hover {
         transform: translateY(-8px) scale(1.02);
+      }
+      
+      /* 모바일 우선 반응형 타이포그래피 */
+      .mobile-title {
+        font-size: 1.5rem;   /* 24px - 모바일 */
+        line-height: 1.3;
+      }
+      
+      @media (min-width: 640px) {
+        .mobile-title {
+          font-size: 1.875rem; /* 30px - sm */
+        }
+      }
+      
+      @media (min-width: 768px) {
+        .mobile-title {
+          font-size: 3rem;     /* 48px - md */
+          line-height: 1.2;
+        }
+      }
+      
+      @media (min-width: 1024px) {
+        .mobile-title {
+          font-size: 4rem;     /* 64px - lg */
+        }
+      }
+      
+      @media (min-width: 1280px) {
+        .mobile-title {
+          font-size: 6rem;     /* 96px - xl */
+        }
+      }
+      
+      .mobile-subtitle {
+        font-size: 0.875rem;  /* 14px - 모바일 */
+        line-height: 1.5;
+      }
+      
+      @media (min-width: 640px) {
+        .mobile-subtitle {
+          font-size: 1rem;     /* 16px - sm */
+        }
+      }
+      
+      @media (min-width: 768px) {
+        .mobile-subtitle {
+          font-size: 1.125rem; /* 18px - md */
+        }
+      }
+      
+      @media (min-width: 1024px) {
+        .mobile-subtitle {
+          font-size: 1.25rem;  /* 20px - lg */
+        }
+      }
+      
+      @media (min-width: 1280px) {
+        .mobile-subtitle {
+          font-size: 1.5rem;   /* 24px - xl */
+        }
+      }
+      
+      .mobile-text {
+        font-size: 0.75rem;   /* 12px - 모바일 */
+        line-height: 1.4;
+      }
+      
+      @media (min-width: 640px) {
+        .mobile-text {
+          font-size: 0.875rem; /* 14px - sm */
+        }
+      }
+      
+      @media (min-width: 768px) {
+        .mobile-text {
+          font-size: 1rem;     /* 16px - md */
+          line-height: 1.5;
+        }
+      }
+      
+      @media (min-width: 1024px) {
+        .mobile-text {
+          font-size: 1.125rem; /* 18px - lg */
+        }
+      }
+      
+      @media (min-width: 1280px) {
+        .mobile-text {
+          font-size: 1.25rem;  /* 20px - xl */
+        }
       }
       
       /* 그라데이션 최적화 */
@@ -277,6 +386,201 @@
         0% { left: -100%; }
         100% { left: 100%; }
       }
+      
+      /* 터치 최적화 - 모든 인터랙티브 요소 */
+      .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        /* 터치 영역 확장 */
+        padding: 8px;
+      }
+      
+      .touch-target-large {
+        min-height: 48px;
+        min-width: 48px;
+        padding: 12px;
+      }
+      
+      /* 터치 피드백 개선 */
+      .touch-feedback {
+        transition: all 0.15s ease;
+        -webkit-tap-highlight-color: rgba(139, 92, 246, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .touch-feedback:active {
+        transform: scale(0.98);
+        opacity: 0.8;
+      }
+      
+      /* 리플 효과 */
+      .touch-feedback::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s ease, height 0.3s ease;
+        pointer-events: none;
+        z-index: 1;
+      }
+      
+      .touch-feedback:active::before {
+        width: 100px;
+        height: 100px;
+      }
+      
+      /* 버튼별 개선된 피드백 */
+      .btn-primary {
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        transition: all 0.2s ease;
+      }
+      
+      .btn-primary:hover {
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        transform: translateY(-2px);
+      }
+      
+      .btn-primary:active {
+        transform: translateY(0) scale(0.98);
+        box-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+      }
+      
+      /* 카드 호버 효과 개선 */
+      .card-interactive {
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      
+      .card-interactive:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+      }
+      
+      .card-interactive:active {
+        transform: translateY(-2px) scale(0.99);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      }
+      
+      /* 모바일 버튼 최적화 */
+      @media (max-width: 768px) {
+        .mobile-btn {
+          font-size: 0.875rem;
+          padding: 12px 20px;
+          min-height: 48px;
+          border-radius: 12px;
+        }
+        
+        .mobile-btn-large {
+          font-size: 1rem;
+          padding: 16px 24px;
+          min-height: 52px;
+          border-radius: 16px;
+        }
+        
+        .mobile-btn-small {
+          font-size: 0.75rem;
+          padding: 8px 16px;
+          min-height: 44px;
+          border-radius: 10px;
+        }
+      }
+      
+      /* 터치 간격 최적화 */
+      .touch-spacing > * + * {
+        margin-top: 8px;
+      }
+      
+      @media (min-width: 768px) {
+        .touch-spacing > * + * {
+          margin-top: 0;
+          margin-left: 16px;
+        }
+      }
+      
+      /* 수평 스크롤 최적화 */
+      .scrollbar-hide {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+      }
+      
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;  /* Chrome, Safari, Opera */
+      }
+      
+      /* 서비스 카드 스크롤 인디케이터 */
+      .service-indicator {
+        transition: all 0.3s ease;
+      }
+      
+      .service-indicator.active {
+        background-color: rgba(255, 255, 255, 0.8);
+        transform: scale(1.2);
+      }
+      
+      /* 개선된 스크롤 애니메이션 */
+      .fade-in-section {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s ease-out;
+      }
+      
+      .fade-in-section.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      /* 스태거드 애니메이션 (순차적 등장) */
+      .stagger-item {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s ease-out;
+      }
+      
+      .stagger-item.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      /* 애니메이션 지연 클래스 */
+      .delay-100 { transition-delay: 0.1s; }
+      .delay-200 { transition-delay: 0.2s; }
+      .delay-300 { transition-delay: 0.3s; }
+      .delay-400 { transition-delay: 0.4s; }
+      .delay-500 { transition-delay: 0.5s; }
+      
+      /* 카운터 애니메이션 개선 */
+      .counter-animate {
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.5s ease-out;
+      }
+      
+      .counter-animate.is-visible {
+        opacity: 1;
+        transform: scale(1);
+      }
+      
+      /* 카드 등장 애니메이션 */
+      .card-animate {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+        transition: all 0.5s ease-out;
+      }
+      
+      .card-animate.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     </style>
 </head>
 
@@ -290,57 +594,73 @@
         </div>
     </div>
 
-    <!-- Fixed Navigation -->
+    <!-- Fixed Navigation - 모바일 최적화 -->
     <nav id="main-nav" class="fixed top-0 w-full z-40 transition-all duration-300 bg-transparent">
         <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-20">
-                <a href="#hero-section" class="text-2xl font-black gradient-text">두리무역</a>
+            <div class="flex justify-between items-center h-16 md:h-20">
+                <!-- 로고 (모바일에서 작게) -->
+                <a href="#hero-section" class="text-xl md:text-2xl font-black gradient-text">두리무역</a>
                 
                 <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-8">
+                <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
                     <a href="#hero-section" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">홈</a>
                     <a href="#detailed-services" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">서비스</a>
                     <a href="#why-choose-us" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">왜 두리무역?</a>
                     <a href="#problem-solution" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">문제 해결</a>
                     <a href="#process" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">프로세스</a>
                     <a href="#faq-section" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">FAQ</a>
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-xl transition-all hover:scale-105 hover:shadow-purple-500/25">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-full font-bold hover:shadow-xl transition-all hover:scale-105 hover:shadow-purple-500/25 text-sm lg:text-base">
                         품질관리 신청하기
                     </a>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-button" class="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" aria-label="메뉴 열기">
+                <!-- Mobile Menu Button - 터치 영역 확대 -->
+                <button id="mobile-menu-button" class="md:hidden p-3 text-gray-700 hover:bg-gray-100 rounded-xl transition-colors touch-target-large touch-feedback" aria-label="메뉴 열기">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
 
-            <!-- Mobile Menu -->
+            <!-- Mobile Menu - 개선된 디자인 -->
             <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md shadow-xl rounded-b-2xl border-t border-gray-100">
-                 <a href="#hero-section" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link">홈</a>
-                 <a href="#detailed-services" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link">서비스</a>
-                 <a href="#why-choose-us" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link">왜 두리무역?</a>
-                 <a href="#problem-solution" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link">문제 해결</a>
-                 <a href="#process" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link">프로세스</a>
-                 <a href="#faq-section" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link">FAQ</a>
+                <div class="py-4">
+                    <a href="#hero-section" class="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link font-medium">🏠 홈</a>
+                    <a href="#detailed-services" class="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link font-medium">🔍 서비스</a>
+                    <a href="#why-choose-us" class="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link font-medium">⭐ 왜 두리무역?</a>
+                    <a href="#problem-solution" class="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link font-medium">❗ 문제 해결</a>
+                    <a href="#process" class="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link font-medium">📋 프로세스</a>
+                    <a href="#faq-section" class="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link font-medium">❓ FAQ</a>
+                    
+                    <!-- 모바일 메뉴 CTA -->
+                    <div class="px-6 py-4 border-t border-gray-200 mt-2">
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog" 
+                           target="_blank" rel="noopener noreferrer" 
+                           class="block w-full text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition-all hover:scale-105 touch-target-large touch-feedback">
+                            📞 무료 상담 받기
+                        </a>
+                        <a href="tel:031-699-8781" 
+                           class="block w-full text-center mt-3 border border-purple-600 text-purple-600 px-6 py-2 rounded-xl font-semibold hover:bg-purple-50 transition-all touch-target touch-feedback">
+                            📞 031-699-8781
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
     
-    <!-- Hero Section -->
-    <header id="hero-section" class="relative h-screen overflow-hidden">
+    <!-- Hero Section - 모바일 최적화 -->
+    <header id="hero-section" class="relative min-h-[75vh] md:h-screen overflow-hidden">
         <div class="absolute inset-0 z-0">
             <!-- 배경 그라데이션 (비디오 로딩 전 표시) -->
             <div id="hero-background" class="absolute inset-0 hero-loading-bg transition-opacity duration-1000"></div>
             
-            <!-- 스마트 배경 비디오 -->
+            <!-- 스마트 배경 비디오 (모바일 최적화) -->
             <video 
                 id="hero-video"
                 class="background-video opacity-0 transition-opacity duration-1000" 
                 muted 
                 playsinline
                 loop
-                preload="none"
+                preload="metadata"
                 poster="/images/hero-fallback.jpg"
                 style="display: none;"
             >
@@ -351,100 +671,155 @@
             
             <!-- 동영상 위 오버레이 (텍스트 가독성을 위한 약간의 어둡게 처리) -->
             <div class="absolute inset-0 bg-black/20"></div>
-            
-            <!-- 비디오 컨트롤 버튼 제거됨 -->
         </div>
-        <div class="relative z-10 h-full flex items-center justify-center text-white px-4">
-          <div class="text-center max-w-5xl mx-auto">
-            <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight animate-fade-in-up">
-              중국 수입, <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">'품질 리스크'</span>가<br class="hidden md:block">
-              가장 큰 문제입니다
+        <div class="relative z-10 h-full flex items-center justify-center text-white px-4 py-20 md:py-0">
+          <div class="text-center max-w-4xl mx-auto">
+            <!-- 모바일 우선 제목 -->
+            <h1 class="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight animate-fade-in-up">
+              <span class="block md:inline">중국 수입 품질 문제</span>
+              <span class="block mt-2 md:mt-0 md:ml-2">
+                <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">두리무역이 해결</span>
+              </span>
             </h1>
-            <h2 class="text-xl sm:text-2xl md:text-3xl font-light mb-12 max-w-3xl mx-auto opacity-90 animate-fade-in-up animation-delay-300">
-              두리무역의 전문적인 현지 관리 시스템으로,<br class="hidden md:block">
-              생산부터 선적까지 모든 단계를 안심하고 맡기세요.
-            </h2>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up animation-delay-600">
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" class="group relative inline-block px-12 py-5 text-lg font-bold text-white overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25">
-                <span class="relative z-10 flex items-center justify-center">
-                  <i data-lucide="send" class="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform"></i>
-                  무료 견적 및 상담 신청
-                </span>
-              </a>
-              <a href="tel:031-699-8781" class="group relative inline-block px-12 py-5 text-lg font-bold bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full hover:bg-white hover:text-purple-700 transition-all duration-300 hover:scale-105">
-                <i data-lucide="phone" class="inline w-5 h-5 mr-3 group-hover:animate-pulse"></i>
-                전화 상담 문의
-              </a>
+            
+            <!-- 간결한 부제목 -->
+            <div class="text-sm sm:text-base md:text-xl lg:text-2xl font-medium mb-8 md:mb-12 max-w-2xl mx-auto opacity-90 animate-fade-in-up animation-delay-300">
+              <div class="flex flex-wrap justify-center gap-2 md:gap-4 text-center">
+                <span class="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">✅ 8년 노하우</span>
+                <span class="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">🔍 현지 검품</span>
+                <span class="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">🛡️ 품질 보장</span>
+              </div>
+              <p class="mt-4 text-xs sm:text-sm md:text-base opacity-80">
+                생산부터 선적까지 모든 단계를 안심하고 맡기세요
+              </p>
             </div>
+            
+                         <!-- 간소화된 CTA - 터치 최적화 -->
+             <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-600 touch-spacing">
+               <a href="https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog" 
+                  target="_blank" rel="noopener noreferrer" 
+                  class="group relative inline-block px-8 md:px-12 py-4 md:py-5 text-base md:text-lg font-bold text-white overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 touch-target-large touch-feedback btn-primary">
+                 <span class="relative z-10 flex items-center justify-center">
+                   <i data-lucide="send" class="w-4 h-4 md:w-5 md:h-5 mr-2 md:mr-3 group-hover:rotate-12 transition-transform"></i>
+                   무료 상담 받기
+                 </span>
+               </a>
+               <a href="tel:031-699-8781" 
+                  class="group relative inline-block px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-semibold bg-white/10 backdrop-blur-md text-white border border-white/30 rounded-full hover:bg-white hover:text-purple-700 transition-all duration-300 hover:scale-105 touch-target touch-feedback">
+                 <i data-lucide="phone" class="inline w-4 h-4 md:w-5 md:h-5 mr-2 group-hover:animate-pulse"></i>
+                 📞 031-699-8781
+               </a>
+             </div>
           </div>
         </div>
         
-        <!-- 스크롤 인디케이터 -->
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
-            <i data-lucide="chevron-down" class="w-8 h-8"></i>
+        <!-- 스크롤 인디케이터 (모바일에서 작게) -->
+        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+            <i data-lucide="chevron-down" class="w-6 h-6 md:w-8 md:h-8"></i>
         </div>
     </header>
 
     <main>
-        <!-- Services Section -->
-        <section id="detailed-services" class="py-24 relative overflow-hidden fade-in-section">
+        <!-- Services Section - 모바일 최적화 -->
+        <section id="detailed-services" class="py-12 md:py-24 relative overflow-hidden fade-in-section">
             <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900"></div>
             <div class="container mx-auto px-4 relative z-10">
-              <div class="text-center mb-20">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6">
-                  맞춤형 전문 검품 솔루션
+              <div class="text-center mb-8 md:mb-20">
+                <h2 class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-white mb-3 md:mb-6">
+                  전문 검품 서비스
                 </h2>
-                <p class="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-                  귀사의 비즈니스 단계와 필요에 따라 가장 적합한 서비스를 선택하세요. 
-                  각 서비스는 독립적으로 또는 함께 이용 가능합니다.
+                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 max-w-2xl mx-auto">
+                  비즈니스 단계에 맞는 최적 서비스를 선택하세요
                 </p>
               </div>
-              <div id="services-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <!-- Service cards will be injected here by JavaScript -->
+              <!-- 모바일 수평 스크롤 + 데스크톱 그리드 -->
+              <div class="max-w-6xl mx-auto">
+                <!-- 모바일: 수평 스크롤 컨테이너 -->
+                <div class="md:hidden">
+                  <div id="services-container-mobile" class="flex overflow-x-auto space-x-4 px-4 pb-4 scrollbar-hide">
+                    <!-- Mobile service cards will be injected here -->
+                  </div>
+                  <!-- 스크롤 인디케이터 -->
+                  <div class="flex justify-center mt-4 space-x-2">
+                    <div class="w-2 h-2 bg-white/30 rounded-full service-indicator active"></div>
+                    <div class="w-2 h-2 bg-white/30 rounded-full service-indicator"></div>
+                    <div class="w-2 h-2 bg-white/30 rounded-full service-indicator"></div>
+                  </div>
+                </div>
+                
+                <!-- 데스크톱: 기존 그리드 -->
+                <div id="services-container" class="hidden md:grid grid-cols-3 gap-8">
+                  <!-- Desktop service cards will be injected here -->
+                </div>
               </div>
             </div>
         </section>
 
-        <!-- Value Section -->
-        <section id="why-choose-us" class="py-24 bg-gradient-to-b from-white to-gray-50 fade-in-section">
+        <!-- Value Section - 모바일 최적화 -->
+        <section id="why-choose-us" class="py-12 md:py-24 bg-gradient-to-b from-white to-gray-50 fade-in-section">
             <div class="container mx-auto px-4">
-              <div class="text-center mb-20">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                  결과로 증명하는 <span class="gradient-text">두리무역의 가치</span>
+              <div class="text-center mb-8 md:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-3 md:mb-6">
+                  <span class="gradient-text">두리무역 실적</span>
                 </h2>
-                <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-                  단순 검품 대행을 넘어, 귀사의 성공적인 비즈니스를 위한 가장 확실한 파트너가 되어드립니다.
+                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-xl mx-auto">
+                  8년간 쌓아온 신뢰할 수 있는 검품 노하우
                 </p>
               </div>
-              <div id="stats-section" class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 max-w-5xl mx-auto">
-                    <div class="group relative bg-white p-10 rounded-3xl text-center shadow-xl hover:shadow-2xl hover-transform transition-all border border-gray-100">
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 rounded-3xl transition-opacity"></div>
-                        <div class="mb-4 text-purple-600 flex justify-center"><i data-lucide="trending-up" class="w-8 h-8"></i></div>
-                        <p class="text-5xl sm:text-6xl font-black mb-2">
-                            <span id="counter-years" class="gradient-text">0</span>
-                            <span class="text-4xl sm:text-5xl gradient-text">+</span>
-                            <span class="text-3xl sm:text-4xl text-gray-600">년</span>
-                        </p>
-                        <p class="text-lg sm:text-xl font-bold text-gray-700">현장 검품 노하우</p>
+              <!-- 컴팩트한 통계 카드 (모바일 최적화) -->
+              <div id="stats-section" class="grid grid-cols-3 gap-3 md:gap-6 mb-8 md:mb-16 max-w-5xl mx-auto">
+                    <!-- 8년 경력 카드 -->
+                    <div class="group relative bg-gradient-to-br from-white to-purple-50 p-3 md:p-8 rounded-xl md:rounded-2xl text-center shadow-md hover:shadow-xl hover-transform transition-all border border-purple-100 hover:border-purple-300">
+                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-10 rounded-xl md:rounded-2xl transition-opacity"></div>
+                        <div class="relative z-10">
+                            <div class="mb-1 md:mb-3 text-purple-600 flex justify-center">
+                                <div class="p-1 md:p-2 bg-purple-100 rounded-lg">
+                                    <i data-lucide="trending-up" class="w-4 h-4 md:w-6 md:h-6"></i>
+                                </div>
+                            </div>
+                            <p class="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black mb-1">
+                                <span id="counter-years" class="gradient-text">0</span>
+                                <span class="text-lg sm:text-xl md:text-3xl lg:text-4xl gradient-text">+</span>
+                            </p>
+                            <p class="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-700">년 경력</p>
+                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">검품 전문가</p>
+                        </div>
                     </div>
-                    <div class="group relative bg-white p-10 rounded-3xl text-center shadow-xl hover:shadow-2xl hover-transform transition-all border border-gray-100">
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 rounded-3xl transition-opacity"></div>
-                        <div class="mb-4 text-purple-600 flex justify-center"><i data-lucide="star" class="w-8 h-8"></i></div>
-                        <p class="text-5xl sm:text-6xl font-black mb-2">
-                            <span id="counter-satisfaction" class="gradient-text">0</span>
-                            <span class="text-4xl sm:text-5xl gradient-text">%</span>
-                        </p>
-                        <p class="text-lg sm:text-xl font-bold text-gray-700">높은 고객 만족도</p>
+                    
+                    <!-- 98% 만족도 카드 -->
+                    <div class="group relative bg-gradient-to-br from-white to-yellow-50 p-3 md:p-8 rounded-xl md:rounded-2xl text-center shadow-md hover:shadow-xl hover-transform transition-all border border-yellow-100 hover:border-yellow-300">
+                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 opacity-0 group-hover:opacity-10 rounded-xl md:rounded-2xl transition-opacity"></div>
+                        <div class="relative z-10">
+                            <div class="mb-1 md:mb-3 text-yellow-600 flex justify-center">
+                                <div class="p-1 md:p-2 bg-yellow-100 rounded-lg">
+                                    <i data-lucide="star" class="w-4 h-4 md:w-6 md:h-6"></i>
+                                </div>
+                            </div>
+                            <p class="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black mb-1">
+                                <span id="counter-satisfaction" class="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">0</span>
+                                <span class="text-lg sm:text-xl md:text-3xl lg:text-4xl bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">%</span>
+                            </p>
+                            <p class="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-700">만족도</p>
+                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">고객 신뢰</p>
+                        </div>
                     </div>
-                    <div class="group relative bg-white p-10 rounded-3xl text-center shadow-xl hover:shadow-2xl hover-transform transition-all border border-gray-100">
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 rounded-3xl transition-opacity"></div>
-                        <div class="mb-4 text-purple-600 flex justify-center"><i data-lucide="award" class="w-8 h-8"></i></div>
-                        <p class="text-5xl sm:text-6xl font-black mb-2">
-                            <span id="counter-projects" class="gradient-text">0</span>
-                            <span class="text-4xl sm:text-5xl gradient-text">+</span>
-                            <span class="text-3xl sm:text-4xl text-gray-600">건</span>
-                        </p>
-                        <p class="text-lg sm:text-xl font-bold text-gray-700">성공적인 프로젝트</p>
+                    
+                    <!-- 500+ 프로젝트 카드 -->
+                    <div class="group relative bg-gradient-to-br from-white to-blue-50 p-3 md:p-8 rounded-xl md:rounded-2xl text-center shadow-md hover:shadow-xl hover-transform transition-all border border-blue-100 hover:border-blue-300">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-10 rounded-xl md:rounded-2xl transition-opacity"></div>
+                        <div class="relative z-10">
+                            <div class="mb-1 md:mb-3 text-blue-600 flex justify-center">
+                                <div class="p-1 md:p-2 bg-blue-100 rounded-lg">
+                                    <i data-lucide="award" class="w-4 h-4 md:w-6 md:h-6"></i>
+                                </div>
+                            </div>
+                            <p class="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black mb-1">
+                                <span id="counter-projects" class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">0</span>
+                                <span class="text-lg sm:text-xl md:text-3xl lg:text-4xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">+</span>
+                            </p>
+                            <p class="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-700">프로젝트</p>
+                            <p class="text-xs text-gray-500 mt-1 hidden sm:block">성공 사례</p>
+                        </div>
                     </div>
               </div>
               <div id="benefits-container" class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
@@ -453,73 +828,102 @@
             </div>
         </section>
 
-        <!-- Problems Section -->
-        <section id="problem-solution" class="py-24 bg-gradient-to-b from-gray-50 to-white fade-in-section">
+        <!-- Problems Section - 모바일 최적화 -->
+        <section id="problem-solution" class="py-12 md:py-24 bg-gradient-to-b from-gray-50 to-white fade-in-section">
             <div class="container mx-auto px-4">
-                <div class="text-center mb-20">
-                    <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                    대표적인 중국 소싱 리스크<br class="hidden md:block">
-                    <span class="gradient-text">두리무역과 함께 해결하세요.</span>
+                <div class="text-center mb-8 md:mb-16">
+                    <h2 class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-3 md:mb-6">
+                    <span class="block md:inline">중국 수입 리스크</span>
+                    <span class="block gradient-text">해결 방법</span>
                     </h2>
-                    <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-                    고객사들이 가장 흔하게 겪는 문제 유형과 저희의 명쾌한 해결책을 확인해보세요.
+                    <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto">
+                    흔한 문제와 명쾌한 해결책을 확인하세요
                     </p>
                 </div>
-                <div id="problems-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                <!-- 모바일 최적화된 문제 해결 카드 그리드 -->
+                <div id="problems-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
                     <!-- Problem cards will be injected here -->
                 </div>
             </div>
         </section>
         
-        <!-- Process Section -->
-        <section id="process" class="py-24 bg-gradient-to-br from-purple-50 via-white to-blue-50 fade-in-section">
+        <!-- Process Section - 모바일 최적화 -->
+        <section id="process" class="py-12 md:py-24 bg-gradient-to-br from-purple-50 via-white to-blue-50 fade-in-section">
             <div class="container mx-auto px-4">
-              <div class="text-center mb-20">
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                  단 4단계로 끝내는 <span class="gradient-text">검품 프로세스</span>
+              <div class="text-center mb-8 md:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-3 md:mb-6">
+                  <span class="gradient-text">4단계 검품 프로세스</span>
                 </h2>
-                <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-                  복잡한 절차는 저희에게 맡기시고, 핵심 비즈니스에만 집중하세요.
+                <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-xl mx-auto">
+                  간단한 절차로 안전한 수입을 보장합니다
                 </p>
               </div>
-              <div class="relative grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-16 max-w-6xl mx-auto">
-                <div class="hidden md:block absolute top-1/2 left-0 w-full h-px -translate-y-20">
-                    <svg width="100%" height="2">
-                        <line x1="0" y1="1" x2="100%" y2="1" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="8 8"></line>
-                    </svg>
+              <!-- 모바일 최적화된 프로세스 레이아웃 -->
+              <div class="max-w-5xl mx-auto">
+                <!-- 모바일: 세로 나열 + 연결선 -->
+                <div class="md:hidden space-y-6">
+                  <div id="process-container-mobile" class="relative">
+                    <!-- Mobile process steps will be injected here -->
+                  </div>
                 </div>
-                <div id="process-container" class="contents"></div>
+                
+                <!-- 데스크톱: 기존 4열 그리드 -->
+                <div class="hidden md:block relative">
+                  <div class="grid grid-cols-4 gap-x-8 gap-y-16">
+                    <div class="absolute top-1/2 left-0 w-full h-px -translate-y-20">
+                      <svg width="100%" height="2">
+                        <line x1="0" y1="1" x2="100%" y2="1" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="8 8"></line>
+                      </svg>
+                    </div>
+                    <div id="process-container" class="contents"></div>
+                  </div>
+                </div>
               </div>
             </div>
         </section>
 
-        <!-- CTA Section -->
-        <section id="application-inquiry" class="relative py-32 overflow-hidden fade-in-section">
+        <!-- CTA Section - 모바일 최적화 간소화 -->
+        <section id="application-inquiry" class="relative py-12 md:py-24 overflow-hidden fade-in-section">
             <div class="absolute inset-0 bg-gradient-to-br from-purple-700 via-indigo-700 to-blue-700"></div>
             <div class="container mx-auto px-4 text-center relative z-10">
-              <h2 class="text-4xl sm:text-5xl md:text-7xl font-black mb-6 text-white">
-                이제 리스크 걱정은 끝내세요.
+              <!-- 간결한 제목 -->
+              <h2 class="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black mb-3 md:mb-4 text-white leading-tight">
+                안전한 수입을 시작하세요
               </h2>
-              <p class="text-xl sm:text-2xl max-w-3xl mx-auto mb-12 text-gray-200">
-                두리무역의 전문 검품 서비스로 비즈니스의 성공 가능성을 높이세요.<br>
-                지금 바로 무료 상담을 통해 무엇이 달라지는지 확인해보세요.
+              
+              <!-- 핵심 메시지만 -->
+              <p class="text-sm sm:text-base md:text-lg max-w-lg mx-auto mb-6 md:mb-8 text-gray-200">
+                두리무역과 함께 품질 리스크 없는 성공적인 중국 수입을 경험해보세요
               </p>
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" class="group relative inline-block">
-                <div class="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                <span class="relative flex items-center bg-white text-purple-700 font-black py-6 px-14 rounded-full text-xl transition-all transform group-hover:scale-105">
-                  무료 상담 및 견적 요청하기 <i data-lucide="arrow-right" class="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform"></i>
-                </span>
-              </a>
+              
+              <!-- 주요 CTA + 전화번호 -->
+              <div class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center max-w-md mx-auto">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog" 
+                   target="_blank" rel="noopener noreferrer" 
+                   class="w-full sm:w-auto group relative inline-block touch-feedback">
+                  <div class="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+                  <span class="relative flex items-center justify-center bg-white text-purple-700 font-black py-3 md:py-4 px-6 md:px-8 rounded-full text-sm md:text-base transition-all transform group-hover:scale-105 touch-target-large">
+                    <i data-lucide="send" class="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform"></i>
+                    무료 상담 받기
+                  </span>
+                </a>
+                
+                <a href="tel:031-699-8781" 
+                   class="w-full sm:w-auto inline-flex items-center justify-center px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-bold bg-white/10 backdrop-blur-md text-white border border-white/30 rounded-full hover:bg-white hover:text-purple-700 transition-all duration-300 hover:scale-105 touch-target-large touch-feedback">
+                  <i data-lucide="phone" class="w-4 h-4 mr-2"></i>
+                  📞 031-699-8781
+                </a>
+              </div>
             </div>
         </section>
 
-        <!-- FAQ Section -->
-        <section id="faq-section" class="py-24 bg-gradient-to-b from-white to-gray-50 fade-in-section">
+        <!-- FAQ Section - 모바일 최적화 -->
+        <section id="faq-section" class="py-12 md:py-24 bg-gradient-to-b from-white to-gray-50 fade-in-section">
             <div class="container mx-auto px-4">
-              <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-center mb-20 text-gray-900">
-                자주 묻는 질문 <span class="gradient-text">(FAQ)</span>
+              <h2 class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-center mb-8 md:mb-16 text-gray-900">
+                <span class="gradient-text">자주 묻는 질문</span>
               </h2>
-              <div id="faq-container" class="max-w-4xl mx-auto space-y-6">
+              <div id="faq-container" class="max-w-3xl mx-auto space-y-4 md:space-y-6">
                 <!-- FAQ items will be injected here -->
               </div>
             </div>
@@ -560,25 +964,54 @@
         </div>
     </footer>
     
-    <!-- Mobile Bottom Navigation -->
+    <!-- Mobile Bottom Navigation - 개선된 버전 -->
     <div class="pb-20 md:pb-0">
         <nav class="fixed bottom-0 left-0 w-full h-20 bg-white/95 backdrop-blur-md shadow-2xl flex justify-around items-center md:hidden z-40 border-t border-gray-100">
-            <a href="#hero-section" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50">
-                <div><i data-lucide="home" class="w-6 h-6 mx-auto mb-1"></i><span class="block text-xs font-medium">홈</span></div>
-            </a>
-            <a href="#why-choose-us" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50">
-                <div><i data-lucide="thumbs-up" class="w-6 h-6 mx-auto mb-1"></i><span class="block text-xs font-medium">왜 두리무역?</span></div>
-            </a>
-            <a href="#detailed-services" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50">
-                <div><i data-lucide="briefcase" class="w-6 h-6 mx-auto mb-1"></i><span class="block text-xs font-medium">서비스</span></div>
-            </a>
-            <a href="#application-inquiry" class="text-center">
-                <div class="p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl text-white px-4 hover:shadow-lg hover:scale-105 transition-all">
-                    <i data-lucide="send" class="w-6 h-6 mx-auto mb-1"></i><span class="block text-xs font-bold">견적문의</span>
+            <a href="#hero-section" class="nav-item text-center text-gray-600 hover:text-purple-600 transition-all duration-200 p-2 rounded-lg hover:bg-purple-50 touch-target touch-feedback" data-section="hero-section">
+                <div class="flex flex-col items-center">
+                    <div class="relative">
+                        <i data-lucide="home" class="w-6 h-6 mb-1 transition-transform duration-200"></i>
+                        <div class="nav-indicator absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-purple-600 rounded-full opacity-0 transition-all duration-200"></div>
+                    </div>
+                    <span class="block text-xs font-medium">홈</span>
                 </div>
             </a>
-            <a href="#faq-section" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50">
-                <div><i data-lucide="help-circle" class="w-6 h-6 mx-auto mb-1"></i><span class="block text-xs font-medium">FAQ</span></div>
+            
+            <a href="#why-choose-us" class="nav-item text-center text-gray-600 hover:text-purple-600 transition-all duration-200 p-2 rounded-lg hover:bg-purple-50 touch-target touch-feedback" data-section="why-choose-us">
+                <div class="flex flex-col items-center">
+                    <div class="relative">
+                        <i data-lucide="thumbs-up" class="w-6 h-6 mb-1 transition-transform duration-200"></i>
+                        <div class="nav-indicator absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-purple-600 rounded-full opacity-0 transition-all duration-200"></div>
+                    </div>
+                    <span class="block text-xs font-medium">실적</span>
+                </div>
+            </a>
+            
+            <a href="#detailed-services" class="nav-item text-center text-gray-600 hover:text-purple-600 transition-all duration-200 p-2 rounded-lg hover:bg-purple-50 touch-target touch-feedback" data-section="detailed-services">
+                <div class="flex flex-col items-center">
+                    <div class="relative">
+                        <i data-lucide="briefcase" class="w-6 h-6 mb-1 transition-transform duration-200"></i>
+                        <div class="nav-indicator absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-purple-600 rounded-full opacity-0 transition-all duration-200"></div>
+                    </div>
+                    <span class="block text-xs font-medium">서비스</span>
+                </div>
+            </a>
+            
+            <a href="#application-inquiry" class="nav-item text-center touch-feedback" data-section="application-inquiry">
+                <div class="p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl text-white px-4 hover:shadow-lg hover:scale-105 transition-all duration-200 touch-target-large btn-primary">
+                    <i data-lucide="send" class="w-6 h-6 mx-auto mb-1 transition-transform duration-200"></i>
+                    <span class="block text-xs font-bold">상담</span>
+                </div>
+            </a>
+            
+            <a href="#faq-section" class="nav-item text-center text-gray-600 hover:text-purple-600 transition-all duration-200 p-2 rounded-lg hover:bg-purple-50 touch-target touch-feedback" data-section="faq-section">
+                <div class="flex flex-col items-center">
+                    <div class="relative">
+                        <i data-lucide="help-circle" class="w-6 h-6 mb-1 transition-transform duration-200"></i>
+                        <div class="nav-indicator absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-purple-600 rounded-full opacity-0 transition-all duration-200"></div>
+                    </div>
+                    <span class="block text-xs font-medium">FAQ</span>
+                </div>
             </a>
         </nav>
     </div>
