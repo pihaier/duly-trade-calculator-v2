@@ -356,33 +356,22 @@ class TotalCostCalculator {
         const tariffResult = document.getElementById('tariffResult');
         if (!tariffResult) return;
 
-        // 🔍 DEBUG: API 응답 데이터 로깅
-        console.log('🔍 관세율 API 응답 데이터:', tariffInfo);
-
         // API 응답에서 관세율 정보 추출
         const data = tariffInfo.data || tariffInfo;
         const rates = data.rates || {};
-        
-        console.log('🔍 추출된 rates 데이터:', rates);
         
         // 기본 관세율들 추출 (0값 안전 처리)
         const basicRate = rates.basic?.rate !== undefined ? rates.basic.rate : (rates.기본세율 !== undefined ? rates.기본세율 : 8);
         const wtoRate = rates.wto?.rate !== undefined ? rates.wto.rate : (rates.WTO협정세율 !== undefined ? rates.WTO협정세율 : basicRate);
         const ftaRate = rates.preferential?.rate !== undefined ? rates.preferential.rate : (rates.특혜세율 !== undefined ? rates.특혜세율 : null);
         
-        console.log('🔍 추출된 관세율들:', { basicRate, wtoRate, ftaRate });
-        
         // 가장 낮은 세율 찾기
         const availableRates = [basicRate, wtoRate];
         if (ftaRate !== null && ftaRate !== undefined) {
             availableRates.push(ftaRate);
-            console.log('🔍 FTA 세율 포함:', availableRates);
-            } else {
-            console.log('🔍 FTA 세율 없음:', availableRates);
         }
         
         const bestRate = Math.min(...availableRates);
-        console.log('🔍 최적 세율:', bestRate);
         
         // 적용 관세율 자동 입력
         const appliedRateInput = document.getElementById('appliedTariffRate');

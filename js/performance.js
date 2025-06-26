@@ -159,13 +159,10 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
             .then(registration => {
-                console.log('SW registered: ', registration);
+                // Service Worker 등록 성공 (조용히 처리)
             })
             .catch(registrationError => {
                 // 에러를 조용히 처리 (배포 환경에서만 작동)
-                if (window.DEBUG_MODE) {
-                    console.log('SW registration failed: ', registrationError);
-                }
             });
     });
 } 

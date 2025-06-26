@@ -72,9 +72,6 @@ module.exports = async (req, res) => {
             imexTp: '2'  // 수입 (1: 수출, 2: 수입) - 필수 파라미터
         };
 
-        console.log('관세청 수입요건 API 호출:', apiUrl);
-        console.log('요청 파라미터:', params);
-
         const response = await axios.get(apiUrl, {
             params,
             timeout: 10000,
@@ -83,10 +80,6 @@ module.exports = async (req, res) => {
                 'Accept': 'application/xml, text/xml, */*'
             }
         });
-
-        console.log('API 응답 상태:', response.status);
-        console.log('API 응답 타입:', typeof response.data);
-        console.log('API 응답 내용 (첫 500자):', response.data?.substring(0, 500));
 
         let requirementInfo = null;
 
@@ -98,7 +91,6 @@ module.exports = async (req, res) => {
             });
             
             const result = await parser.parseStringPromise(response.data);
-            console.log('파싱된 XML:', JSON.stringify(result, null, 2));
             
             if (result && result.ccctLworCdQryRtnVo) {
                 // 오류 응답 체크
@@ -111,7 +103,7 @@ module.exports = async (req, res) => {
                     const requirementData = result.ccctLworCdQryRtnVo.ccctLworCdQryRsltVo;
                     const requirementList = Array.isArray(requirementData) ? requirementData : [requirementData];
                     
-                    console.log('수입요건 개수:', result.ccctLworCdQryRtnVo.tCnt || requirementList.length);
+                    // 수입요건 개수 확인
                     
                     const requirements = requirementList.map(item => ({
                         lawCode: item.dcerCfrmLworCd || '',
@@ -205,9 +197,6 @@ module.exports = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('수입요건 조회 오류:', error.message);
-        console.error('상세 오류:', error.response?.data || error.stack);
-        
         // 에러 발생 시 빈 배열이 아닌 에러 응답 반환
         res.status(500).json({
             success: false,

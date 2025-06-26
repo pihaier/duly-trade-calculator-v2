@@ -77,9 +77,6 @@ module.exports = async (req, res) => {
             aplyStrtDt: queryDate
         };
 
-        console.log('관세청 관세율 API 호출:', apiUrl);
-        console.log('요청 파라미터:', params);
-
         const response = await axios.get(apiUrl, {
             params,
             timeout: 10000,
@@ -88,10 +85,6 @@ module.exports = async (req, res) => {
                 'Accept': 'application/xml, text/xml, */*'
             }
         });
-
-        console.log('API 응답 상태:', response.status);
-        console.log('API 응답 타입:', typeof response.data);
-        console.log('API 응답 내용 (첫 500자):', response.data?.substring(0, 500));
 
         let tariffInfo = null;
 
@@ -103,7 +96,6 @@ module.exports = async (req, res) => {
             });
             
             const result = await parser.parseStringPromise(response.data);
-            console.log('파싱된 XML:', JSON.stringify(result, null, 2));
             
             if (result && result.trrtQryRtnVo) {
                 // 오류 응답 체크 - errYn이 있고 'Y'인 경우만 에러로 처리
@@ -146,7 +138,6 @@ module.exports = async (req, res) => {
                     const applicableFtaCodes = countryFtaMapping[importCountry] || [];
                     
                     tariffList.forEach(item => {
-                        console.log('관세율 항목:', JSON.stringify(item));
                         
                         // imexTpcd가 없으므로 모든 데이터가 수입 관련
                         const rateValue = parseFloat(item.trrt || 0);  // 필드명 수정
@@ -248,9 +239,6 @@ module.exports = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('관세율 조회 오류:', error.message);
-        console.error('상세 오류:', error.response?.data || error.stack);
-        
         res.status(500).json({
             success: false,
             error: error.message,

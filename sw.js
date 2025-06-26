@@ -31,12 +31,9 @@ const DYNAMIC_ASSETS = [
 
 // 설치 이벤트
 self.addEventListener('install', event => {
-    console.log('Service Worker installing...');
-    
     event.waitUntil(
         caches.open(STATIC_CACHE)
             .then(cache => {
-                console.log('Caching static assets...');
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
@@ -44,15 +41,13 @@ self.addEventListener('install', event => {
                 return self.skipWaiting();
             })
             .catch(error => {
-                console.error('Cache installation failed:', error);
+                // 캐시 설치 실패 조용히 처리
             })
     );
 });
 
 // 활성화 이벤트
 self.addEventListener('activate', event => {
-    console.log('Service Worker activating...');
-    
     event.waitUntil(
         caches.keys()
             .then(cacheNames => {
@@ -62,7 +57,6 @@ self.addEventListener('activate', event => {
                         if (cacheName !== STATIC_CACHE && 
                             cacheName !== DYNAMIC_CACHE && 
                             cacheName !== CACHE_NAME) {
-                            console.log('Deleting old cache:', cacheName);
                             return caches.delete(cacheName);
                         }
                     })
@@ -128,7 +122,6 @@ async function handleStaticAsset(request) {
         
         return networkResponse;
     } catch (error) {
-        console.error('Static asset fetch failed:', error);
         return new Response('Asset not available', { status: 404 });
     }
 }
@@ -151,8 +144,6 @@ async function handleApiRequest(request) {
         
         throw new Error('Network response not ok');
     } catch (error) {
-        console.log('Network failed, trying cache:', error);
-        
         const cachedResponse = await caches.match(request);
         if (cachedResponse) {
             return cachedResponse;
@@ -225,7 +216,6 @@ async function handleOtherAssets(request) {
         
         return networkResponse;
     } catch (error) {
-        console.error('Asset fetch failed:', error);
         return new Response('Asset not available', { status: 404 });
     }
 }
@@ -276,10 +266,10 @@ async function doBackgroundSync() {
                     await cache.put(request, response);
                 }
             } catch (error) {
-                console.log('Background sync failed for:', request.url);
+                // 백그라운드 동기화 실패 조용히 처리
             }
         }
     } catch (error) {
-        console.error('Background sync failed:', error);
+        // 백그라운드 동기화 실패 조용히 처리
     }
 } 

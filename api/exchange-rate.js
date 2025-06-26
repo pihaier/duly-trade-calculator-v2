@@ -68,9 +68,6 @@ module.exports = async (req, res) => {
             imexTp: '2' // 수입
         };
 
-        console.log('관세청 환율 API 호출:', apiUrl);
-        console.log('요청 파라미터:', params);
-
         const response = await axios.get(apiUrl, {
             params,
             timeout: 10000,
@@ -79,9 +76,6 @@ module.exports = async (req, res) => {
                 'Accept': 'application/xml, text/xml, */*'
             }
         });
-
-        console.log('API 응답 상태:', response.status);
-        console.log('API 응답 타입:', typeof response.data);
 
         let exchangeRates = [];
 
@@ -93,7 +87,6 @@ module.exports = async (req, res) => {
             });
             
             const result = await parser.parseStringPromise(response.data);
-            console.log('파싱된 XML:', JSON.stringify(result, null, 2));
             
             if (result && result.trifFxrtInfoQryRtnVo) {
                 // 오류 응답 체크
@@ -145,9 +138,6 @@ module.exports = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('환율 조회 오류:', error.message);
-        console.error('상세 오류:', error.response?.data || error.stack);
-        
         res.status(500).json({
             success: false,
             error: error.message,

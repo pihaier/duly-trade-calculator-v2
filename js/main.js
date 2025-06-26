@@ -454,7 +454,6 @@ class MainController {
      * 디버그 정보 출력
      */
     debugInfo() {
-        console.log('디버그 정보 출력');
         // 디버그 관련 코드를 여기에 추가
         }
 }

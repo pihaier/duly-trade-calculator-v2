@@ -78,27 +78,24 @@ class SmartVideoLoader {
                 this.background.style.display = 'none';
             }
             
-            // 尝试自动播放
+            // 자동재생 시도
             this.video.play().then(() => {
                 this.isPlaying = true;
-                console.log('视频自动播放成功');
             }).catch(error => {
-                console.log('视频自动播放失败:', error);
                 this.isPlaying = false;
             });
         });
         
         this.video.addEventListener('error', (e) => {
-            console.error('视频加载错误:', e);
             this.disableVideo();
         });
         
         this.video.addEventListener('loadstart', () => {
-            console.log('视频开始加载');
+            // 비디오 로딩 시작
         });
         
         this.video.addEventListener('progress', () => {
-            console.log('视频加载进度更新');
+            // 비디오 로딩 진행
         });
     }
     
@@ -113,7 +110,7 @@ class SmartVideoLoader {
             this.background.style.animation = 'none';
         }
         
-        console.log('비디오 비활성화 완료');
+        // 비디오 비활성화 완료
     }
     
     setupManualMode() {
@@ -130,7 +127,7 @@ class SmartVideoLoader {
             }
         });
         
-        console.log('수동 재생 모드 설정');
+        // 수동 재생 모드 설정
     }
     
     setupAutoMode() {
@@ -145,7 +142,7 @@ class SmartVideoLoader {
             }
         });
         
-        console.log('자동 재생 모드 설정');
+        // 자동 재생 모드 설정
     }
     
     loadAndPlay() {
@@ -165,14 +162,11 @@ class SmartVideoLoader {
         this.video.play().then(() => {
             this.isPlaying = true;
             this.toggleBtn.innerHTML = '<i data-lucide="pause" class="w-5 h-5"></i>';
-            console.log('비디오 재생 시작');
         }).catch(error => {
-            console.log('비디오 자동재생 실패:', error);
             this.setupManualMode();
         });
         
         this.video.addEventListener('error', () => {
-            console.log('비디오 로딩 실패');
             this.disableVideo();
         });
     }
@@ -182,7 +176,7 @@ class SmartVideoLoader {
             this.video.play().then(() => {
                 this.isPlaying = true;
             }).catch(error => {
-                console.log('视频播放失败:', error);
+                // 비디오 재생 실패
             });
         }
     }
@@ -209,26 +203,24 @@ class BatteryOptimizer {
                 
                 // 배터리 20% 이하면 비디오 일시정지
                 if (battery.level < 0.2) {
-                    console.log('배터리 부족: 비디오 일시정지');
                     this.videoLoader.pauseVideo();
                 }
                 
                 // 배터리 상태 변화 감지
                 battery.addEventListener('levelchange', () => {
                     if (battery.level < 0.15 && this.videoLoader.isPlaying) {
-                        console.log('배터리 매우 부족: 비디오 정지');
                         this.videoLoader.pauseVideo();
                     }
                 });
                 
                 battery.addEventListener('chargingchange', () => {
                     if (battery.charging && battery.level > 0.3) {
-                        console.log('충전 중: 비디오 재생 허용');
+                        // 충전 중: 비디오 재생 허용
                     }
                 });
                 
             } catch (error) {
-                console.log('배터리 API 지원 안함');
+                // 배터리 API 지원 안함
             }
         }
     }
@@ -461,9 +453,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 스마트 비디오 로딩 시스템 초기화
-    console.log('🎬 스마트 비디오 로딩 시스템 시작');
-    
-    // 비디오 로더 초기화
     const videoLoader = new SmartVideoLoader();
     
     // 배터리 최적화 초기화
@@ -471,14 +460,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 네트워크 상태 변화 감지
     window.addEventListener('online', () => {
-        console.log('온라인 상태: 비디오 로딩 재시도');
         if (videoLoader.shouldLoad === true && !videoLoader.isPlaying) {
             videoLoader.loadAndPlay();
         }
     });
     
     window.addEventListener('offline', () => {
-        console.log('오프라인 상태: 비디오 일시정지');
         videoLoader.pauseVideo();
     });
     
@@ -490,8 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
             videoLoader.playVideo();
         }
     });
-    
-    console.log('✅ 스마트 비디오 로딩 시스템 초기화 완료');
 });
 
 // Component Rendering Functions
@@ -676,7 +661,6 @@ function initializeMobileMenu() {
 function initializeCounters() {
     const statsSection = document.getElementById('stats-section');
     if (!statsSection) {
-        console.warn('⚠️ stats-section을 찾을 수 없습니다');
         return;
     }
 
@@ -687,30 +671,23 @@ function initializeCounters() {
             { id: 'counter-projects', end: 3000, duration: 2000 }
         ];
         
-        console.log('📊 카운터 애니메이션 시작');
-        
         counters.forEach(counter => {
             const el = document.getElementById(counter.id);
             if (el && !el.classList.contains('animated')) {
-                console.log(`🎯 ${counter.id} 애니메이션 시작: 0 → ${counter.end}`);
                 el.classList.add('animated');
                 animateCounter(el, counter.end, counter.duration);
-            } else if (!el) {
-                console.warn(`⚠️ ${counter.id} 엘리먼트를 찾을 수 없습니다`);
             }
         });
     };
 
-    // 즉시 실행 (디버그용)
+    // 즉시 실행
     setTimeout(() => {
-        console.log('🔍 stats-section 확인:', statsSection);
         animateCounters();
     }, 1000);
 
     const counterObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                console.log('👁️ stats-section이 화면에 나타남');
                 animateCounters();
                 counterObserver.unobserve(entry.target);
             }
@@ -721,14 +698,12 @@ function initializeCounters() {
 }
 
 function animateCounter(element, end, duration) {
-    console.log(`🔄 animateCounter 호출: ${element.id}, ${end}, ${duration}ms`);
-    
     const frameDuration = 1000 / 60;
     const totalFrames = Math.round(duration / frameDuration);
     let currentFrame = 0;
     
-    // 강제 DOM 업데이트 함수
-    const forceUpdate = (value) => {
+    // DOM 업데이트 함수
+    const updateValue = (value) => {
         element.textContent = value.toString();
         element.innerHTML = value.toString();
         element.innerText = value.toString();
@@ -738,28 +713,22 @@ function animateCounter(element, end, duration) {
         
         // 스타일 강제 적용
         element.style.display = 'inline';
-        
-        // 디버그 로그 빈도 줄이기 (10의 배수만)
-        if (value % 10 === 0 || value === 0 || value === end) {
-            console.log(`🔄 DOM 강제 업데이트: ${element.id} = ${value}`);
-        }
     };
     
     // 즉시 0으로 시작
-    forceUpdate(0);
+    updateValue(0);
     
     const timer = setInterval(() => {
         currentFrame++;
         const progress = currentFrame / totalFrames;
         const currentValue = Math.round(end * progress);
         
-        // 강제 DOM 업데이트
-        forceUpdate(currentValue);
+        // DOM 업데이트
+        updateValue(currentValue);
         
         if (currentFrame >= totalFrames) {
             clearInterval(timer);
-            forceUpdate(end);
-            console.log(`✅ ${element.id} 애니메이션 완료: ${end}`);
+            updateValue(end);
         }
     }, frameDuration);
 }
