@@ -424,33 +424,24 @@ const services = [
         }
     ];
 
-// 페이지 로딩 최적화
+// 페이지 로딩 최적화 - 깜박임 제거
 document.addEventListener('DOMContentLoaded', () => {
-    // 로딩 화면 즉시 제거 (성능 최적화)
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-        loadingScreen.classList.add('fade-out');
-        setTimeout(() => {
-            loadingScreen.remove();
-        }, 300);
+    // 로딩 화면 처리 제거 (이미 HTML에서 숨김 처리됨)
+    
+    // Initialize components - 즉시 실행으로 깜박임 방지
+    renderServices();
+    renderBenefits();
+    renderProblems();
+    renderProcess();
+    renderFAQ();
+    renderModals();
+    initializeEventListeners();
+    initializeAnimations();
+    
+    // Lucide 아이콘 초기화
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
     }
-
-    // Initialize components (지연 로딩으로 성능 최적화)
-    requestAnimationFrame(() => {
-        renderServices();
-        renderBenefits();
-        renderProblems();
-        renderProcess();
-        renderFAQ();
-        renderModals();
-        initializeEventListeners();
-        initializeAnimations();
-        
-        // Lucide 아이콘 초기화를 마지막에 실행
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-    });
 
     // 스마트 비디오 로딩 시스템 초기화
     const videoLoader = new SmartVideoLoader();
@@ -623,20 +614,22 @@ function initializeNavigation() {
     const nav = document.getElementById('main-nav');
     if (!nav) return;
 
-    // 네비게이션바는 항상 불투명하게 유지
-    // 모바일에서 투명도로 인한 가독성 문제 해결
+    // 네비게이션바 고정 스타일 - 깜박임 제거
     nav.classList.add('shadow-lg');
 
+    // 스크롤 효과 단순화
     const handleScroll = debounce(() => {
-        // 스크롤 시 그림자만 조정 (투명도 변경 없음)
+        // 클래스 변경 최소화
         if (window.scrollY > 50) {
-            nav.classList.add('shadow-xl');
-            nav.classList.remove('shadow-lg');
+            if (!nav.classList.contains('shadow-xl')) {
+                nav.classList.add('shadow-xl');
+            }
         } else {
-            nav.classList.remove('shadow-xl');
-            nav.classList.add('shadow-lg');
+            if (nav.classList.contains('shadow-xl')) {
+                nav.classList.remove('shadow-xl');
+            }
         }
-    }, 10);
+    }, 50); // 디바운스 시간 증가
 
     window.addEventListener('scroll', handleScroll);
 }
@@ -702,17 +695,9 @@ function animateCounter(element, end, duration) {
     const totalFrames = Math.round(duration / frameDuration);
     let currentFrame = 0;
     
-    // DOM 업데이트 함수
+    // DOM 업데이트 함수 - 깜박임 제거
     const updateValue = (value) => {
-        element.textContent = value.toString();
-        element.innerHTML = value.toString();
-        element.innerText = value.toString();
-        
-        // 강제 리플로우 트리거
-        element.offsetHeight;
-        
-        // 스타일 강제 적용
-        element.style.display = 'inline';
+        element.textContent = value.toString(); // 하나만 사용
     };
     
     // 즉시 0으로 시작
@@ -846,28 +831,8 @@ function initializeAnimations() {
         sectionObserver.observe(section);
     });
 
-    // Parallax effect for hero section
-    let ticking = false;
-    const updateParallax = () => {
-        const scrolled = window.pageYOffset;
-        const parallaxElements = document.querySelectorAll('.background-video');
-        
-        parallaxElements.forEach(element => {
-            const speed = 0.5;
-            element.style.transform = `translateX(-50%) translateY(${-50 + scrolled * speed * 0.01}%)`;
-        });
-        
-        ticking = false;
-    };
-
-    const requestTick = () => {
-        if (!ticking) {
-            requestAnimationFrame(updateParallax);
-            ticking = true;
-        }
-    };
-
-    window.addEventListener('scroll', requestTick);
+    // 패럴랙스 효과 제거 - 깜박임 원인
+    // 비디오는 고정 위치로 유지
 }
 
 // Modal Creation
