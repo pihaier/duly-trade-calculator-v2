@@ -207,6 +207,14 @@
         /* 원본 색상 유지 - 필터 제거 */
       }
       
+      /* 모바일에서 영상 위치 조정 - 네비게이션바 밑으로 */
+      @media (max-width: 768px) {
+        .background-video {
+          top: calc(50% + 2rem); /* 네비게이션바 높이만큼 아래로 이동 */
+          transform: translateX(-50%) translateY(-50%);
+        }
+      }
+      
       /* 성능 최적화 */
       * {
         will-change: auto;
@@ -316,7 +324,7 @@
             </div>
 
             <!-- Mobile Menu -->
-            <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md shadow-xl rounded-b-2xl border-t border-gray-100">
+            <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-xl rounded-b-2xl border-t border-gray-200">
                  <a href="#hero-section" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">홈</a>
                  <a href="#detailed-services" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">서비스</a>
                  <a href="#why-choose-us" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">왜 두리무역?</a>
@@ -563,7 +571,7 @@
     
     <!-- Mobile Bottom Navigation -->
     <div class="pb-16 md:pb-0">
-        <nav class="fixed bottom-0 left-0 w-full h-16 bg-white/95 backdrop-blur-md shadow-2xl flex justify-around items-center md:hidden z-40 border-t border-gray-100">
+        <nav class="fixed bottom-0 left-0 w-full h-16 bg-white shadow-2xl flex justify-around items-center md:hidden z-40 border-t border-gray-300">
             <a href="#hero-section" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50 min-w-[44px] min-h-[44px] flex flex-col items-center justify-center">
                 <i data-lucide="home" class="w-5 h-5 mb-1"></i><span class="block text-xs font-medium">홈</span>
             </a>
