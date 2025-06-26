@@ -857,12 +857,14 @@ class TotalCostCalculator {
         // 3. 관세액 계산
         const tariffAmount = cifKRW * appliedTariffRate;
 
-        // 4. 부가세 계산 - 모든 금액의 합의 10%로 수정 ✅
-        const vatBase = cifKRW + tariffAmount + coCost + otherCosts;
-        const vatAmount = vatBase * this.taxRates.VAT_RATE;
+        // 4. 부가세 계산 - 총 비용의 정확히 10%가 되도록 계산 ✅
+        const baseAmount = cifKRW + tariffAmount + coCost + otherCosts;
+        // 부가세가 총 비용의 10%가 되려면: 부가세 = 기본비용 ÷ 9
+        const vatAmount = baseAmount / 9; // 총 비용의 정확히 10%
+        const vatBase = baseAmount; // 부가세 과세표준
 
         // 5. 총 비용 계산
-        const totalCost = cifKRW + tariffAmount + coCost + vatAmount + otherCosts;
+        const totalCost = baseAmount + vatAmount;
         const costPerUnit = totalCost / quantity;
 
         return {
@@ -963,11 +965,6 @@ class TotalCostCalculator {
                                     <span>${formatCurrency(calculation.coCost)}</span>
                                 </div>
                             ` : ''}
-                            <div class="flex justify-between">
-                                <span>부가세 (10%)</span>
-                                <span>${formatCurrency(calculation.vatAmount)}</span>
-                            </div>
-                            <div class="text-xs text-gray-400">부가세 과세표준: ${formatCurrency(calculation.vatBase)}</div>
                         </div>
                     </div>
 
@@ -982,17 +979,33 @@ class TotalCostCalculator {
                         </div>
                     ` : ''}
 
+                    <!-- 부가세 (맨 밑에 표시) -->
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <h5 class="font-semibold mb-3">${calculation.otherCosts > 0 ? '4️⃣' : '3️⃣'} 부가세 계산</h5>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>부가세 (10%)</span>
+                                <span>${formatCurrency(calculation.vatAmount)}</span>
+                            </div>
+                            <div class="text-xs text-gray-400">부가세 과세표준: ${formatCurrency(calculation.vatBase)}</div>
+                        </div>
+                    </div>
+
                     <!-- 최종 합계 -->
                     <div class="bg-blue-900/30 rounded-lg p-4 border border-blue-500/30">
                         <h5 class="font-semibold mb-3">💎 최종 합계</h5>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <div class="text-2xl font-bold text-blue-400">${formatCurrency(calculation.totalCost)}</div>
-                                <div class="text-sm text-gray-400">총 수입 비용</div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-medium text-gray-300">총 수입 비용</span>
+                                <span class="text-2xl font-bold text-blue-400">${formatCurrency(calculation.totalCost)}</span>
                             </div>
-                            <div>
-                                <div class="text-xl font-bold text-green-400">${formatCurrency(calculation.costPerUnit)}</div>
-                                <div class="text-sm text-gray-400">개당 부가세 포함 원가</div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-medium text-gray-300">개당 부가세 포함 원가</span>
+                                <span class="text-xl font-bold text-green-400">${formatCurrency(calculation.costPerUnit)}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-medium text-gray-300">개당 부가세 별도 원가</span>
+                                <span class="text-xl font-bold text-purple-400">${formatCurrency(Math.round(calculation.costPerUnit / 1.1))}</span>
                             </div>
                         </div>
                     </div>
@@ -1159,15 +1172,21 @@ class TotalCostCalculator {
     generateCostBreakdownChart(result) {
         const { breakdown } = result;
         
-        const total = breakdown.productCost + breakdown.shippingCost + 
-                     breakdown.tariffCost + breakdown.coCost + 
-                     breakdown.vatCost + breakdown.otherCosts;
+        // 부가세를 제외한 기본 비용 계산
+        const baseTotal = breakdown.productCost + breakdown.shippingCost + 
+                         breakdown.tariffCost + breakdown.coCost + breakdown.otherCosts;
+        
+        // 부가세가 총 비용의 정확히 10%가 되도록 계산
+        const vatCostForChart = baseTotal / 9; // 총 비용의 정확히 10%
+        
+        // 전체 총합 (부가세 포함)
+        const total = baseTotal + vatCostForChart;
 
         const chartData = [
             { label: '제품 비용', value: breakdown.productCost, color: '#3B82F6' },
             { label: '운송비', value: breakdown.shippingCost, color: '#10B981' },
             { label: '관세', value: breakdown.tariffCost, color: '#F59E0B' },
-            { label: '부가세', value: breakdown.vatCost, color: '#EF4444' },
+            { label: '부가세', value: vatCostForChart, color: '#EF4444' },
             { label: 'C/O 비용', value: breakdown.coCost, color: '#8B5CF6' },
             { label: '기타 비용', value: breakdown.otherCosts, color: '#6B7280' }
         ].filter(item => item.value > 0);
@@ -1559,14 +1578,18 @@ class TotalCostCalculator {
             <!-- 최종 결과 -->
             <div class="highlight-box">
                 <h3>💎 최종 계산 결과 (예측)</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <div class="main-value">${(calculation.totalCost).toLocaleString()}원</div>
-                        <div class="sub-value">총 수입 비용 (부가세 포함)</div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #ddd;">
+                        <span style="font-size: 16px; font-weight: bold;">총 수입 비용 (부가세 포함)</span>
+                        <span class="main-value">${(calculation.totalCost).toLocaleString()}원</span>
                     </div>
-                    <div>
-                        <div class="main-value">${(calculation.costPerUnit).toLocaleString()}원</div>
-                        <div class="sub-value">개당 원가 (부가세 포함)</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #ddd;">
+                        <span style="font-size: 16px; font-weight: bold;">개당 원가 (부가세 포함)</span>
+                        <span class="main-value">${(calculation.costPerUnit).toLocaleString()}원</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+                        <span style="font-size: 16px; font-weight: bold;">개당 원가 (부가세 별도)</span>
+                        <span class="main-value">${Math.round(calculation.costPerUnit / 1.1).toLocaleString()}원</span>
                     </div>
                 </div>
                 <p style="margin-top: 15px; font-size: 12px; color: #7c3aed; font-weight: bold;">※ 실제 통관 시 환율 변동, 관세율 변경 등으로 차이가 발생할 수 있습니다.</p>
@@ -1755,15 +1778,21 @@ class TotalCostCalculator {
     generateCostBreakdownForPDF(result) {
         const { breakdown } = result;
         
-        const total = breakdown.productCost + breakdown.shippingCost + 
-                     breakdown.tariffCost + breakdown.coCost + 
-                     breakdown.vatCost + breakdown.otherCosts;
+        // 부가세를 제외한 기본 비용 계산
+        const baseTotal = breakdown.productCost + breakdown.shippingCost + 
+                         breakdown.tariffCost + breakdown.coCost + breakdown.otherCosts;
+        
+        // 부가세가 총 비용의 정확히 10%가 되도록 계산
+        const vatCostForChart = baseTotal / 9; // 총 비용의 정확히 10%
+        
+        // 전체 총합 (부가세 포함)
+        const total = baseTotal + vatCostForChart;
 
         const chartData = [
             { label: '제품 비용', value: breakdown.productCost, color: '#3B82F6' },
             { label: '운송비', value: breakdown.shippingCost, color: '#10B981' },
             { label: '관세', value: breakdown.tariffCost, color: '#F59E0B' },
-            { label: '부가세', value: breakdown.vatCost, color: '#EF4444' },
+            { label: '부가세', value: vatCostForChart, color: '#EF4444' },
             { label: 'C/O 비용', value: breakdown.coCost, color: '#8B5CF6' },
             { label: '기타 비용', value: breakdown.otherCosts, color: '#6B7280' }
         ].filter(item => item.value > 0);

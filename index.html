@@ -149,12 +149,19 @@
     
     <!-- 스타일시트 - 완전 로컬 최적화 -->
     <link href="/lib/tailwind.min.css" rel="stylesheet">
-    <link href="/lib/fonts.css" rel="stylesheet">
+    <link href="/lib/fonts.css" rel="stylesheet" media="all">
     <script src="/lib/lucide.js"></script>
+    
+    <!-- 성능 최적화 스크립트 -->
+    <script src="/js/performance.js" defer></script>
     
     <!-- 인라인 중요 CSS -->
     <style>
-      /* 기본 설정 */
+      /* 기본 설정 - 폰트 즉시 적용 */
+      * {
+        font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      
       body {
         font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         font-display: swap;

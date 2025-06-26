@@ -739,7 +739,10 @@ function animateCounter(element, end, duration) {
         // 스타일 강제 적용
         element.style.display = 'inline';
         
-        console.log(`🔄 DOM 강제 업데이트: ${element.id} = ${value}`);
+        // 디버그 로그 빈도 줄이기 (10의 배수만)
+        if (value % 10 === 0 || value === 0 || value === end) {
+            console.log(`🔄 DOM 강제 업데이트: ${element.id} = ${value}`);
+        }
     };
     
     // 즉시 0으로 시작

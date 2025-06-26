@@ -598,7 +598,7 @@ class CBMCalculator {
             const nameMap = {
                 '20ft': '20ft GP',
                 '40ft': '40ft GP', 
-                '40hc': '40ft HG'
+                '40hc': '40ft HC'
             };
             return nameMap[type] || type;
         };
@@ -648,7 +648,7 @@ class CBMCalculator {
                 bestRecommendation = {
                     containerType: '40hc',
                     shippingMethod: `${getSimpleContainerName('40hc')} * 1개 FCL`,
-                    reason: `박스 수량 ${totalQuantity}개는 40ft HG 적재 가능`,
+                    reason: `박스 수량 ${totalQuantity}개는 40ft HC 적재 가능`,
                     efficiency: container40hc.efficiency,
                     containersNeeded: 1,
                     boxesPerContainer: container40hc.boxesPerContainer,
@@ -783,7 +783,7 @@ class CBMCalculator {
         if (container40hc.boxesPerContainer >= remainingBoxes) {
             containerOptions.push({
                 type: '40hc',
-                name: '40ft HG',  // 간단한 이름으로 변경 (HG = High-Cube)
+                name: '40ft HC',  // 간단한 이름으로 변경 (HC = High-Cube)
                 capacity: container40hc.boxesPerContainer
             });
         }
@@ -834,7 +834,7 @@ class CBMCalculator {
                 <!-- 추천 컨테이너 -->
                 <div class="alert alert-success">
                     <h4 class="font-bold mb-2">🎯 최적 추천</h4>
-                    <p><strong>${recommendation.shippingMethod === 'LCL' ? 'LCL' : recommendation.containerType + ' ' + recommendation.shippingMethod}</strong></p>
+                    <p><strong>${recommendation.shippingMethod === 'LCL' ? 'LCL' : recommendation.shippingMethod}</strong></p>
                     <p class="text-sm mt-1">${recommendation.reason}</p>
                     <p class="text-sm">효율성: ${recommendation.efficiency}%</p>
                 </div>

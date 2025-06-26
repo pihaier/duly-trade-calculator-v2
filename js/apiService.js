@@ -54,7 +54,11 @@ class ApiService {
             const timeoutId = setTimeout(() => controller.abort(), 3000);
             
             const response = await fetch('/api/health', {
-                signal: controller.signal
+                signal: controller.signal,
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
             
             clearTimeout(timeoutId);
@@ -63,9 +67,12 @@ class ApiService {
                 this.useBackend = true;
                 return true;
             } else {
-                throw new Error('Serverless function health check failed');
+                // 401, 404 등의 에러는 조용히 처리 (콘솔 에러 방지)
+                this.useBackend = false;
+                return false;
             }
         } catch (error) {
+            // 네트워크 에러, CORS 에러 등을 조용히 처리
             this.useBackend = false;
             return false;
         }
