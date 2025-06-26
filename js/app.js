@@ -638,13 +638,18 @@ function initializeNavigation() {
     const nav = document.getElementById('main-nav');
     if (!nav) return;
 
+    // 네비게이션바는 항상 불투명하게 유지
+    // 모바일에서 투명도로 인한 가독성 문제 해결
+    nav.classList.add('shadow-lg');
+
     const handleScroll = debounce(() => {
+        // 스크롤 시 그림자만 조정 (투명도 변경 없음)
         if (window.scrollY > 50) {
-            nav.classList.add('shadow-lg');
-            nav.classList.remove('shadow-sm');
-        } else {
+            nav.classList.add('shadow-xl');
             nav.classList.remove('shadow-lg');
-            nav.classList.add('shadow-sm');
+        } else {
+            nav.classList.remove('shadow-xl');
+            nav.classList.add('shadow-lg');
         }
     }, 10);
 
