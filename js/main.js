@@ -108,17 +108,13 @@ class MainController {
     }
 
     /**
-     * 탭 전환 애니메이션
+     * 탭 전환 애니메이션 - 깜박임 제거
      */
     animateTabTransition(element) {
-        element.style.opacity = '0';
-        element.style.transform = 'translateY(20px)';
-        
-        requestAnimationFrame(() => {
-            element.style.transition = 'all 0.3s ease';
-            element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
-        });
+        // 간단한 페이드인 효과만 적용
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+        element.style.transition = 'opacity 0.2s ease';
     }
 
     /**
@@ -214,7 +210,7 @@ class MainController {
     }
 
     /**
-     * 로딩 상태 표시
+     * 로딩 상태 표시 - 깜박임 제거
      */
     showLoading(message = '⏳ 처리 중입니다...') {
         const overlay = document.getElementById('loadingOverlay');
@@ -225,12 +221,8 @@ class MainController {
             }
             
             overlay.classList.remove('hidden');
-            overlay.style.opacity = '0';
-            
-            requestAnimationFrame(() => {
-                overlay.style.transition = 'opacity 0.3s ease';
-                overlay.style.opacity = '1';
-            });
+            overlay.style.opacity = '1';
+            overlay.style.transition = 'opacity 0.2s ease';
         }
 
         // 30초 후 자동으로 숨기기 (타임아웃 방지)
@@ -282,15 +274,10 @@ class MainController {
         
         alertContainer.appendChild(alertElement);
         
-        // 애니메이션으로 나타내기
-        alertElement.style.opacity = '0';
-        alertElement.style.transform = 'translateX(100%)';
-        
-        requestAnimationFrame(() => {
-            alertElement.style.transition = 'all 0.3s ease';
-            alertElement.style.opacity = '1';
-            alertElement.style.transform = 'translateX(0)';
-        });
+        // 즉시 표시 - 깜박임 제거
+        alertElement.style.opacity = '1';
+        alertElement.style.transform = 'translateX(0)';
+        alertElement.style.transition = 'all 0.2s ease';
         
         // 긴 메시지는 더 오래 표시 (10초), 짧은 메시지는 기본 시간
         const displayDuration = isLongMessage ? 10000 : duration;

@@ -534,7 +534,7 @@ class TotalCostCalculator {
         const loadingHtml = `
             <div id="costCalculationLoading" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
                 <div class="bg-white rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                    <div class="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <div class="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" style="animation: spin 1s linear infinite;"></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">총 비용 계산 중...</h3>
                     <p class="text-gray-600 mb-4">정확한 관세율과 환율을 적용하여 계산합니다</p>
                     
@@ -553,9 +553,9 @@ class TotalCostCalculator {
                     
                     <div class="mt-4">
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div id="costLoadingProgress" class="bg-purple-600 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                            <div id="costLoadingProgress" class="bg-purple-600 h-2 rounded-full" style="width: 100%; transition: none;"></div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">계산 진행률: <span id="costProgressText">0%</span></p>
+                        <p class="text-xs text-gray-500 mt-2">계산 진행률: <span id="costProgressText">100%</span></p>
                     </div>
                 </div>
             </div>
@@ -563,46 +563,8 @@ class TotalCostCalculator {
         
         document.body.insertAdjacentHTML('beforeend', loadingHtml);
         
-        // 스크롤에 따라 광고 위치 업데이트
-        const loadingContainer = document.getElementById('costCalculationLoading');
-        if (loadingContainer) {
-            const updatePosition = () => {
-                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                loadingContainer.style.top = `${scrollTop}px`;
-            };
-            
-            // 초기 위치 설정
-            updatePosition();
-            
-            // 스크롤 이벤트 리스너 추가
-            window.addEventListener('scroll', updatePosition);
-            
-            // 5초 후 이벤트 리스너 제거
-            setTimeout(() => {
-                window.removeEventListener('scroll', updatePosition);
-            }, 5000);
-        }
-        
-        // 진행률 애니메이션 (성능 최적화)
-        const progressBar = document.getElementById('costLoadingProgress');
-        const progressText = document.getElementById('costProgressText');
-        
-        if (progressBar && progressText) {
-            // CSS transition 사용으로 성능 최적화
-            progressBar.style.transition = 'width 5s linear';
-            progressBar.style.width = '100%';
-            
-            // 텍스트는 더 적은 빈도로 업데이트
-            let progress = 0;
-            const textInterval = setInterval(() => {
-                progress += 20;
-                progressText.textContent = `${Math.min(progress, 100)}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(textInterval);
-                }
-            }, 1000); // 1초마다 업데이트
-        }
+        // 복잡한 스크롤 위치 업데이트 제거 - 깜박임 방지
+        // 진행률 애니메이션 제거 - 즉시 100% 표시
     }
 
     /**
@@ -989,7 +951,7 @@ class TotalCostCalculator {
                                 <span class="text-2xl font-bold text-blue-400">${formatCurrency(calculation.totalCost)}</span>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-lg font-medium text-gray-300">개당 부가세 포함 원가</span>
+                                <span class="text-lg font-medium text-gray-300">개당 원가 (부가세 포함)</span>
                                 <span class="text-xl font-bold text-green-400">${formatCurrency(calculation.costPerUnit)}</span>
                             </div>
                             <div class="flex justify-between items-center">

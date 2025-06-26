@@ -171,13 +171,13 @@ class CBMCalculator {
     }
 
     /**
-     * 계산 로딩 표시
+     * 계산 로딩 표시 - 깜박임 제거
      */
     showCalculationLoading() {
         const loadingHtml = `
             <div id="calculationLoading" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
                 <div class="bg-white rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl">
-                    <div class="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" style="animation: spin 1s linear infinite;"></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">CBM 계산 중...</h3>
                     <p class="text-gray-600 mb-4">정확한 계산을 위해 잠시만 기다려주세요</p>
                     
@@ -196,9 +196,9 @@ class CBMCalculator {
                     
                     <div class="mt-4">
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div id="loadingProgress" class="bg-blue-600 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                            <div id="loadingProgress" class="bg-blue-600 h-2 rounded-full" style="width: 100%; transition: none;"></div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">계산 진행률: <span id="progressText">0%</span></p>
+                        <p class="text-xs text-gray-500 mt-2">계산 진행률: <span id="progressText">100%</span></p>
                     </div>
                 </div>
             </div>
@@ -206,26 +206,8 @@ class CBMCalculator {
         
         document.body.insertAdjacentHTML('beforeend', loadingHtml);
         
-        // 진행률 애니메이션 (성능 최적화)
-        const progressBar = document.getElementById('loadingProgress');
-        const progressText = document.getElementById('progressText');
-        
-        if (progressBar && progressText) {
-            // CSS transition 사용으로 성능 최적화
-            progressBar.style.transition = 'width 5s linear';
-            progressBar.style.width = '100%';
-            
-            // 텍스트는 더 적은 빈도로 업데이트
-            let progress = 0;
-            const textInterval = setInterval(() => {
-                progress += 20;
-                progressText.textContent = `${Math.min(progress, 100)}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(textInterval);
-                }
-            }, 1000); // 1초마다 업데이트
-        }
+        // 진행률 애니메이션 제거 - 즉시 100% 표시
+        // 깜박임 방지를 위해 복잡한 애니메이션 제거
     }
 
     /**
