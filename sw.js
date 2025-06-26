@@ -13,7 +13,6 @@ const STATIC_ASSETS = [
     '/lib/fonts.css',
     '/lib/lucide.js',
     '/lib/three.min.js',
-    '/lib/chart.js',
     '/js/main.js',
     '/js/app.js',
     '/js/apiService.js',
