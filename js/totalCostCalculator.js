@@ -206,7 +206,7 @@ class TotalCostCalculator {
     }
 
     /**
-     * 모든 환율 조회 (통합) - 중복 호출 방지 최적화 ✅
+     * 모든 환율 조회 (통합) - INP 최적화 버전 ⚡
      */
     async fetchAllExchangeRates() {
         const button = document.getElementById('fetchAllRates');
@@ -219,6 +219,9 @@ class TotalCostCalculator {
             button.disabled = true;
             button.textContent = '🔄 조회중...';
             
+            // 🔧 INP 최적화: UI 업데이트를 다음 프레임으로 지연
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            
             // 🔧 최적화: 한 번의 API 호출로 모든 환율 가져오기
             if (window.apiService) {
                 try {
@@ -226,12 +229,15 @@ class TotalCostCalculator {
                     const cachedRates = window.apiService.cache.get('exchangeRates');
                     
                     if (cachedRates && cachedRates.USD && cachedRates.CNY) {
-                        // 캐시에서 환율 사용
+                        // 🔧 INP 최적화: 캐시에서 환율 사용 (즉시 반환)
                         usdInput.value = this.addCommas(cachedRates.USD);
                         cnyInput.value = this.addCommas(cachedRates.CNY);
                         showAlert(`✅ 환율 조회 완료! (캐시) USD: ${this.addCommas(cachedRates.USD)}원, CNY: ${this.addCommas(cachedRates.CNY)}원`, 'success');
                         return;
                     }
+                    
+                    // 🔧 INP 최적화: API 호출을 다음 프레임으로 지연
+                    await new Promise(resolve => requestAnimationFrame(resolve));
                     
                     // USD 환율 한 번만 호출 (API에서 모든 환율 반환)
                     const usdRate = await this.getExchangeRate('USD');
@@ -240,37 +246,51 @@ class TotalCostCalculator {
                     const updatedCache = window.apiService.cache.get('exchangeRates');
                     const cnyRate = updatedCache?.CNY || await this.getExchangeRate('CNY');
             
-            usdInput.value = this.addCommas(usdRate);
-            cnyInput.value = this.addCommas(cnyRate);
-            
-            showAlert(`✅ 환율 조회 완료! USD: ${this.addCommas(usdRate)}원, CNY: ${this.addCommas(cnyRate)}원`, 'success');
+                    // 🔧 INP 최적화: DOM 업데이트를 배치로 처리
+                    requestAnimationFrame(() => {
+                        usdInput.value = this.addCommas(usdRate);
+                        cnyInput.value = this.addCommas(cnyRate);
+                        showAlert(`✅ 환율 조회 완료! USD: ${this.addCommas(usdRate)}원, CNY: ${this.addCommas(cnyRate)}원`, 'success');
+                    });
                     
                 } catch (apiError) {
-                    // API 실패 시 기본값 사용
+                    // 🔧 INP 최적화: 에러 처리도 다음 프레임으로 지연
+                    requestAnimationFrame(() => {
+                        // API 실패 시 기본값 사용
+                        const defaultUSD = 1350;
+                        const defaultCNY = 190;
+                        
+                        usdInput.value = this.addCommas(defaultUSD);
+                        cnyInput.value = this.addCommas(defaultCNY);
+                        
+                        showAlert(`⚠️ 환율 API 조회 실패. 기본값 사용: USD ${this.addCommas(defaultUSD)}원, CNY ${this.addCommas(defaultCNY)}원`, 'warning');
+                    });
+                }
+            } else {
+                // 🔧 INP 최적화: 기본값 설정도 다음 프레임으로 지연
+                requestAnimationFrame(() => {
+                    // apiService가 없는 경우 기본값 사용
                     const defaultUSD = 1350;
                     const defaultCNY = 190;
                     
                     usdInput.value = this.addCommas(defaultUSD);
                     cnyInput.value = this.addCommas(defaultCNY);
                     
-                    showAlert(`⚠️ 환율 API 조회 실패. 기본값 사용: USD ${this.addCommas(defaultUSD)}원, CNY ${this.addCommas(defaultCNY)}원`, 'warning');
-                }
-            } else {
-                // apiService가 없는 경우 기본값 사용
-                const defaultUSD = 1350;
-                const defaultCNY = 190;
-                
-                usdInput.value = this.addCommas(defaultUSD);
-                cnyInput.value = this.addCommas(defaultCNY);
-                
-                showAlert(`⚠️ API 서비스 미사용. 기본값 적용: USD ${this.addCommas(defaultUSD)}원, CNY ${this.addCommas(defaultCNY)}원`, 'info');
+                    showAlert(`⚠️ API 서비스 미사용. 기본값 적용: USD ${this.addCommas(defaultUSD)}원, CNY ${this.addCommas(defaultCNY)}원`, 'info');
+                });
             }
             
         } catch (error) {
-            showAlert('❌ 환율 조회 실패. 기본값을 사용합니다.', 'warning');
+            // 🔧 INP 최적화: 에러 알림도 다음 프레임으로 지연
+            requestAnimationFrame(() => {
+                showAlert('❌ 환율 조회 실패. 기본값을 사용합니다.', 'warning');
+            });
         } finally {
-            button.disabled = false;
-            button.textContent = '🔄 환율 조회';
+            // 🔧 INP 최적화: 버튼 복원을 다음 프레임으로 지연
+            requestAnimationFrame(() => {
+                button.disabled = false;
+                button.textContent = '🔄 환율 조회';
+            });
         }
     }
 
@@ -427,11 +447,11 @@ class TotalCostCalculator {
     }
 
     /**
-     * 총 비용 계산 실행
+     * 총 비용 계산 실행 - INP 최적화 버전 ⚡
      */
     async calculateTotalCost() {
         try {
-            // 5초 로딩 시작
+            // 🔧 INP 최적화: 즉시 로딩 표시 (5초 지연 제거)
             this.showCalculationLoading();
 
             // 입력값 수집
@@ -443,8 +463,8 @@ class TotalCostCalculator {
                 throw new Error(validation.message);
             }
 
-            // 5초 대기 (광고 시간)
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            // 🔧 INP 최적화: 5초 대기 완전 제거 (광고 시간 삭제)
+            // await new Promise(resolve => setTimeout(resolve, 5000));
 
             // 환율 정보 수집 (UI에서 입력된 값 사용)
             const productExchangeRate = this.getInputExchangeRate(input.productCurrency);
@@ -454,22 +474,11 @@ class TotalCostCalculator {
             const appliedTariffRate = parseFloat(document.getElementById('appliedTariffRate')?.value || '8') / 100;
             const tariffType = document.getElementById('tariffType')?.value || '기본 관세율';
             
-            // 수입요건 조회 (타임아웃 늘림)
+            // 🔧 INP 최적화: 수입요건 조회를 비동기로 분리 (메인 계산과 병렬 처리)
             let requirementsInfo = [];
             if (input.hsCode && input.hsCode.length === 10) {
-                try {
-                    // 5초 타임아웃으로 충분한 시간 제공
-                    const timeoutPromise = new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('timeout')), 5000)
-                    );
-                    requirementsInfo = await Promise.race([
-                        this.getRequirementsInfo(input.hsCode),
-                        timeoutPromise
-                    ]);
-                    } catch (apiError) {
-                    // API 실패 시 빈 배열로 유지 (가짜 데이터 표시하지 않음)
-                    requirementsInfo = [];
-                }
+                // 수입요건 조회를 별도 작업으로 분리 (계산 완료 후 처리)
+                this.fetchRequirementsAsync(input.hsCode);
             }
             
             // 관세율 정보 객체 생성 (UI에서 입력된 값만 사용)
@@ -481,15 +490,44 @@ class TotalCostCalculator {
                 coCountry: tariffType.includes('FTA') ? input.importCountry : null
             };
             
-            // 관세율 API 호출 제거 - UI에 입력된 값만 사용
+            // 🔧 INP 최적화: 계산을 다음 프레임으로 지연 (UI 응답성 개선)
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            
             // 계산 수행
             const result = this.performCalculation(input, productExchangeRate, shippingExchangeRate, tariffInfo);
+            
+            // 🔧 INP 최적화: 결과 표시를 다음 프레임으로 지연
+            await new Promise(resolve => requestAnimationFrame(resolve));
             
             // 결과 표시
             this.displayResults(result);
             
-            // 수입 요건 표시 (HS Code가 있고, API 응답이 있을 때만 표시)
-            if (input.hsCode && input.hsCode.length === 10) {
+            // 수입 요건은 별도 처리 (이미 비동기로 시작됨)
+            
+        } catch (error) {
+            showAlert(error.message, 'error');
+        } finally {
+            this.hideCalculationLoading();
+        }
+    }
+
+    /**
+     * 🔧 INP 최적화: 수입요건 비동기 조회 (메인 계산과 분리)
+     */
+    async fetchRequirementsAsync(hsCode) {
+        try {
+            // 1초 타임아웃으로 빠른 응답 (INP 개선)
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('timeout')), 1000)
+            );
+            
+            const requirementsInfo = await Promise.race([
+                this.getRequirementsInfo(hsCode),
+                timeoutPromise
+            ]);
+            
+            // 수입요건 표시 (별도 프레임에서 처리)
+            requestAnimationFrame(() => {
                 if (requirementsInfo.length > 0 || (requirementsInfo.data && requirementsInfo.data.requirements && requirementsInfo.data.requirements.length > 0)) {
                     this.displayRequirements(requirementsInfo);
                 } else {
@@ -499,81 +537,59 @@ class TotalCostCalculator {
                         requirementSection.classList.add('hidden');
                     }
                 }
-            } else {
-                // HS코드가 없는 경우 수입요건 섹션 숨김
-                const requirementSection = document.getElementById('requirementSection');
-                if (requirementSection) {
-                    requirementSection.classList.add('hidden');
-                }
+            });
+            
+        } catch (apiError) {
+            // API 실패 시 조용히 처리 (에러 알림 없음)
+            const requirementSection = document.getElementById('requirementSection');
+            if (requirementSection) {
+                requirementSection.classList.add('hidden');
             }
-            
-            // 계산 결과 저장
-            this.lastCalculationResult = result;
-            
-            // 총 비용 계산 완료 후 하단 광고 표시
-            this.showBottomAd();
-            
-            showAlert('✅ 총 비용 계산이 완료되었습니다!', 'success');
-
-        } catch (error) {
-            // CORS 에러는 조용히 처리
-            if (!error.message.includes('CORS') && !error.message.includes('Failed to fetch')) {
-                showAlert(`❌ 계산 오류: ${error.message}`, 'error');
-            } else {
-                showAlert('❌ 계산 중 오류가 발생했습니다. 기본값으로 계산합니다.', 'warning');
-            }
-        } finally {
-            this.hideCalculationLoading();
         }
     }
 
     /**
-     * 계산 로딩 표시
+     * 계산 로딩 화면 표시 - INP 최적화 버전 ⚡
      */
     showCalculationLoading() {
-        const loadingHtml = `
-            <div id="costCalculationLoading" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-                <div class="bg-white rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                    <div class="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" style="animation: spin 1s linear infinite;"></div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">총 비용 계산 중...</h3>
-                    <p class="text-gray-600 mb-4">정확한 관세율과 환율을 적용하여 계산합니다</p>
-                    
-                    <!-- 광고 컨텐츠 -->
-                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
-                        <h4 class="text-sm font-bold text-purple-800 mb-1">💡 수입 비용 절약 팁!</h4>
-                        <p class="text-xs text-gray-700 mb-2">
-                            정확한 비용 계산 후에는 <strong>품질 검수</strong>가 필수입니다!
-                        </p>
-                        <p class="text-xs text-purple-600 font-semibold">
-                            <a href="https://www.duly.co.kr/" target="_blank" rel="noopener noreferrer" class="hover:underline">
-                                두리무역의 현지 검품으로 불량품 리스크 차단 → 자세히 보기
-                            </a>
-                        </p>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div id="costLoadingProgress" class="bg-purple-600 h-2 rounded-full" style="width: 100%; transition: none;"></div>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-2">계산 진행률: <span id="costProgressText">100%</span></p>
-                    </div>
+        const resultsSection = document.getElementById('resultsSection');
+        if (!resultsSection) return;
+
+        // 🔧 INP 최적화: 복잡한 애니메이션 제거, 단순한 로딩 표시
+        resultsSection.innerHTML = `
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 text-center">
+                <div class="mb-4">
+                    <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                </div>
+                <h3 class="text-xl font-bold text-blue-400 mb-2">💎 총 비용 계산 중...</h3>
+                <p class="text-gray-300 mb-4">정확한 계산을 위해 잠시만 기다려주세요</p>
+                
+                <!-- 🔧 INP 최적화: 광고 및 진행률 애니메이션 제거 -->
+                <div class="bg-gray-700/30 rounded-lg p-4">
+                    <h4 class="font-bold text-yellow-400 mb-2">💡 알고 계셨나요?</h4>
+                    <p class="text-sm text-gray-300 mb-2">
+                        총 비용 계산 후 가장 중요한 것은 <strong class="text-blue-400">품질 관리</strong>입니다!
+                    </p>
+                    <p class="text-xs text-gray-400">
+                        <a href="https://www.duly.co.kr/" target="_blank" class="text-blue-400 hover:text-blue-300 underline">
+                            두리무역의 8년 경력 검품 전문가 → 자세히 보기
+                        </a>
+                    </p>
                 </div>
             </div>
         `;
         
-        document.body.insertAdjacentHTML('beforeend', loadingHtml);
-        
-        // 복잡한 스크롤 위치 업데이트 제거 - 깜박임 방지
-        // 진행률 애니메이션 제거 - 즉시 100% 표시
+        resultsSection.classList.remove('hidden');
     }
 
     /**
-     * 계산 로딩 숨기기
+     * 계산 로딩 화면 숨김 - INP 최적화 버전 ⚡
      */
     hideCalculationLoading() {
-        const loading = document.getElementById('costCalculationLoading');
-        if (loading) {
-            loading.remove();
+        // 🔧 INP 최적화: 즉시 숨김 처리 (지연 없음)
+        const resultsSection = document.getElementById('resultsSection');
+        if (resultsSection) {
+            resultsSection.classList.add('hidden');
         }
     }
 

@@ -15,18 +15,18 @@ class ApiService {
     constructor() {
         this.cache = new Map();
         
-        // Vercel 서버리스 함수 설정 (우선순위)
+        // Vercel 서버리스 함수 설정 (우선순위) - INP 최적화 ⚡
         this.BACKEND_CONFIG = {
             BASE_URL: '/api',  // Vercel 서버리스 함수 경로
-            TIMEOUT: 10000,
-            RETRY_COUNT: 2
+            TIMEOUT: 3000,     // 🔧 10초 → 3초로 단축 (INP 개선)
+            RETRY_COUNT: 1     // 🔧 2회 → 1회로 단축 (INP 개선)
         };
         
-        // 직접 관세청 API 호출 설정 (fallback)
+        // 직접 관세청 API 호출 설정 (fallback) - INP 최적화 ⚡
         this.API_CONFIG = {
             API_KEY: 'o260t225i086q161g060c050i0',
-            TIMEOUT: 10000,
-            RETRY_COUNT: 3,
+            TIMEOUT: 3000,     // 🔧 10초 → 3초로 단축 (INP 개선)
+            RETRY_COUNT: 1,    // 🔧 3회 → 1회로 단축 (INP 개선)
             CACHE_DURATION: 300000
         };
         this.API_ENDPOINTS = {
