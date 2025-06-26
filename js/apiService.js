@@ -1,32 +1,32 @@
 /**
- * 🌐 API 서비스 모듈 v3.0 - Vercel 서버리스 함수 연동
+ * 🌐 API 서비스 모듈 v3.1 - INP 최적화
  * 
  * 관세청 Open API와의 통신을 담당하며,
  * 관세율, 환율, 수입요건 정보를 조회합니다.
  * 
- * @version 3.0.0
- * @updated 2025-06-22
+ * @version 3.1.0 - INP 성능 최적화
+ * @updated 2025-06-26
  */
 
 /**
- * API 서비스 클래스
+ * API 서비스 클래스 - INP 최적화
  */
 class ApiService {
     constructor() {
         this.cache = new Map();
         
-        // Vercel 서버리스 함수 설정 (우선순위) - INP 최적화 ⚡
+        // Vercel 서버리스 함수 설정 (우선순위)
         this.BACKEND_CONFIG = {
             BASE_URL: '/api',  // Vercel 서버리스 함수 경로
-            TIMEOUT: 3000,     // 🔧 10초 → 3초로 단축 (INP 개선)
-            RETRY_COUNT: 1     // 🔧 2회 → 1회로 단축 (INP 개선)
+            TIMEOUT: 8000,     // 타임아웃 단축
+            RETRY_COUNT: 1     // 재시도 횟수 감소
         };
         
-        // 직접 관세청 API 호출 설정 (fallback) - INP 최적화 ⚡
+        // 직접 관세청 API 호출 설정 (fallback)
         this.API_CONFIG = {
             API_KEY: 'o260t225i086q161g060c050i0',
-            TIMEOUT: 3000,     // 🔧 10초 → 3초로 단축 (INP 개선)
-            RETRY_COUNT: 1,    // 🔧 3회 → 1회로 단축 (INP 개선)
+            TIMEOUT: 8000,     // 타임아웃 단축
+            RETRY_COUNT: 1,    // 재시도 횟수 감소
             CACHE_DURATION: 300000
         };
         this.API_ENDPOINTS = {
@@ -46,12 +46,12 @@ class ApiService {
     }
 
     /**
-     * 서버리스 함수 연결 확인
+     * 서버리스 함수 연결 확인 - 타임아웃 단축
      */
     async checkBackendConnection() {
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const timeoutId = setTimeout(() => controller.abort(), 2000); // 3초 → 2초 단축
             
             const response = await fetch('/api/health', {
                 signal: controller.signal,
@@ -67,12 +67,10 @@ class ApiService {
                 this.useBackend = true;
                 return true;
             } else {
-                // 401, 404 등의 에러는 조용히 처리 (콘솔 에러 방지)
                 this.useBackend = false;
                 return false;
             }
         } catch (error) {
-            // 네트워크 에러, CORS 에러 등을 조용히 처리
             this.useBackend = false;
             return false;
         }
@@ -121,16 +119,15 @@ class ApiService {
     }
 
     /**
-     * HTTP 요청 함수
+     * HTTP 요청 함수 - INP 최적화
      */
     async makeRequest(url, options = {}) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.API_CONFIG.TIMEOUT);
 
         try {
-            // 디버그 모드에서만 로그 출력
-            if (window.DEBUG_MODE) {
-                }
+            // 🔧 INP 최적화: 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
 
             const response = await fetch(url, {
                 ...options,
@@ -143,10 +140,10 @@ class ApiService {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
+            // 🔧 INP 최적화: JSON 파싱 전 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
             const data = await response.json();
             
-            if (window.DEBUG_MODE) {
-                }
             return data;
 
         } catch (error) {
@@ -161,19 +158,21 @@ class ApiService {
     }
 
     /**
-     * 재시도 로직이 포함된 API 호출
+     * 재시도 로직이 포함된 API 호출 - 재시도 횟수 감소
      */
     async makeRequestWithRetry(url, options = {}, retryCount = 0) {
         try {
             return await this.makeRequest(url, options);
         } catch (error) {
-            // CORS 에러는 재시도하지 않음 (조용히 처리)
+            // CORS 에러는 재시도하지 않음
             if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
                 throw error;
             }
             
+            // 재시도 횟수 감소 (3회 → 1회)
             if (retryCount < this.API_CONFIG.RETRY_COUNT) {
-                await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+                // 재시도 대기 시간 단축
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
                 return this.makeRequestWithRetry(url, options, retryCount + 1);
             }
@@ -183,13 +182,16 @@ class ApiService {
     }
 
     /**
-     * 서버리스 함수 API 호출
+     * 서버리스 함수 API 호출 - INP 최적화
      */
     async callBackendAPI(endpoint, params = {}) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.BACKEND_CONFIG.TIMEOUT);
 
         try {
+            // 🔧 INP 최적화: URL 생성 전 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
             const url = new URL(`${this.BACKEND_CONFIG.BASE_URL}/${endpoint}`, window.location.origin);
             
             // 파라미터를 URL에 추가
@@ -198,8 +200,6 @@ class ApiService {
                     url.searchParams.append(key, params[key]);
                 }
             });
-
-        
 
             const response = await fetch(url.toString(), {
                 signal: controller.signal,
@@ -215,6 +215,8 @@ class ApiService {
                 throw new Error(`Serverless API Error: ${response.status} - ${errorData.message || response.statusText}`);
             }
 
+            // 🔧 INP 최적화: JSON 파싱 전 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
             const data = await response.json();
             
             if (data.success) {
@@ -235,7 +237,76 @@ class ApiService {
     }
 
     /**
-     * 관세환율 정보 조회 (서버리스 함수 우선, fallback으로 직접 호출) - 중복 호출 방지 최적화 ✅
+     * 모든 환율 정보 조회 (USD, CNY 한 번에) - INP 최적화 + 중복 호출 방지
+     */
+    async getExchangeRates() {
+        try {
+            // 캐시에서 먼저 확인
+            const cached = this.cache.get('exchangeRates');
+            if (cached && cached.USD && cached.CNY) {
+                return cached;
+            }
+
+            // 🔧 INP 최적화: 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+            // 서버리스 함수 API 우선 시도
+            if (this.useBackend) {
+                try {
+                    const data = await this.callBackendAPI('exchange-rate', {
+                        date: currentDate
+                    });
+
+                    if (data && data.rates && data.rates.length > 0) {
+                        const rates = {};
+                        
+                        // 🔧 INP 최적화: 배열 처리 전 메인 스레드 양보
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                        
+                        // 모든 환율을 캐시에 저장
+                        data.rates.forEach(item => {
+                            rates[item.currency] = item.baseRate;
+                        });
+
+                        // 최소한 USD, CNY 기본값 보장
+                        if (!rates.USD) rates.USD = this.CURRENCIES.USD.defaultRate;
+                        if (!rates.CNY) rates.CNY = this.CURRENCIES.CNY.defaultRate;
+
+                        this.saveExchangeRateCache(rates);
+                        
+                        return rates;
+                    }
+                } catch (serverlessError) {
+                    this.useBackend = false;
+                    // 기본값으로 폴백
+                }
+            }
+
+            // 기본값 반환
+            const defaultRates = {
+                USD: this.CURRENCIES.USD.defaultRate,
+                CNY: this.CURRENCIES.CNY.defaultRate
+            };
+            
+            this.saveExchangeRateCache(defaultRates);
+            return defaultRates;
+
+        } catch (error) {
+            // 에러 시 기본값 반환
+            const defaultRates = {
+                USD: this.CURRENCIES.USD.defaultRate,
+                CNY: this.CURRENCIES.CNY.defaultRate
+            };
+            
+            this.saveExchangeRateCache(defaultRates);
+            return defaultRates;
+        }
+    }
+
+    /**
+     * 관세환율 정보 조회 - INP 최적화
      */
     async getExchangeRate(currency = 'USD') {
         try {
@@ -245,19 +316,23 @@ class ApiService {
                 return cached[currency];
             }
 
+            // 🔧 INP 최적화: 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
+
             const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
 
             // 서버리스 함수 API 우선 시도
             if (this.useBackend) {
                 try {
-                    // 🔧 최적화: 모든 환율을 한 번에 가져오기 (currency 파라미터 제거)
                     const data = await this.callBackendAPI('exchange-rate', {
                         date: currentDate
-                        // currency 파라미터 제거하여 모든 환율 조회
                     });
 
                     if (data && data.rates && data.rates.length > 0) {
                         const rates = {};
+                        
+                        // 🔧 INP 최적화: 배열 처리 전 메인 스레드 양보
+                        await new Promise(resolve => setTimeout(resolve, 0));
                         
                         // 모든 환율을 캐시에 저장
                         data.rates.forEach(item => {
@@ -274,19 +349,16 @@ class ApiService {
                     }
                 } catch (serverlessError) {
                     this.useBackend = false;
-                    
-                    // 서버리스 함수 실패 시 바로 기본값 반환 (CORS 에러 방지)
                     return this.CURRENCIES[currency]?.defaultRate || 1350;
                 }
             }
 
             // 직접 관세청 API 호출은 CORS 문제로 브라우저에서 제한됨
-            // 로컬 파일 실행 시 기본값 사용
             if (location.protocol === 'file:') {
                 return this.CURRENCIES[currency]?.defaultRate || 1350;
             }
 
-            // 기본값 반환 (CORS 에러 방지)
+            // 기본값 반환
             return this.CURRENCIES[currency]?.defaultRate || 1350;
 
         } catch (error) {
@@ -295,13 +367,16 @@ class ApiService {
     }
 
     /**
-     * 관세율 기본 조회 (서버리스 함수 우선, fallback으로 직접 호출)
+     * 관세율 기본 조회 - INP 최적화 + 503 에러 처리 개선
      */
     async getTariffRate(hsCode, importCountry = null) {
         try {
             if (!hsCode || hsCode.length !== 10) {
                 throw new Error('올바른 HS Code를 입력해주세요 (10자리)');
             }
+
+            // 🔧 INP 최적화: 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
 
             const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
             
@@ -330,7 +405,9 @@ class ApiService {
                     });
 
                     if (data && data.rates) {
-                        // API 응답을 그대로 전달 (변형하지 않음)
+                        // 🔧 INP 최적화: 데이터 처리 전 메인 스레드 양보
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                        
                         return {
                             hsCode: data.hsCode,
                             itemName: data.itemName,
@@ -342,26 +419,31 @@ class ApiService {
                         };
                     }
                 } catch (serverlessError) {
-                    this.useBackend = false;
-                    
-                    // 서버리스 함수 실패 시 에러 throw (가짜 데이터 반환하지 않음)
-                    throw new Error('관세청 API 연동 실패: ' + serverlessError.message);
+                    // 🔧 503 에러 등 서버 에러 처리 개선
+                    if (serverlessError.message.includes('503') || serverlessError.message.includes('502') || serverlessError.message.includes('500')) {
+                        this.useBackend = false;
+                        throw new Error('관세청 API 서버가 일시적으로 응답하지 않습니다. 잠시 후 다시 시도해주세요.');
+                    } else {
+                        this.useBackend = false;
+                        throw new Error('관세청 API 연동 실패: ' + serverlessError.message);
+                    }
                 }
             }
 
-            // 백엔드를 사용하지 않는 경우에도 에러 throw
             throw new Error('관세율 조회 서비스를 사용할 수 없습니다.');
 
         } catch (error) {
-            // CORS 에러는 조용히 넘김 (콘솔 출력만 안함)
             throw error;
         }
     }
 
     /**
-     * 최적 관세율 선택
+     * 최적 관세율 선택 - INP 최적화
      */
-    selectBestTariffRate(tariffRates) {
+    async selectBestTariffRate(tariffRates) {
+        // 🔧 INP 최적화: 계산 전 메인 스레드 양보
+        await new Promise(resolve => setTimeout(resolve, 0));
+        
         const wtoRate = tariffRates.wto || tariffRates.default;
         let bestOption = {
             rate: wtoRate,
@@ -396,13 +478,16 @@ class ApiService {
     }
 
     /**
-     * 세관장확인대상 물품 조회 (서버리스 함수 우선, fallback으로 직접 호출)
+     * 세관장확인대상 물품 조회 - INP 최적화
      */
     async getCustomsRequirements(hsCode) {
         try {
             if (!hsCode || hsCode.length !== 10) {
                 throw new Error('올바른 HS Code를 입력해주세요 (10자리)');
             }
+
+            // 🔧 INP 최적화: 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
 
             // 서버리스 함수 API 우선 시도
             if (this.useBackend) {
@@ -412,6 +497,9 @@ class ApiService {
                     });
 
                     if (data && data.requirements) {
+                        // 🔧 INP 최적화: 배열 처리 전 메인 스레드 양보
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                        
                         const requirements = data.requirements.map(item => ({
                             lawName: item.law,
                             requirementDoc: item.description,
@@ -425,7 +513,6 @@ class ApiService {
                 } catch (serverlessError) {
                     this.useBackend = false;
                     
-                    // 서버리스 함수 실패 시 기본값 반환
                     return [{
                         lawName: '일반 수입 요건',
                         requirementDoc: '세관에서 요구하는 일반적인 수입 서류를 준비해주세요.',
@@ -436,7 +523,6 @@ class ApiService {
                 }
             }
 
-            // 기본값 반환 (CORS 에러 방지)
             return [{
                 lawName: '일반 수입 요건',
                 requirementDoc: '세관에서 요구하는 일반적인 수입 서류를 준비해주세요.',
@@ -451,14 +537,17 @@ class ApiService {
     }
 
     /**
-     * 전체 세관 정보 조회
+     * 전체 세관 정보 조회 - INP 최적화
      */
     async getFullCustomsInfo(hsCode) {
         try {
-            const [tariffInfo, requirements] = await Promise.all([
-                this.getTariffRate(hsCode),
-                this.getCustomsRequirements(hsCode)
-            ]);
+            // 🔧 INP 최적화: 병렬 처리 대신 순차 처리로 메인 스레드 부하 감소
+            const tariffInfo = await this.getTariffRate(hsCode);
+            
+            // 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
+            const requirements = await this.getCustomsRequirements(hsCode);
 
             return {
                 hsCode,

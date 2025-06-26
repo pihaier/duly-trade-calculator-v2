@@ -252,9 +252,9 @@ class MainController {
     }
 
     /**
-     * 알림 메시지 표시 - 다중 라인 지원 ✅
+     * 알림 메시지 표시 - 다중 라인 지원 ✅ + 알람 시간 단축
      */
-    showAlert(message, type = 'info', duration = 5000) {
+    showAlert(message, type = 'info', duration = 3000) {
         const alertContainer = this.getOrCreateAlertContainer();
         
         // 메시지에서 \n을 <br>로 변환
@@ -279,8 +279,8 @@ class MainController {
         alertElement.style.transform = 'translateX(0)';
         alertElement.style.transition = 'all 0.2s ease';
         
-        // 긴 메시지는 더 오래 표시 (10초), 짧은 메시지는 기본 시간
-        const displayDuration = isLongMessage ? 10000 : duration;
+        // 긴 메시지는 더 오래 표시 (5초), 짧은 메시지는 기본 시간 (3초)
+        const displayDuration = isLongMessage ? 5000 : duration;
         
         // 자동으로 제거
         if (displayDuration > 0) {

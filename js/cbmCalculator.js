@@ -127,15 +127,21 @@ class CBMCalculator {
     }
 
     /**
-     * CBM 계산 실행 - INP 최적화 버전 ⚡
+     * CBM 계산 실행 - INP 최적화
      */
     async calculateCBM() {
         try {
-            // 🔧 INP 최적화: 즉시 로딩 표시 (5초 지연 제거)
+            // 로딩 시작 (즉시 표시)
             this.showCalculationLoading();
+
+            // 🔧 INP 최적화: 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
 
             // 입력값 수집
             const input = this.collectInput();
+            
+            // 🔧 INP 최적화: 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
             
             // 입력값 검증
             const validation = this.validateInput(input);
@@ -143,74 +149,108 @@ class CBMCalculator {
                 throw new Error(validation.message);
             }
 
-            // 🔧 INP 최적화: 5초 대기 완전 제거 (광고 시간 삭제)
-            // await new Promise(resolve => setTimeout(resolve, 5000));
-
-            // 🔧 INP 최적화: 계산을 다음 프레임으로 지연 (UI 응답성 개선)
-            await new Promise(resolve => requestAnimationFrame(resolve));
-
-            // 계산 수행
-            const result = this.performCalculation(input);
-            
-            // 🔧 INP 최적화: 결과 표시를 다음 프레임으로 지연
-            await new Promise(resolve => requestAnimationFrame(resolve));
-
-            // 결과 표시
-            this.displayResults(result);
-
-            // 3D 시뮬레이션 활성화 (별도 프레임에서 처리)
-            requestAnimationFrame(() => {
-                this.enable3DSimulation(result);
-            });
-
-            // 중간 광고 표시 (별도 프레임에서 처리)
-            requestAnimationFrame(() => {
-                this.showMiddleAd();
-            });
+            // 🔧 INP 최적화: 계산 처리를 청크로 분할
+            await this.performCalculationWithYield(input);
 
         } catch (error) {
-            showAlert(error.message, 'error');
+            showAlert(`❌ 계산 오류: ${error.message}`, 'error');
         } finally {
             this.hideCalculationLoading();
         }
     }
 
     /**
-     * 계산 로딩 표시 - INP 최적화 버전 ⚡
+     * 계산 수행 - INP 최적화 (청크 처리)
+     */
+    async performCalculationWithYield(input) {
+        // 1단계: 기본 계산
+        await new Promise(resolve => setTimeout(resolve, 0));
+        const result = {
+            input,
+            boxCBM: this.calculateBoxCBM(input.box),
+            optimizedLayout: this.optimizeLayout(input),
+            containerResults: {},
+            recommendation: null
+        };
+
+        // 2단계: 컨테이너별 계산 (청크 처리)
+        const containerTypes = Object.entries(this.containers);
+        for (let i = 0; i < containerTypes.length; i++) {
+            const [containerType, containerSpec] = containerTypes[i];
+            
+            // 메인 스레드 양보
+            await new Promise(resolve => setTimeout(resolve, 0));
+            
+            result.containerResults[containerType] = this.calculateContainerResult(
+                input, containerSpec, result.optimizedLayout, containerType
+            );
+        }
+
+        // 3단계: 추천 생성
+        await new Promise(resolve => setTimeout(resolve, 0));
+        result.recommendation = this.generateRecommendation(input, result.containerResults);
+
+        // 4단계: 결과 표시
+        await new Promise(resolve => setTimeout(resolve, 0));
+        this.displayResults(result);
+        
+        // 5단계: 3D 시뮬레이션 활성화
+        await new Promise(resolve => setTimeout(resolve, 0));
+        this.enable3DSimulation(result);
+        
+        // 계산 결과 저장
+        this.lastCalculationResult = result;
+        
+        // 중간 광고 표시
+        this.showMiddleAd();
+        
+        showAlert('✅ CBM 계산이 완료되었습니다!', 'success');
+    }
+
+    /**
+     * 계산 로딩 표시 - 깜박임 제거
      */
     showCalculationLoading() {
-        // 🔧 INP 최적화: 복잡한 애니메이션 제거, 단순한 로딩 표시
         const loadingHtml = `
             <div id="calculationLoading" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-                <div class="bg-gray-800 rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl border border-gray-600">
-                    <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4 animate-spin"></div>
-                    <h3 class="text-xl font-bold text-blue-400 mb-2">📦 CBM 계산 중...</h3>
-                    <p class="text-gray-300 mb-4">정확한 계산을 위해 잠시만 기다려주세요</p>
+                <div class="bg-white rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl">
+                    <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" style="animation: spin 1s linear infinite;"></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">CBM 계산 중...</h3>
+                    <p class="text-gray-600 mb-4">정확한 계산을 위해 잠시만 기다려주세요</p>
                     
-                    <!-- 🔧 INP 최적화: 광고 및 진행률 애니메이션 제거 -->
-                    <div class="bg-gray-700/30 rounded-lg p-4">
-                        <h4 class="font-bold text-yellow-400 mb-2">💡 알고 계셨나요?</h4>
-                        <p class="text-sm text-gray-300 mb-2">
-                            CBM 계산 후 가장 중요한 것은 <strong class="text-blue-400">품질 관리</strong>입니다!
+                    <!-- 광고 컨텐츠 -->
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                        <h4 class="text-sm font-bold text-blue-800 mb-1">💡 알고 계셨나요?</h4>
+                        <p class="text-xs text-gray-700 mb-2">
+                            CBM 계산 후 가장 중요한 것은 <strong>품질 관리</strong>입니다!
                         </p>
-                        <p class="text-xs text-gray-400">
-                            <a href="https://www.duly.co.kr/" target="_blank" class="text-blue-400 hover:text-blue-300 underline">
+                        <p class="text-xs text-blue-600 font-semibold">
+                            <a href="https://www.duly.co.kr/" target="_blank" rel="noopener noreferrer" class="hover:underline">
                                 두리무역의 8년 경력 검품 전문가 → 자세히 보기
                             </a>
                         </p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="loadingProgress" class="bg-blue-600 h-2 rounded-full" style="width: 100%; transition: none;"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">계산 진행률: <span id="progressText">100%</span></p>
                     </div>
                 </div>
             </div>
         `;
         
         document.body.insertAdjacentHTML('beforeend', loadingHtml);
+        
+        // 진행률 애니메이션 제거 - 즉시 100% 표시
+        // 깜박임 방지를 위해 복잡한 애니메이션 제거
     }
 
     /**
-     * 계산 로딩 숨기기 - INP 최적화 버전 ⚡
+     * 계산 로딩 숨기기
      */
     hideCalculationLoading() {
-        // 🔧 INP 최적화: 즉시 숨김 처리 (지연 없음)
         const loading = document.getElementById('calculationLoading');
         if (loading) {
             loading.remove();

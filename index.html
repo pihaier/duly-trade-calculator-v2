@@ -204,18 +204,16 @@
         transform: translateY(0);
       }
       
-      /* 배경 비디오 최적화 */
+      /* 배경 비디오 최적화 - 동영상 잘림 문제 해결 */
       .background-video {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        min-width: 100%;
-        min-height: 100%;
-        width: auto;
-        height: auto;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         z-index: -100;
-        transform: translateX(-50%) translateY(-50%);
-        object-fit: cover;
+        object-fit: cover; /* 화면을 가득 채우되 비율 유지 */
+        object-position: center center; /* 중앙 정렬 */
         /* 원본 색상 유지 - 필터 제거 */
       }
       
@@ -234,12 +232,6 @@
         
         main section:first-child {
           padding-top: 1rem;
-        }
-        
-        /* 영상도 헤드바를 고려한 위치 조정 */
-        .background-video {
-          top: 50%; /* 기본 위치로 복원 */
-          transform: translateX(-50%) translateY(-50%);
         }
         
         /* 히어로 콘텐츠가 확실히 보이도록 추가 여백 */
@@ -319,6 +311,16 @@
         100% { left: 100%; }
       }
     </style>
+
+    <!-- 성능 최적화: 중요 리소스 preload -->
+    <link rel="preload" href="/css/style.css" as="style">
+    <link rel="preload" href="/js/app.js" as="script">
+    
+    <!-- 계산기 페이지 prefetch -->
+    <link rel="prefetch" href="/calculator">
+    
+    <!-- 성능 모니터링 스크립트 preload -->
+    <link rel="preload" href="/js/performance.js" as="script">
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 antialiased">
@@ -380,15 +382,14 @@
             <!-- 배경 그라데이션 (안정적인 배경) -->
             <div id="hero-background" class="absolute inset-0 hero-loading-bg"></div>
             
-            <!-- 배경 비디오 - 자동재생 최적화 -->
+            <!-- 배경 비디오 - 깜박임 제거 -->
             <video 
                 id="hero-video"
                 class="background-video opacity-60 hidden md:block" 
-                autoplay
                 muted 
                 playsinline
                 loop
-                preload="auto"
+                preload="metadata"
                 poster="/images/hero-fallback.jpg"
             >
                 <!-- 현재 사용 가능한 비디오 파일 -->
