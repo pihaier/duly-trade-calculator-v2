@@ -222,53 +222,25 @@ class TotalCostCalculator {
             // 🔧 INP 최적화: 메인 스레드 양보
             await new Promise(resolve => setTimeout(resolve, 0));
             
-            // 🔧 중복 호출 완전 제거: 캐시 우선 확인
+            // 🔧 중복 호출 완전 제거: apiService 통합 사용
             if (window.apiService) {
-                const cachedRates = window.apiService.cache.get('exchangeRates');
-                
-                if (cachedRates && cachedRates.USD && cachedRates.CNY) {
-                    // 캐시에서 환율 사용
-                    usdInput.value = this.addCommas(cachedRates.USD);
-                    cnyInput.value = this.addCommas(cachedRates.CNY);
-                    showAlert(`✅ 환율 조회 완료! (캐시) USD: ${this.addCommas(cachedRates.USD)}원, CNY: ${this.addCommas(cachedRates.CNY)}원`, 'success');
-                    return;
-                }
-                
-                // 🔧 API 호출은 한 번만: 서버리스 함수 직접 호출
                 try {
-                    const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
-                    const response = await fetch(`/api/exchange-rate?date=${currentDate}`);
+                    // apiService의 getExchangeRates() 메소드 한 번만 호출
+                    const rates = await window.apiService.getExchangeRates();
                     
-                    if (response.ok) {
-                        const data = await response.json();
+                    if (rates && rates.USD && rates.CNY) {
+                        // UI 업데이트
+                        usdInput.value = this.addCommas(rates.USD);
+                        cnyInput.value = this.addCommas(rates.CNY);
                         
-                        if (data.success && data.data && data.data.rates) {
-                            const rates = {};
-                            
-                            // 모든 환율을 한 번에 처리
-                            data.data.rates.forEach(item => {
-                                rates[item.currency] = item.baseRate;
-                            });
-                            
-                            // 기본값 보장
-                            const usdRate = rates.USD || this.defaultExchangeRates.USD;
-                            const cnyRate = rates.CNY || this.defaultExchangeRates.CNY;
-                            
-                            // 캐시에 저장
-                            window.apiService.saveExchangeRateCache({ USD: usdRate, CNY: cnyRate });
-                            
-                            // UI 업데이트
-                            usdInput.value = this.addCommas(usdRate);
-                            cnyInput.value = this.addCommas(cnyRate);
-                            
-                            showAlert(`✅ 환율 조회 완료! USD: ${this.addCommas(usdRate)}원, CNY: ${this.addCommas(cnyRate)}원`, 'success');
-                            return;
-                        }
+                        showAlert(`✅ 환율 조회 완료! USD: ${this.addCommas(rates.USD)}원, CNY: ${this.addCommas(rates.CNY)}원`, 'success');
+                        return;
                     }
                     
-                    throw new Error('API 응답 실패');
+                    throw new Error('환율 데이터가 없습니다');
                     
                 } catch (apiError) {
+                    console.log('API 실패, 기본값 사용:', apiError.message);
                     // API 실패 시 기본값 사용
                     const defaultUSD = this.defaultExchangeRates.USD;
                     const defaultCNY = this.defaultExchangeRates.CNY;
@@ -290,6 +262,7 @@ class TotalCostCalculator {
             }
             
         } catch (error) {
+            console.error('환율 조회 중 오류:', error);
             showAlert('❌ 환율 조회 실패. 기본값을 사용합니다.', 'warning');
         } finally {
             button.disabled = false;

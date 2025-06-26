@@ -382,27 +382,28 @@
             <!-- 배경 그라데이션 (안정적인 배경) -->
             <div id="hero-background" class="absolute inset-0 hero-loading-bg"></div>
             
-            <!-- 배경 비디오 - 깜박임 제거 -->
+            <!-- 배경 비디오 - 정적 배경용 -->
             <video 
                 id="hero-video"
-                class="background-video opacity-60 hidden md:block" 
+                class="background-video opacity-60" 
                 muted 
+                autoplay
                 playsinline
                 loop
                 preload="metadata"
                 poster="/images/hero-fallback.jpg"
+                volume="0"
+                style="pointer-events: none;"
             >
-                <!-- 현재 사용 가능한 비디오 파일 -->
                 <source src="/video/WeChat_20250625002234.mp4" type="video/mp4">
-                Your browser does not support the video tag.
             </video>
             
             <!-- 동영상 위 오버레이 (텍스트 가독성을 위한 약간의 어둡게 처리) -->
-            <div class="absolute inset-0 bg-black/20"></div>
+            <div class="absolute inset-0 bg-black/20 z-10"></div>
             
             <!-- 비디오 컨트롤 버튼 제거됨 -->
         </div>
-        <div class="relative z-10 h-full flex items-center justify-center text-white px-4 py-8 pt-12 md:pt-8">
+        <div class="relative z-20 h-full flex items-center justify-center text-white px-4 py-8 pt-12 md:pt-8">
           <div class="text-center max-w-5xl mx-auto">
             <h1 class="text-2xl sm:text-3xl md:text-7xl font-black mb-4 md:mb-6 leading-tight animate-fade-in-up">
               중국 수입, <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">'품질 리스크'</span>가<br class="hidden md:block">
@@ -426,7 +427,7 @@
         </div>
         
         <!-- 스크롤 인디케이터 - 깜박임 제거 -->
-        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 text-white">
+        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 text-white z-20">
             <i data-lucide="chevron-down" class="w-6 h-6 md:w-8 md:h-8"></i>
         </div>
     </header>

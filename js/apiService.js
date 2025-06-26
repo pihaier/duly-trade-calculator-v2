@@ -306,58 +306,17 @@ class ApiService {
     }
 
     /**
-     * 관세환율 정보 조회 - INP 최적화
+     * 관세환율 정보 조회 - INP 최적화 (중복 호출 방지)
      */
     async getExchangeRate(currency = 'USD') {
         try {
-            // 캐시에서 먼저 확인
-            const cached = this.cache.get('exchangeRates');
-            if (cached && cached[currency]) {
-                return cached[currency];
+            // 🔧 중복 호출 방지: getExchangeRates()의 결과를 재사용
+            const rates = await this.getExchangeRates();
+            
+            if (rates && rates[currency]) {
+                return rates[currency];
             }
-
-            // 🔧 INP 최적화: 메인 스레드 양보
-            await new Promise(resolve => setTimeout(resolve, 0));
-
-            const currentDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
-
-            // 서버리스 함수 API 우선 시도
-            if (this.useBackend) {
-                try {
-                    const data = await this.callBackendAPI('exchange-rate', {
-                        date: currentDate
-                    });
-
-                    if (data && data.rates && data.rates.length > 0) {
-                        const rates = {};
-                        
-                        // 🔧 INP 최적화: 배열 처리 전 메인 스레드 양보
-                        await new Promise(resolve => setTimeout(resolve, 0));
-                        
-                        // 모든 환율을 캐시에 저장
-                        data.rates.forEach(item => {
-                            rates[item.currency] = item.baseRate;
-                        });
-
-                        // 최소한 USD, CNY 기본값 보장
-                        if (!rates.USD) rates.USD = this.CURRENCIES.USD.defaultRate;
-                        if (!rates.CNY) rates.CNY = this.CURRENCIES.CNY.defaultRate;
-
-                        this.saveExchangeRateCache(rates);
-                        
-                        return rates[currency] || this.CURRENCIES[currency]?.defaultRate || 1350;
-                    }
-                } catch (serverlessError) {
-                    this.useBackend = false;
-                    return this.CURRENCIES[currency]?.defaultRate || 1350;
-                }
-            }
-
-            // 직접 관세청 API 호출은 CORS 문제로 브라우저에서 제한됨
-            if (location.protocol === 'file:') {
-                return this.CURRENCIES[currency]?.defaultRate || 1350;
-            }
-
+            
             // 기본값 반환
             return this.CURRENCIES[currency]?.defaultRate || 1350;
 

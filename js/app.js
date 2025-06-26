@@ -10,182 +10,128 @@ class SmartVideoLoader {
         this.background = document.getElementById('hero-background');
         this.isPlaying = false;
         this.isLoaded = false;
-        this.shouldLoad = this.checkShouldLoad();
         
         this.init();
     }
     
-    checkShouldLoad() {
-        // 检查设备和网络条件
-        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        const isSlowConnection = connection && (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
-        const isLowEndDevice = navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // 如果是慢速连接或低端设备，则不自动加载视频
-        if (isSlowConnection || isLowEndDevice) {
-            return false;
+    init() {
+        if (!this.video) {
+            console.warn('⚠️ hero-video 요소를 찾을 수 없습니다.');
+            return;
         }
         
-        return true;
-    }
-    
-    init() {
-        if (!this.video) return;
-        
-        // 동영상 로딩 시간 단축 (3초 → 0.5초)
-        setTimeout(() => {
-            if (this.shouldLoad) {
-                this.loadVideo();
-            } else {
-                this.showVideoButton();
-            }
-        }, 500);
-        
-        // 视频控制按钮已移除
-    }
-    
-    showVideoButton() {
-        // 视频控制按钮已移除
-    }
-    
-    loadVideo() {
-        if (this.isLoaded || !this.video) return;
-        
-        this.video.style.display = 'block';
+        // 비디오 정적 배경 설정 - 완전 무음
+        this.video.muted = true;
+        this.video.volume = 0;
+        this.video.playsInline = true;
+        this.video.loop = true;
         this.video.preload = 'metadata';
+        this.video.autoplay = true;
+        this.video.controls = false; // 컨트롤 숨김
+        
+        // 비디오 표시
+        this.video.style.display = 'block';
+        this.video.style.pointerEvents = 'none'; // 클릭 이벤트 차단
+        
+        // 이벤트 리스너 설정
+        this.setupVideoEvents();
+        
+        // 비디오 로딩 시작
         this.video.load();
         
-        this.setupVideoPlayback();
-        this.showVideoButton();
+        console.log('🔇 무음 배경 비디오 초기화 완료');
     }
     
-    setupVideoPlayback() {
+    setupVideoEvents() {
         if (!this.video) return;
         
-        // 监听视频事件
-        this.video.addEventListener('loadeddata', () => {
-            this.isLoaded = true;
-        });
-        
+        // 재생 가능 상태
         this.video.addEventListener('canplay', () => {
+            console.log('🔇 무음 비디오 재생 준비 완료');
             this.isLoaded = true;
             
-            // 显示视频，完全隐藏背景
-            this.video.style.opacity = '1';
-            if (this.background) {
-                this.background.style.opacity = '0';
-                this.background.style.display = 'none';
-            }
+            // 무음 재생 시도
+            this.startSilentPlayback();
+        });
+        
+        // 재생 시작
+        this.video.addEventListener('play', () => {
+            console.log('🔇 무음 비디오 재생 시작');
+            this.isPlaying = true;
             
-            // 자동재생 시도
-            this.video.play().then(() => {
-                this.isPlaying = true;
-            }).catch(error => {
-                this.isPlaying = false;
-            });
+            // 재생 중에도 무음 보장
+            this.video.muted = true;
+            this.video.volume = 0;
         });
         
+        // 재생 완료 시 자동 반복
+        this.video.addEventListener('ended', () => {
+            console.log('🔄 비디오 재생 완료, 다시 시작');
+            this.video.currentTime = 0;
+            this.video.play();
+        });
+        
+        // 에러 처리 - 단순화
         this.video.addEventListener('error', (e) => {
-            this.disableVideo();
-        });
-        
-        this.video.addEventListener('loadstart', () => {
-            // 비디오 로딩 시작
-        });
-        
-        this.video.addEventListener('progress', () => {
-            // 비디오 로딩 진행
+            console.log('ℹ️ 비디오 재생 불가 - 정적 배경 사용');
+            this.video.style.display = 'none';
         });
     }
     
-    disableVideo() {
-        this.video.style.display = 'none';
-        
-        // 정적 배경으로 대체 (애니메이션 없음)
-        if (this.background) {
-            this.background.style.opacity = '1';
-            this.background.style.display = 'block';
-            // 애니메이션 제거
-            this.background.style.animation = 'none';
-        }
-        
-        // 비디오 비활성화 완료
-    }
-    
-    setupManualMode() {
-        // 수동 재생 모드 (모바일)
-        this.video.autoplay = false;
-        this.video.controls = false;
-        this.toggleBtn.innerHTML = '<i data-lucide="play" class="w-5 h-5"></i>';
-        
-        this.toggleBtn.addEventListener('click', () => {
-            if (!this.isPlaying) {
-                this.loadAndPlay();
-            } else {
-                this.pauseVideo();
-            }
-        });
-        
-        // 수동 재생 모드 설정
-    }
-    
-    setupAutoMode() {
-        // 자동 재생 모드 (데스크톱)
-        this.loadAndPlay();
-        
-        this.toggleBtn.addEventListener('click', () => {
-            if (this.isPlaying) {
-                this.pauseVideo();
-            } else {
-                this.playVideo();
-            }
-        });
-        
-        // 자동 재생 모드 설정
-    }
-    
-    loadAndPlay() {
+    startSilentPlayback() {
         if (!this.video) return;
         
-        // 비디오가 이미 src를 가지고 있는지 확인
-        const sources = this.video.querySelectorAll('source[data-src]');
-        if (sources.length > 0) {
-            // data-src가 있는 경우에만 로딩
-            sources.forEach(source => {
-                source.src = source.dataset.src;
-            });
-            this.video.load();
-        }
+        // 무음 자동재생 시도
+        this.video.muted = true;
+        this.video.volume = 0;
         
-        // 비디오 재생 시도
+        const playPromise = this.video.play();
+        
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    console.log('🔇 무음 비디오 재생 성공');
+                    this.isPlaying = true;
+                })
+                .catch(error => {
+                    console.log('ℹ️ 자동재생 제한 - 정적 배경으로 사용');
+                    // 자동재생 실패해도 비디오는 표시 유지 (정적 이미지처럼)
+                });
+        }
+    }
+    
+    // 强制播放视频 (调试用)
+    forcePlay() {
+        if (!this.video) return;
+        
+        console.log('🎬 강제 비디오 재생 시도');
+        this.video.muted = true;
+        this.video.volume = 0;
+        this.video.currentTime = 0;
+        
         this.video.play().then(() => {
+            console.log('✅ 강제 재생 성공');
             this.isPlaying = true;
-            this.toggleBtn.innerHTML = '<i data-lucide="pause" class="w-5 h-5"></i>';
         }).catch(error => {
-            this.setupManualMode();
+            console.error('❌ 강제 재생 실패:', error);
         });
+    }
+    
+    // 获取视频状态信息
+    getVideoStatus() {
+        if (!this.video) return null;
         
-        this.video.addEventListener('error', () => {
-            this.disableVideo();
-        });
-    }
-    
-    playVideo() {
-        if (this.video && this.video.paused) {
-            this.video.play().then(() => {
-                this.isPlaying = true;
-            }).catch(error => {
-                // 비디오 재생 실패
-            });
-        }
-    }
-    
-    pauseVideo() {
-        if (this.video && !this.video.paused) {
-            this.video.pause();
-            this.isPlaying = false;
-        }
+        return {
+            paused: this.video.paused,
+            ended: this.video.ended,
+            currentTime: this.video.currentTime,
+            duration: this.video.duration,
+            readyState: this.video.readyState,
+            networkState: this.video.networkState,
+            muted: this.video.muted,
+            volume: this.video.volume,
+            src: this.video.src
+        };
     }
 }
 
@@ -446,28 +392,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // 스마트 비디오 로딩 시스템 초기화
     const videoLoader = new SmartVideoLoader();
     
+    // 전역 접근을 위해 window 객체에 추가
+    window.videoLoader = videoLoader;
+    
+    // 调试方法全局访问
+    window.playVideo = () => {
+        console.log('🎬 수동 비디오 재생 시도');
+        videoLoader.forcePlay();
+    };
+    
+    window.getVideoStatus = () => {
+        const status = videoLoader.getVideoStatus();
+        console.log('📊 현재 비디오 상태:');
+        console.table(status);
+        return status;
+    };
+    
+    // 3秒后自动检查视频状态并尝试播放
+    setTimeout(() => {
+        console.log('📊 자동 비디오 상태 확인 중...');
+        const status = videoLoader.getVideoStatus();
+        
+        if (status) {
+            console.table(status);
+            
+            // 如果视频已加载但未播放，尝试强制播放
+            if (status.readyState >= 2 && status.paused && !videoLoader.isPlaying) {
+                console.log('🔄 비디오가 로드되었지만 재생되지 않음. 강제 재생 시도...');
+                videoLoader.forcePlay();
+            }
+        }
+    }, 3000);
+    
     // 배터리 최적화 초기화
     const batteryOptimizer = new BatteryOptimizer(videoLoader);
-    
-    // 네트워크 상태 변화 감지
-    window.addEventListener('online', () => {
-        if (videoLoader.shouldLoad === true && !videoLoader.isPlaying) {
-            videoLoader.loadAndPlay();
-        }
-    });
-    
-    window.addEventListener('offline', () => {
-        videoLoader.pauseVideo();
-    });
-    
-    // 가시성 변화 감지 (탭 전환 등)
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            videoLoader.pauseVideo();
-        } else if (videoLoader.shouldLoad === true) {
-            videoLoader.playVideo();
-        }
-    });
 });
 
 // Component Rendering Functions
