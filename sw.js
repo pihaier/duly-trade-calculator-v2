@@ -1,7 +1,8 @@
-// 서비스 워커 - 캐싱 최적화
-const CACHE_NAME = 'duly-trade-v2.3.1';
-const STATIC_CACHE = 'duly-static-v2.3.1';
-const DYNAMIC_CACHE = 'duly-dynamic-v2.3.1';
+// Service Worker - 캐시 무효화 강화 버전 2.4
+const CACHE_VERSION = 'v2.4';
+const STATIC_CACHE = `static-cache-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `dynamic-cache-${CACHE_VERSION}`;
+const CACHE_NAME = `duly-trade-calculator-${CACHE_VERSION}`;
 
 // 캐시할 정적 리소스
 const STATIC_ASSETS = [

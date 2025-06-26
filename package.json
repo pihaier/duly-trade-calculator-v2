@@ -1,6 +1,6 @@
 {
   "name": "duly-trade-calculator",
-  "version": "2.0.0",
+  "version": "2.4.0",
   "description": "두리무역 통합 무역 비용 계산기 - Vercel 배포용",
   "main": "server.js",
   "scripts": {
