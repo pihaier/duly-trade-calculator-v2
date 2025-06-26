@@ -501,18 +501,18 @@ function renderServices() {
 
     services.forEach(service => {
         const card = document.createElement('div');
-        card.className = "group relative bg-white/10 backdrop-blur-lg p-10 rounded-3xl text-center hover:bg-white/20 transition-all cursor-pointer hover-transform border border-white/20 modal-trigger";
+        card.className = "group relative bg-white/10 backdrop-blur-lg p-6 md:p-10 rounded-2xl md:rounded-3xl text-center hover:bg-white/20 transition-all cursor-pointer hover-transform border border-white/20 modal-trigger";
         card.dataset.modalTarget = service.id;
         card.innerHTML = `
-            <div class="absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 rounded-3xl transition-opacity"></div>
+            <div class="absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 rounded-2xl md:rounded-3xl transition-opacity"></div>
             <div class="relative z-10">
-                <div class="mb-8 flex justify-center text-white transform transition-transform group-hover:scale-110 group-hover:rotate-3">
-                    <i data-lucide="${service.icon}" class="w-20 h-20"></i>
+                <div class="mb-4 md:mb-8 flex justify-center text-white transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+                    <i data-lucide="${service.icon}" class="w-12 h-12 md:w-20 md:h-20"></i>
                 </div>
-                <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-white">${service.title}</h3>
-                <p class="text-gray-300 mb-6">${service.description}</p>
+                <h3 class="text-lg sm:text-xl md:text-3xl font-bold mb-3 md:mb-4 text-white">${service.title}</h3>
+                <p class="text-sm md:text-base text-gray-300 mb-4 md:mb-6">${service.description}</p>
                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span class="text-yellow-400 font-bold text-lg">자세히 보기 →</span>
+                    <span class="text-yellow-400 font-bold text-sm md:text-lg">자세히 보기 →</span>
                 </div>
             </div>
         `;
@@ -526,15 +526,15 @@ function renderBenefits() {
 
     benefits.forEach(benefit => {
         const card = document.createElement('div');
-        card.className = "group relative bg-white rounded-3xl shadow-xl overflow-hidden hover-transform transition-all";
+        card.className = "group relative bg-white rounded-2xl md:rounded-3xl shadow-xl overflow-hidden hover-transform transition-all";
         card.innerHTML = `
             <div class="absolute inset-0 bg-gradient-to-br ${benefit.color} opacity-5 group-hover:opacity-10 transition-opacity"></div>
-            <div class="relative z-10 p-10">
-                <div class="mb-6 text-transparent bg-clip-text bg-gradient-to-r ${benefit.color} flex justify-center">
-                    <i data-lucide="${benefit.icon}" class="w-16 h-16"></i>
+            <div class="relative z-10 p-4 md:p-10">
+                <div class="mb-3 md:mb-6 text-transparent bg-clip-text bg-gradient-to-r ${benefit.color} flex justify-center">
+                    <i data-lucide="${benefit.icon}" class="w-8 h-8 md:w-16 md:h-16"></i>
                 </div>
-                <h3 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">${benefit.title}</h3>
-                <p class="text-gray-600 leading-relaxed">${benefit.description}</p>
+                <h3 class="text-base sm:text-lg md:text-3xl font-bold text-gray-800 mb-2 md:mb-4">${benefit.title}</h3>
+                <p class="text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed">${benefit.description}</p>
             </div>
         `;
         container.appendChild(card);
@@ -640,11 +640,11 @@ function initializeNavigation() {
 
     const handleScroll = debounce(() => {
         if (window.scrollY > 50) {
-            nav.classList.add('bg-white/80', 'backdrop-blur-md', 'shadow-lg');
-            nav.classList.remove('bg-transparent');
+            nav.classList.add('shadow-lg');
+            nav.classList.remove('shadow-sm');
         } else {
-            nav.classList.remove('bg-white/80', 'backdrop-blur-md', 'shadow-lg');
-            nav.classList.add('bg-transparent');
+            nav.classList.remove('shadow-lg');
+            nav.classList.add('shadow-sm');
         }
     }, 10);
 
