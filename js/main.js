@@ -291,7 +291,7 @@ class MainController {
     }
 
     /**
-     * 알림 컨테이너 가져오기 또는 생성
+     * 알림 컨테이너 가져오기 또는 생성 - 화면 가운데 위치
      */
     getOrCreateAlertContainer() {
         let container = document.getElementById('alertContainer');
@@ -299,8 +299,8 @@ class MainController {
         if (!container) {
             container = document.createElement('div');
             container.id = 'alertContainer';
-            // 모바일에서는 화면 가운데, 데스크톱에서는 우상단
-            container.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 md:top-4 md:left-auto md:right-4 md:transform-none z-50 space-y-2 w-11/12 max-w-md md:w-auto';
+            // 모바일과 데스크톱 모두 화면 가운데에 표시
+            container.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 space-y-2 w-11/12 max-w-md';
             document.body.appendChild(container);
         }
         
