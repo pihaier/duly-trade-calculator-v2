@@ -131,19 +131,8 @@ class PerformanceOptimizer {
             link.rel = 'stylesheet';
         });
 
-        // 비중요 스크립트 로딩
-        const scripts = [
-            '/js/analytics.js',
-            '/js/chat.js'
-        ];
-
-        scripts.forEach(src => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.async = true;
-            script.defer = true;
-            document.head.appendChild(script);
-        });
+        // 비중요 스크립트 로딩 (필요시 추가)
+        // 현재 추가 스크립트 없음
     }
 
     cleanup() {
