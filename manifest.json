@@ -15,9 +15,15 @@
       "purpose": "any"
     },
     {
-      "src": "/images/og-image.jpg",
+      "src": "/images/og-image.svg",
       "sizes": "1200x630",
-      "type": "image/jpeg",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
     }
   ],

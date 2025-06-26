@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 배경 그라데이션 -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  
+  <!-- 반투명 오버레이 -->
+  <rect width="1200" height="630" fill="rgba(0,0,0,0.1)"/>
+  
+  <!-- 메인 텍스트 -->
+  <text x="600" y="250" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle">두리무역</text>
+  
+  <!-- 서브 텍스트 -->
+  <text x="600" y="320" font-family="Arial, sans-serif" font-size="36" fill="rgba(255,255,255,0.9)" text-anchor="middle">중국 수입 검품 전문가</text>
+  
+  <!-- 설명 텍스트 -->
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)" text-anchor="middle">품질관리 리스크 완벽 해결</text>
+  
+  <!-- 연락처 -->
+  <text x="600" y="480" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.7)" text-anchor="middle">📞 031-699-8781 | 🌐 www.duly.co.kr</text>
+  
+  <!-- 장식용 원 -->
+  <circle cx="150" cy="150" r="80" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="1050" cy="480" r="100" fill="rgba(255,255,255,0.1)"/>
+</svg> 
