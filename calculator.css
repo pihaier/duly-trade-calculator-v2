@@ -245,34 +245,54 @@ body {
 /* 알림 메시지 */
 .alert {
     margin-bottom: 0.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     /* 애니메이션 제거 */
     transition: none;
 }
 
+/* 모바일에서 알림 크기 최적화 */
+@media (max-width: 768px) {
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.875rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(10px);
+    }
+    
+    .alert-large {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+}
+
 .alert-info {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
     color: #1d4ed8;
     font-weight: 500;
 }
 
 .alert-success {
-    background: rgba(5, 150, 105, 0.1);
-    border-color: rgba(5, 150, 105, 0.3);
+    background: rgba(5, 150, 105, 0.15);
+    border-color: rgba(5, 150, 105, 0.4);
     color: #047857;
     font-weight: 500;
 }
 
 .alert-warning {
-    background: rgba(217, 119, 6, 0.1);
-    border-color: rgba(217, 119, 6, 0.3);
+    background: rgba(217, 119, 6, 0.15);
+    border-color: rgba(217, 119, 6, 0.4);
     color: #92400e;
     font-weight: 500;
 }
 
 .alert-error {
-    background: rgba(220, 38, 38, 0.1);
-    border-color: rgba(220, 38, 38, 0.3);
+    background: rgba(220, 38, 38, 0.15);
+    border-color: rgba(220, 38, 38, 0.4);
     color: #991b1b;
     font-weight: 500;
 }
