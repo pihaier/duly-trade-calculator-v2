@@ -121,7 +121,7 @@ async function handleStaticAsset(request) {
         }
 
         const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
+        if (networkResponse.ok && networkResponse.status === 200) {
             const cache = await caches.open(STATIC_CACHE);
             cache.put(request, networkResponse.clone());
         }
@@ -138,9 +138,14 @@ async function handleApiRequest(request) {
     try {
         const networkResponse = await fetch(request);
         
-        if (networkResponse.ok) {
+        if (networkResponse.ok && networkResponse.status === 200) {
             const cache = await caches.open(DYNAMIC_CACHE);
             cache.put(request, networkResponse.clone());
+            return networkResponse;
+        }
+        
+        // 200이 아닌 성공 응답도 반환 (캐싱하지 않음)
+        if (networkResponse.ok) {
             return networkResponse;
         }
         
@@ -169,9 +174,14 @@ async function handlePageRequest(request) {
     try {
         const networkResponse = await fetch(request);
         
-        if (networkResponse.ok) {
+        if (networkResponse.ok && networkResponse.status === 200) {
             const cache = await caches.open(DYNAMIC_CACHE);
             cache.put(request, networkResponse.clone());
+            return networkResponse;
+        }
+        
+        // 200이 아닌 성공 응답도 반환 (캐싱하지 않음)
+        if (networkResponse.ok) {
             return networkResponse;
         }
         
@@ -195,7 +205,7 @@ async function handleOtherAssets(request) {
         if (cachedResponse) {
             // 백그라운드에서 업데이트
             fetch(request).then(response => {
-                if (response.ok) {
+                if (response.ok && response.status === 200) {
                     const cache = caches.open(DYNAMIC_CACHE);
                     cache.then(c => c.put(request, response));
                 }
@@ -206,7 +216,9 @@ async function handleOtherAssets(request) {
 
         // 네트워크에서 가져오기
         const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
+        
+        // 206 (Partial Content) 및 기타 특수 상태 코드는 캐싱하지 않음
+        if (networkResponse.ok && networkResponse.status === 200) {
             const cache = await caches.open(DYNAMIC_CACHE);
             cache.put(request, networkResponse.clone());
         }
