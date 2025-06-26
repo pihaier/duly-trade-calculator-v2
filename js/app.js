@@ -453,7 +453,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderModals();
         initializeEventListeners();
         initializeAnimations();
-        initializeMobileNavigation();
         
         // Lucide 아이콘 초기화를 마지막에 실행
         if (typeof lucide !== 'undefined') {
@@ -497,63 +496,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Component Rendering Functions
 function renderServices() {
-    const desktopContainer = document.getElementById('services-container');
-    const mobileContainer = document.getElementById('services-container-mobile');
-    
-    if (!desktopContainer && !mobileContainer) return;
+    const container = document.getElementById('services-container');
+    if (!container) return;
 
-    // 데스크톱 버전 렌더링
-    if (desktopContainer) {
-        services.forEach(service => {
-            const card = document.createElement('div');
-            card.className = "group relative bg-white/10 backdrop-blur-lg p-10 rounded-3xl text-center hover:bg-white/20 transition-all cursor-pointer hover-transform border border-white/20 modal-trigger";
-            card.dataset.modalTarget = service.id;
-            card.innerHTML = `
-                <div class="absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 rounded-3xl transition-opacity"></div>
-                <div class="relative z-10">
-                    <div class="mb-8 flex justify-center text-white transform transition-transform group-hover:scale-110 group-hover:rotate-3">
-                        <i data-lucide="${service.icon}" class="w-20 h-20"></i>
-                    </div>
-                    <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-white">${service.title}</h3>
-                    <p class="text-gray-300 mb-6">${service.description}</p>
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span class="text-yellow-400 font-bold text-lg">자세히 보기 →</span>
-                    </div>
+    services.forEach(service => {
+        const card = document.createElement('div');
+        card.className = "group relative bg-white/10 backdrop-blur-lg p-10 rounded-3xl text-center hover:bg-white/20 transition-all cursor-pointer hover-transform border border-white/20 modal-trigger";
+        card.dataset.modalTarget = service.id;
+        card.innerHTML = `
+            <div class="absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 rounded-3xl transition-opacity"></div>
+            <div class="relative z-10">
+                <div class="mb-8 flex justify-center text-white transform transition-transform group-hover:scale-110 group-hover:rotate-3">
+                    <i data-lucide="${service.icon}" class="w-20 h-20"></i>
                 </div>
-            `;
-            desktopContainer.appendChild(card);
-        });
-    }
-
-    // 모바일 버전 렌더링 (컴팩트한 카드)
-    if (mobileContainer) {
-        services.forEach(service => {
-            const card = document.createElement('div');
-            card.className = "group relative bg-white/10 backdrop-blur-lg p-6 rounded-2xl text-center hover:bg-white/20 transition-all cursor-pointer border border-white/20 modal-trigger flex-shrink-0 w-72 touch-target-large touch-feedback";
-            card.dataset.modalTarget = service.id;
-            card.innerHTML = `
-                <div class="absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity"></div>
-                <div class="relative z-10">
-                    <div class="mb-4 flex justify-center text-white transform transition-transform group-hover:scale-110">
-                        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                            <i data-lucide="${service.icon}" class="w-8 h-8"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-lg font-bold mb-3 text-white leading-tight">${service.title}</h3>
-                    <p class="text-gray-300 text-sm mb-4 leading-relaxed">${service.description}</p>
-                    <div class="mt-auto">
-                        <span class="inline-flex items-center text-yellow-400 font-bold text-sm group-hover:gap-2 transition-all">
-                            자세히 보기 <i data-lucide="chevron-right" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"></i>
-                        </span>
-                    </div>
+                <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-white">${service.title}</h3>
+                <p class="text-gray-300 mb-6">${service.description}</p>
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="text-yellow-400 font-bold text-lg">자세히 보기 →</span>
                 </div>
-            `;
-            mobileContainer.appendChild(card);
-        });
-        
-        // 모바일 스크롤 인디케이터 초기화
-        initializeServiceScroll();
-    }
+            </div>
+        `;
+        container.appendChild(card);
+    });
 }
 
 function renderBenefits() {
@@ -583,23 +547,21 @@ function renderProblems() {
 
     problemSolutions.forEach(item => {
         const card = document.createElement('div');
-        card.className = "group relative bg-white p-4 md:p-6 lg:p-8 rounded-2xl md:rounded-3xl shadow-md hover:shadow-xl transition-all cursor-pointer hover-transform overflow-hidden modal-trigger touch-target touch-feedback";
+        card.className = "group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all cursor-pointer hover-transform overflow-hidden modal-trigger";
         card.dataset.modalTarget = `problem-${item.id}`;
         card.innerHTML = `
             <div class="absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-5 transition-opacity"></div>
-            <div class="relative z-10 flex flex-col items-center text-center h-full min-h-[200px] md:min-h-[240px]">
-                <div class="flex-grow flex flex-col justify-center">
-                    <div class="mb-3 md:mb-4 text-transparent bg-clip-text bg-gradient-to-r ${item.gradient}">
-                        <div class="w-12 h-12 md:w-16 md:h-16 mx-auto bg-gradient-to-r ${item.gradient} rounded-full flex items-center justify-center text-white">
-                            <i data-lucide="${item.icon}" class="w-6 h-6 md:w-8 md:h-8"></i>
-                        </div>
+            <div class="relative z-10 flex flex-col items-center text-center h-full">
+                <div class="flex-grow">
+                    <div class="mb-4 text-transparent bg-clip-text bg-gradient-to-r ${item.gradient}">
+                        <i data-lucide="${item.icon}" class="w-10 h-10 mx-auto"></i>
                     </div>
-                    <h3 class="text-lg md:text-xl lg:text-2xl font-bold text-gray-800 mb-2 md:mb-3 leading-tight">${item.title}</h3>
-                    <p class="text-sm md:text-base text-gray-600 leading-snug">${item.problem}</p>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">${item.title}</h3>
+                    <p class="text-gray-600">${item.problem}</p>
                 </div>
-                <div class="mt-4 pt-2 border-t border-gray-100 w-full">
-                    <span class="inline-flex items-center justify-center w-full font-bold bg-gradient-to-r ${item.gradient} text-transparent bg-clip-text group-hover:gap-2 transition-all text-sm md:text-base">
-                        해결책 보기 <i data-lucide="chevron-right" class="inline w-4 h-4 md:w-5 md:h-5 ml-1 text-purple-600 group-hover:translate-x-1 transition-transform"></i>
+                <div class="mt-auto pt-4">
+                    <span class="inline-flex items-center font-bold bg-gradient-to-r ${item.gradient} text-transparent bg-clip-text group-hover:gap-3 transition-all">
+                        해결책 보기 <i data-lucide="chevron-right" class="inline w-5 h-5 ml-1 text-purple-600"></i>
                     </span>
                 </div>
             </div>
@@ -609,54 +571,22 @@ function renderProblems() {
 }
 
 function renderProcess() {
-    const desktopContainer = document.getElementById('process-container');
-    const mobileContainer = document.getElementById('process-container-mobile');
-    
-    if (!desktopContainer && !mobileContainer) return;
+    const container = document.getElementById('process-container');
+    if (!container) return;
 
-    // 데스크톱 버전 렌더링
-    if (desktopContainer) {
-        processSteps.forEach(item => {
-            const stepDiv = document.createElement('div');
-            stepDiv.className = "relative flex flex-col items-center text-center group";
-            stepDiv.innerHTML = `
-                <div class="relative z-10 w-32 h-32 flex items-center justify-center bg-white rounded-full shadow-lg group-hover:scale-110 transition-transform mb-6 border-4 border-purple-100">
-                    <div class="absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full opacity-10 group-hover:opacity-20 transition-opacity"></div>
-                    <span class="text-5xl font-black bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">${item.step}</span>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-800">${item.title}</h3>
-                <p class="text-gray-600 px-4">${item.description}</p>
-            `;
-            desktopContainer.appendChild(stepDiv);
-        });
-    }
-
-    // 모바일 버전 렌더링 (세로 나열 + 연결선)
-    if (mobileContainer) {
-        processSteps.forEach((item, index) => {
-            const stepDiv = document.createElement('div');
-            stepDiv.className = "relative flex items-start space-x-4 group";
-            stepDiv.innerHTML = `
-                <!-- 단계 번호 원 -->
-                <div class="flex-shrink-0 relative">
-                    <div class="w-16 h-16 flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 rounded-full shadow-lg text-white font-black text-xl group-hover:scale-110 transition-transform">
-                        ${item.step}
-                    </div>
-                    ${index < processSteps.length - 1 ? `
-                        <!-- 연결선 -->
-                        <div class="absolute top-16 left-1/2 w-0.5 h-6 bg-gradient-to-b from-purple-300 to-blue-300 transform -translate-x-0.5"></div>
-                    ` : ''}
-                </div>
-                
-                <!-- 내용 -->
-                <div class="flex-1 pb-6">
-                    <h3 class="text-lg font-bold mb-2 text-gray-800 leading-tight">${item.title}</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">${item.description}</p>
-                </div>
-            `;
-            mobileContainer.appendChild(stepDiv);
-        });
-    }
+    processSteps.forEach(item => {
+        const stepDiv = document.createElement('div');
+        stepDiv.className = "relative flex flex-col items-center text-center group";
+        stepDiv.innerHTML = `
+            <div class="relative z-10 w-32 h-32 flex items-center justify-center bg-white rounded-full shadow-lg group-hover:scale-110 transition-transform mb-6 border-4 border-purple-100">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full opacity-10 group-hover:opacity-20 transition-opacity"></div>
+                <span class="text-5xl font-black bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">${item.step}</span>
+            </div>
+            <h3 class="text-xl font-bold mb-3 text-gray-800">${item.title}</h3>
+            <p class="text-gray-600 px-4">${item.description}</p>
+        `;
+        container.appendChild(stepDiv);
+    });
 }
 
 function renderFAQ() {
@@ -665,19 +595,17 @@ function renderFAQ() {
 
     faqs.forEach(faq => {
         const faqDiv = document.createElement('div');
-        faqDiv.className = "bg-white rounded-xl md:rounded-2xl shadow-md hover:shadow-lg overflow-hidden border border-gray-100 transition-all";
+        faqDiv.className = "bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition-all";
         faqDiv.innerHTML = `
-            <button class="w-full text-left px-4 md:px-6 py-4 md:py-6 bg-white hover:bg-purple-50 flex justify-between items-center focus:outline-none transition-colors group faq-toggle touch-target-large touch-feedback" data-faq-id="${faq.id}" aria-expanded="false">
-                <span class="text-base md:text-lg font-bold text-gray-800 pr-4 leading-tight">${faq.question}</span>
-                <div class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white transition-transform duration-300 flex items-center justify-center faq-icon">
-                    <i data-lucide="plus" class="w-4 h-4 md:w-5 md:h-5"></i>
+            <button class="w-full text-left p-8 bg-white hover:bg-gray-50 flex justify-between items-center text-lg font-bold text-gray-800 focus:outline-none transition-colors group faq-toggle" data-faq-id="${faq.id}">
+                <span class="pr-4">${faq.question}</span>
+                <div class="p-2 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white transition-transform duration-300">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
                 </div>
             </button>
-            <div id="faq-answer-${faq.id}" class="transition-all duration-300 ease-in-out overflow-hidden max-h-0 faq-content">
-                <div class="px-4 md:px-6 pb-4 md:pb-6">
-                    <div class="pt-2 border-t border-gray-100">
-                        <p class="text-sm md:text-base text-gray-600 leading-relaxed">${faq.answer}</p>
-                    </div>
+            <div id="faq-answer-${faq.id}" class="transition-all duration-500 ease-in-out overflow-hidden max-h-0">
+                <div class="p-8 pt-0 text-gray-700 leading-relaxed">
+                    <p>${faq.answer}</p>
                 </div>
             </div>
         `;
@@ -835,61 +763,25 @@ function initializeFAQ() {
         button.addEventListener('click', () => {
             const faqId = button.dataset.faqId;
             const answer = document.getElementById(`faq-answer-${faqId}`);
-            const icon = button.querySelector('.faq-icon');
-            const plusIcon = icon.querySelector('i');
+            const icon = button.querySelector('div');
 
             // Close previously active FAQ
             if (activeFaqId && activeFaqId !== faqId) {
                 const lastActiveAnswer = document.getElementById(`faq-answer-${activeFaqId}`);
-                const lastActiveButton = document.querySelector(`[data-faq-id="${activeFaqId}"]`);
-                const lastActiveIcon = lastActiveButton?.querySelector('.faq-icon');
-                const lastActivePlusIcon = lastActiveIcon?.querySelector('i');
-                
-                if (lastActiveAnswer) {
-                    lastActiveAnswer.style.maxHeight = '0px';
-                    lastActiveButton.setAttribute('aria-expanded', 'false');
-                }
-                if (lastActiveIcon) {
-                    lastActiveIcon.classList.remove('rotate-45', 'bg-gradient-to-r', 'from-green-500', 'to-teal-500');
-                    lastActiveIcon.classList.add('bg-gradient-to-r', 'from-purple-500', 'to-blue-500');
-                }
-                if (lastActivePlusIcon) {
-                    lastActivePlusIcon.setAttribute('data-lucide', 'plus');
-                }
+                const lastActiveIcon = document.querySelector(`[data-faq-id="${activeFaqId}"] div`);
+                if (lastActiveAnswer) lastActiveAnswer.style.maxHeight = '0px';
+                if (lastActiveIcon) lastActiveIcon.classList.remove('rotate-45');
             }
             
             // Toggle current FAQ
-            const isOpen = answer.style.maxHeight && answer.style.maxHeight !== '0px';
-            
-            if (isOpen) {
-                // Close current FAQ
+            if (answer && answer.style.maxHeight && answer.style.maxHeight !== '0px') {
                 answer.style.maxHeight = '0px';
-                button.setAttribute('aria-expanded', 'false');
-                if (icon) {
-                    icon.classList.remove('rotate-45', 'bg-gradient-to-r', 'from-green-500', 'to-teal-500');
-                    icon.classList.add('bg-gradient-to-r', 'from-purple-500', 'to-blue-500');
-                }
-                if (plusIcon) {
-                    plusIcon.setAttribute('data-lucide', 'plus');
-                }
+                if (icon) icon.classList.remove('rotate-45');
                 activeFaqId = null;
-            } else {
-                // Open current FAQ
+            } else if (answer) {
                 answer.style.maxHeight = answer.scrollHeight + 'px';
-                button.setAttribute('aria-expanded', 'true');
-                if (icon) {
-                    icon.classList.remove('bg-gradient-to-r', 'from-purple-500', 'to-blue-500');
-                    icon.classList.add('rotate-45', 'bg-gradient-to-r', 'from-green-500', 'to-teal-500');
-                }
-                if (plusIcon) {
-                    plusIcon.setAttribute('data-lucide', 'minus');
-                }
+                if (icon) icon.classList.add('rotate-45');
                 activeFaqId = faqId;
-            }
-            
-            // Re-initialize Lucide icons for the changed icon
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
             }
         });
     });
@@ -960,20 +852,11 @@ function initializeSmoothScrolling() {
 }
 
 function initializeAnimations() {
-    // 개선된 섹션 애니메이션
+    // Intersection Observer for fade-in animations
     const sectionObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('is-visible');
-                
-                // 스태거드 애니메이션 처리
-                const staggerItems = entry.target.querySelectorAll('.stagger-item');
-                staggerItems.forEach((item, index) => {
-                    setTimeout(() => {
-                        item.classList.add('is-visible');
-                    }, index * 100); // 100ms씩 지연
-                });
-                
                 sectionObserver.unobserve(entry.target);
             }
         });
@@ -982,53 +865,18 @@ function initializeAnimations() {
         rootMargin: '50px'
     });
 
-    // 섹션 애니메이션 관찰
     document.querySelectorAll('.fade-in-section').forEach(section => {
         sectionObserver.observe(section);
     });
 
-    // 카드 애니메이션 관찰
-    const cardObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                cardObserver.unobserve(entry.target);
-            }
-        });
-    }, { 
-        threshold: 0.2,
-        rootMargin: '30px'
-    });
-
-    document.querySelectorAll('.card-animate').forEach(card => {
-        cardObserver.observe(card);
-    });
-
-    // 카운터 애니메이션 관찰
-    const counterObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                counterObserver.unobserve(entry.target);
-            }
-        });
-    }, { 
-        threshold: 0.3,
-        rootMargin: '20px'
-    });
-
-    document.querySelectorAll('.counter-animate').forEach(counter => {
-        counterObserver.observe(counter);
-    });
-
-    // 부드러운 패럴랙스 효과
+    // Parallax effect for hero section
     let ticking = false;
     const updateParallax = () => {
         const scrolled = window.pageYOffset;
         const parallaxElements = document.querySelectorAll('.background-video');
         
         parallaxElements.forEach(element => {
-            const speed = 0.3; // 더 부드러운 속도
+            const speed = 0.5;
             element.style.transform = `translateX(-50%) translateY(${-50 + scrolled * speed * 0.01}%)`;
         });
         
@@ -1043,237 +891,6 @@ function initializeAnimations() {
     };
 
     window.addEventListener('scroll', requestTick);
-    
-    // 성능 최적화: 스크롤 이벤트 쓰로틀링
-    let scrollTimeout;
-    window.addEventListener('scroll', () => {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-        }
-        scrollTimeout = setTimeout(() => {
-            // 스크롤 완료 후 추가 처리
-                 }, 100);
-     });
-}
-
-// 모바일 하단 네비게이션 개선
-function initializeMobileNavigation() {
-    const navItems = document.querySelectorAll('.nav-item');
-    const sections = ['hero-section', 'why-choose-us', 'detailed-services', 'application-inquiry', 'faq-section'];
-    
-    if (navItems.length === 0) return;
-    
-    // 현재 활성 섹션 추적
-    const sectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const sectionId = entry.target.id;
-                updateActiveNavItem(sectionId);
-            }
-        });
-    }, {
-        threshold: 0.3,
-        rootMargin: '-20% 0px -20% 0px'
-    });
-    
-    // 모든 섹션 관찰
-    sections.forEach(sectionId => {
-        const section = document.getElementById(sectionId);
-        if (section) {
-            sectionObserver.observe(section);
-        }
-    });
-    
-    // 네비게이션 클릭 시 부드러운 스크롤 + 피드백
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            const sectionId = item.getAttribute('data-section');
-            const targetSection = document.getElementById(sectionId);
-            
-            if (targetSection) {
-                // 즉시 활성 상태 업데이트 (반응성 향상)
-                updateActiveNavItem(sectionId);
-                
-                // 부드러운 스크롤
-                targetSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-                
-                // 햅틱 피드백 (지원하는 기기에서)
-                if (navigator.vibrate) {
-                    navigator.vibrate(50);
-                }
-                
-                // 아이콘 애니메이션
-                const icon = item.querySelector('i');
-                if (icon) {
-                    icon.style.transform = 'scale(1.2)';
-                    setTimeout(() => {
-                        icon.style.transform = 'scale(1)';
-                    }, 150);
-                }
-            }
-        });
-    });
-}
-
-// 활성 네비게이션 아이템 업데이트
-function updateActiveNavItem(activeSectionId) {
-    const navItems = document.querySelectorAll('.nav-item');
-    
-    navItems.forEach(item => {
-        const sectionId = item.getAttribute('data-section');
-        const indicator = item.querySelector('.nav-indicator');
-        const icon = item.querySelector('i');
-        
-        if (sectionId === activeSectionId) {
-            // 활성 상태
-            item.classList.add('text-purple-600');
-            item.classList.remove('text-gray-600');
-            
-            if (indicator) {
-                indicator.style.opacity = '1';
-                indicator.style.transform = 'translateX(-50%) scale(1.5)';
-            }
-            
-            if (icon) {
-                icon.style.transform = 'scale(1.1)';
-            }
-        } else {
-            // 비활성 상태
-            item.classList.remove('text-purple-600');
-            item.classList.add('text-gray-600');
-            
-            if (indicator) {
-                indicator.style.opacity = '0';
-                indicator.style.transform = 'translateX(-50%) scale(1)';
-            }
-            
-            if (icon) {
-                icon.style.transform = 'scale(1)';
-            }
-        }
-    });
-}
-
-// 서비스 카드 수평 스크롤 인디케이터
-function initializeServiceScroll() {
-    const container = document.getElementById('services-container-mobile');
-    const indicators = document.querySelectorAll('.service-indicator');
-    
-    if (!container || indicators.length === 0) return;
-    
-    const updateIndicators = () => {
-        const scrollLeft = container.scrollLeft;
-        const cardWidth = container.children[0]?.offsetWidth || 0;
-        const gap = 16; // space-x-4
-        const totalWidth = cardWidth + gap;
-        
-        const currentIndex = Math.round(scrollLeft / totalWidth);
-        
-        indicators.forEach((indicator, index) => {
-            if (index === currentIndex) {
-                indicator.classList.add('active');
-            } else {
-                indicator.classList.remove('active');
-            }
-        });
-    };
-    
-    // 스크롤 이벤트 리스너
-    container.addEventListener('scroll', debounce(updateIndicators, 100));
-    
-    // 인디케이터 클릭 이벤트
-    indicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => {
-            const cardWidth = container.children[0]?.offsetWidth || 0;
-            const gap = 16;
-            const scrollTo = index * (cardWidth + gap);
-            
-            container.scrollTo({
-                left: scrollTo,
-                behavior: 'smooth'
-            });
-        });
-    });
-    
-    // 초기 상태 설정
-    updateIndicators();
-    
-    // 터치 스와이프 제스처 추가
-    initializeSwipeGesture(container, indicators);
-}
-
-// 터치 스와이프 제스처 구현
-function initializeSwipeGesture(container, indicators) {
-    let startX = 0;
-    let startY = 0;
-    let distX = 0;
-    let distY = 0;
-    let startTime = 0;
-    let elapsedTime = 0;
-    
-    const threshold = 100; // 최소 스와이프 거리
-    const restraint = 100; // 수직 방향 제한
-    const allowedTime = 300; // 최대 스와이프 시간
-    
-    container.addEventListener('touchstart', (e) => {
-        const touchobj = e.changedTouches[0];
-        startX = touchobj.pageX;
-        startY = touchobj.pageY;
-        startTime = new Date().getTime();
-        e.preventDefault();
-    }, { passive: false });
-    
-    container.addEventListener('touchmove', (e) => {
-        e.preventDefault(); // 스크롤 방지
-    }, { passive: false });
-    
-    container.addEventListener('touchend', (e) => {
-        const touchobj = e.changedTouches[0];
-        distX = touchobj.pageX - startX;
-        distY = touchobj.pageY - startY;
-        elapsedTime = new Date().getTime() - startTime;
-        
-        // 스와이프 조건 확인
-        if (elapsedTime <= allowedTime && Math.abs(distX) >= threshold && Math.abs(distY) <= restraint) {
-            const currentIndex = getCurrentCardIndex(container);
-            
-            if (distX > 0) {
-                // 오른쪽 스와이프 (이전 카드)
-                navigateToCard(container, Math.max(0, currentIndex - 1));
-            } else {
-                // 왼쪽 스와이프 (다음 카드)
-                navigateToCard(container, Math.min(indicators.length - 1, currentIndex + 1));
-            }
-        }
-        
-        e.preventDefault();
-    }, { passive: false });
-}
-
-// 현재 카드 인덱스 계산
-function getCurrentCardIndex(container) {
-    const scrollLeft = container.scrollLeft;
-    const cardWidth = container.children[0]?.offsetWidth || 0;
-    const gap = 16;
-    const totalWidth = cardWidth + gap;
-    return Math.round(scrollLeft / totalWidth);
-}
-
-// 특정 카드로 이동
-function navigateToCard(container, index) {
-    const cardWidth = container.children[0]?.offsetWidth || 0;
-    const gap = 16;
-    const scrollTo = index * (cardWidth + gap);
-    
-    container.scrollTo({
-        left: scrollTo,
-        behavior: 'smooth'
-    });
 }
 
 // Modal Creation

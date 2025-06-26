@@ -282,16 +282,14 @@ class MainController {
         
         alertContainer.appendChild(alertElement);
         
-        // 애니메이션으로 나타내기 - 모바일 최적화
+        // 애니메이션으로 나타내기
         alertElement.style.opacity = '0';
-        // 모바일: 아래에서 위로, 데스크톱: 오른쪽에서 왼쪽으로
-        const isMobile = window.innerWidth < 768;
-        alertElement.style.transform = isMobile ? 'translateY(20px) scale(0.95)' : 'translateX(100%)';
+        alertElement.style.transform = 'translateX(100%)';
         
         requestAnimationFrame(() => {
-            alertElement.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            alertElement.style.transition = 'all 0.3s ease';
             alertElement.style.opacity = '1';
-            alertElement.style.transform = isMobile ? 'translateY(0) scale(1)' : 'translateX(0)';
+            alertElement.style.transform = 'translateX(0)';
         });
         
         // 긴 메시지는 더 오래 표시 (10초), 짧은 메시지는 기본 시간
@@ -306,7 +304,7 @@ class MainController {
     }
 
     /**
-     * 알림 컨테이너 가져오기 또는 생성 - 모바일 최적화
+     * 알림 컨테이너 가져오기 또는 생성
      */
     getOrCreateAlertContainer() {
         let container = document.getElementById('alertContainer');
@@ -314,8 +312,7 @@ class MainController {
         if (!container) {
             container = document.createElement('div');
             container.id = 'alertContainer';
-            // 모바일: 화면 중앙, 데스크톱: 오른쪽 위
-            container.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 md:top-4 md:right-4 md:left-auto md:transform-none z-50 space-y-2 w-11/12 max-w-md md:w-auto md:max-w-lg';
+            container.className = 'fixed top-4 right-4 z-50 space-y-2';
             document.body.appendChild(container);
         }
         
@@ -323,15 +320,13 @@ class MainController {
     }
 
     /**
-     * 알림 메시지 제거 - 모바일 최적화
+     * 알림 메시지 제거
      */
     removeAlert(alertElement) {
         if (alertElement && alertElement.parentElement) {
-            const isMobile = window.innerWidth < 768;
-            alertElement.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            alertElement.style.transition = 'all 0.3s ease';
             alertElement.style.opacity = '0';
-            // 모바일: 아래로 사라지기, 데스크톱: 오른쪽으로 사라지기
-            alertElement.style.transform = isMobile ? 'translateY(20px) scale(0.95)' : 'translateX(100%)';
+            alertElement.style.transform = 'translateX(100%)';
             
             setTimeout(() => {
                 if (alertElement.parentElement) {

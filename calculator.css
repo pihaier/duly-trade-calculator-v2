@@ -242,81 +242,39 @@ body {
     margin-top: 0.25rem;
 }
 
-/* 알림 메시지 - 모바일 최적화 */
+/* 알림 메시지 */
 .alert {
     margin-bottom: 0.5rem;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    border: 1px solid;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
-    font-size: 0.875rem;
-    line-height: 1.5;
-    max-width: 100%;
-    word-wrap: break-word;
-}
-
-/* 모바일에서 더 큰 알림 */
-@media (max-width: 768px) {
-    .alert {
-        padding: 1.25rem;
-        font-size: 1rem;
-        border-radius: 1rem;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        margin-bottom: 0.75rem;
-    }
-    
-    .alert-large {
-        padding: 1.5rem;
-        font-size: 1rem;
-        line-height: 1.6;
-    }
+    /* 애니메이션 제거 */
+    transition: none;
 }
 
 .alert-info {
-    background: rgba(59, 130, 246, 0.15);
-    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
     color: #1d4ed8;
     font-weight: 500;
 }
 
 .alert-success {
-    background: rgba(5, 150, 105, 0.15);
-    border-color: rgba(5, 150, 105, 0.4);
+    background: rgba(5, 150, 105, 0.1);
+    border-color: rgba(5, 150, 105, 0.3);
     color: #047857;
     font-weight: 500;
 }
 
 .alert-warning {
-    background: rgba(217, 119, 6, 0.15);
-    border-color: rgba(217, 119, 6, 0.4);
+    background: rgba(217, 119, 6, 0.1);
+    border-color: rgba(217, 119, 6, 0.3);
     color: #92400e;
     font-weight: 500;
 }
 
 .alert-error {
-    background: rgba(220, 38, 38, 0.15);
-    border-color: rgba(220, 38, 38, 0.4);
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
     color: #991b1b;
     font-weight: 500;
-}
-
-/* 알림 닫기 버튼 모바일 최적화 */
-@media (max-width: 768px) {
-    .alert button {
-        min-width: 44px;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 0.5rem;
-        background: rgba(0, 0, 0, 0.1);
-        transition: background-color 0.2s ease;
-    }
-    
-    .alert button:hover {
-        background: rgba(0, 0, 0, 0.2);
-    }
 }
 
 /* 진행률 바 */
