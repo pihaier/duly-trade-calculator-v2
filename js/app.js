@@ -33,14 +33,12 @@ class SmartVideoLoader {
     init() {
         if (!this.video) return;
         
-        // 동영상 로딩 시간 단축 (3초 → 0.5초)
-        setTimeout(() => {
-            if (this.shouldLoad) {
-                this.loadVideo();
-            } else {
-                this.showVideoButton();
-            }
-        }, 500);
+        // 🚀 즉시 비디오 로딩 시작 (0.5초 지연도 제거)
+        if (this.shouldLoad) {
+            this.loadVideo();
+        } else {
+            this.showVideoButton();
+        }
         
         // 视频控制按钮已移除
     }

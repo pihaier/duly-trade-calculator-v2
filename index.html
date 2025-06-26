@@ -380,14 +380,15 @@
             <!-- 배경 그라데이션 (안정적인 배경) -->
             <div id="hero-background" class="absolute inset-0 hero-loading-bg"></div>
             
-            <!-- 배경 비디오 - 깜박임 제거 -->
+            <!-- 배경 비디오 - 자동재생 최적화 -->
             <video 
                 id="hero-video"
                 class="background-video opacity-60 hidden md:block" 
+                autoplay
                 muted 
                 playsinline
                 loop
-                preload="metadata"
+                preload="auto"
                 poster="/images/hero-fallback.jpg"
             >
                 <!-- 현재 사용 가능한 비디오 파일 -->
