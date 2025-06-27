@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     setupEventListeners();
     loadSavedData();
-    lucide.createIcons();
+    if (window.lucide) {
+        lucide.createIcons();
+    }
 });
 
 // 폼 초기화
@@ -190,7 +192,9 @@ function handleFiles(files) {
             </button>
         `;
         fileList.appendChild(fileItem);
-        lucide.createIcons();
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     });
 }
 
@@ -219,8 +223,10 @@ function updateFileList() {
             </button>
         `;
         fileList.appendChild(fileItem);
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     });
-    lucide.createIcons();
 }
 
 // 파일 크기 포맷
@@ -408,7 +414,9 @@ function showSuccessModal() {
     const successModal = document.getElementById('successModal');
     successModal.classList.remove('hidden');
     successModal.classList.add('flex');
-    lucide.createIcons();
+    if (window.lucide) {
+        lucide.createIcons();
+    }
 }
 
 // 전역 함수로 파일 제거 (인라인 onclick용)
