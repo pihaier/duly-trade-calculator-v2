@@ -309,7 +309,7 @@ async function handleFormSubmit(e) {
         if (response.success) {
             // 성공 처리
             localStorage.removeItem('applicationFormData');
-            showSuccessModal();
+            showSuccessModal(response.reservationCode);
         } else {
             throw new Error(response.message || '제출 실패');
         }
@@ -380,18 +380,39 @@ async function convertFilesToBase64() {
 
 // Google Sheets로 데이터 전송
 async function submitToGoogleSheets(data) {
+    console.log('Google Apps Script로 전송할 데이터:', data);
+    console.log('전송 URL:', GOOGLE_APPS_SCRIPT_URL);
+    
     try {
         const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'cors', // CORS 모드로 변경하여 응답 읽기 시도
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data)
         });
         
-        // no-cors 모드에서는 응답을 읽을 수 없으므로 성공으로 간주
-        return { success: true };
+        console.log('전송 완료, 응답 상태:', response.status);
+        
+        try {
+            // 응답 텍스트 읽기 시도
+            const responseText = await response.text();
+            console.log('응답 텍스트:', responseText);
+            
+            // JSON 파싱 시도
+            const result = JSON.parse(responseText);
+            console.log('파싱된 응답:', result);
+            
+            return result;
+        } catch (parseError) {
+            console.log('응답 파싱 실패, 성공으로 간주:', parseError);
+            // 파싱 실패해도 HTTP 상태가 성공이면 성공으로 처리
+            return { 
+                success: response.ok, 
+                message: response.ok ? '신청서가 성공적으로 제출되었습니다.' : '전송 중 오류가 발생했습니다.' 
+            };
+        }
     } catch (error) {
         console.error('Google Apps Script 전송 오류:', error);
         return { success: false, message: error.message };
@@ -399,10 +420,27 @@ async function submitToGoogleSheets(data) {
 }
 
 // 성공 모달 표시
-function showSuccessModal() {
+function showSuccessModal(reservationCode) {
     const successModal = document.getElementById('successModal');
     successModal.classList.remove('hidden');
     successModal.classList.add('flex');
+    
+    // 예약번호 표시
+    if (reservationCode) {
+        document.getElementById('reservationCode').textContent = reservationCode;
+    } else {
+        document.getElementById('reservationCode').textContent = '생성 중...';
+    }
+}
+
+// 성공 모달 닫기
+function closeSuccessModal() {
+    const successModal = document.getElementById('successModal');
+    successModal.classList.add('hidden');
+    successModal.classList.remove('flex');
+    
+    // 홈페이지로 이동
+    window.location.href = '/';
 }
 
 // 전역 함수로 파일 제거 (인라인 onclick용)
