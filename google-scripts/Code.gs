@@ -29,10 +29,30 @@ function doPost(e) {
 
     if (!sheet) throw new Error(`시트를 찾을 수 없습니다: ${SHEET_NAME}`);
 
+    // 헤더 확인 (디버깅용)
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    Logger.log('시트 헤더:', headers);
+    Logger.log('시트 열 개수:', headers.length);
+    
     const fileUrls = saveFilesToDrive_(data.files, data.companyName);
     const newRow = formatDataForSheet_(data, fileUrls);
     
-    sheet.appendRow(newRow);
+    // 데이터 추가 전 확인
+    Logger.log('추가할 행의 열 개수:', newRow.length);
+    Logger.log('시트의 열 개수:', sheet.getLastColumn());
+    
+    // appendRow 대신 setValues 사용
+    const lastRow = sheet.getLastRow();
+    const targetRow = lastRow + 1;
+    
+    // 시트의 실제 열 개수만큼 데이터 설정
+    const numColumns = sheet.getLastColumn();
+    sheet.getRange(targetRow, 1, 1, numColumns).setValues([newRow]);
+    
+    // 추가 후 확인
+    const addedRow = sheet.getRange(targetRow, 1, 1, sheet.getLastColumn()).getValues()[0];
+    Logger.log('실제 추가된 행:', addedRow);
+    
     sendNewApplicationEmail_(data, fileUrls);
 
     return createJsonResponse_({ 
@@ -50,44 +70,70 @@ function formatDataForSheet_(data, fileUrls) {
   const now = new Date();
   const koreanTime = Utilities.formatDate(now, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
   
-  const rowData = new Array(36).fill(''); // AJ열(36번째)까지 빈 배열 생성
+  // 디버깅용 로그
+  Logger.log('받은 데이터:', JSON.stringify(data));
   
-  rowData[0] = koreanTime;                                // A: 타임스탬프
-  rowData[1] = data.companyName || '';                    // B: 회사명
-  // rowData[2] = '';                                     // C: 중국거래시 사용 회사명 (비워둠)
-  rowData[3] = data.contactName || '';                    // D: 담당자명
-  rowData[4] = data.contactPhone || '';                   // E: 담당자 연락처
-  rowData[5] = data.contactEmail || '';                   // F: 담당자 이메일
-  rowData[6] = data.serviceTypeKr || '';                  // G: 신청서비스
-  rowData[7] = data.serviceType === 'inspection' ? data.productName : ''; // H: 제품명
-  rowData[8] = data.serviceType === 'inspection' ? data.quantity : '';    // I: 생산수량
-  rowData[9] = data.serviceType === 'inspection' ? data.inspectionTypeKr : ''; // J: 검품 옵션
-  rowData[10] = data.factoryName || '';                   // K: 공장명
-  rowData[11] = data.factoryContact || '';                // L: 공장 담당자명
-  rowData[12] = data.factoryPhone || '';                  // M: 공장 담당자 연락처
-  rowData[13] = data.factoryAddress || '';                // N: 공장 주소
-  rowData[14] = data.scheduleStatusKr || '';              // O: 공장 협의 여부
-  rowData[15] = data.scheduleStatus === 'agreed' ? data.startDate : '';  // P: 시작일
-  rowData[16] = data.scheduleStatus === 'agreed' ? data.endDate : '';    // Q: 종료일
-  rowData[17] = data.requirements || '';                  // R: 요청사항
-  rowData[18] = fileUrls.join('\n');                      // S: 관련 자료 업로드
-  // rowData[19] = '';                                    // T: 연락 방식 (비워둠)
-  rowData[20] = data.reservationNumber || '';             // U: 예약번호
-  // rowData[21] = '';                                    // V: 검품 확정일자
-  // rowData[22] = '';                                    // W: 보고서 링크
-  // rowData[23] = '';                                    // X: 견적 금액
-  // rowData[24] = '';                                    // Y: 결제 상태
-  // rowData[25] = '';                                    // Z: 결제일자
-  // rowData[26] = '';                                    // AA: 내부 메모
-  rowData[27] = data.requirements || '';                  // AB: 고객 추가 사항
-  // rowData[28] = '';                                    // AC: 추가 첨부파일
-  // rowData[29] = '';                                    // AD: 客户要求 (번역 대상)
-  // rowData[30] = '';                                    // AE: 客户附加内容 (번역 대상)
-  // rowData[31] = '';                                    // AF: 产品名称 (번역 대상)
-  // rowData[32] = '';                                    // AG: 日志
-  // rowData[33] = '';                                    // AH: 附件上传
-  // rowData[34] = '';                                    // AI: 중국피드백
-  rowData[35] = '접수';                                   // AJ: 진행상태
+  // 시트에서 헤더 가져오기
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  
+  // 헤더 이름과 인덱스 매핑 생성
+  const headerMap = {};
+  headers.forEach((header, index) => {
+    headerMap[header] = index;
+  });
+  
+  Logger.log('헤더 매핑:', JSON.stringify(headerMap));
+  
+  // 빈 배열 생성 (시트의 열 개수만큼)
+  const rowData = new Array(headers.length).fill('');
+  
+  // 헤더 이름을 기준으로 데이터 매핑
+  if (headerMap['타임스탬프'] !== undefined) rowData[headerMap['타임스탬프']] = koreanTime;
+  if (headerMap['회사명'] !== undefined) rowData[headerMap['회사명']] = data.companyName || '';
+  if (headerMap['중국거래시 사용 회사명'] !== undefined) rowData[headerMap['중국거래시 사용 회사명']] = data.companyNameCn || '';
+  if (headerMap['담당자명'] !== undefined) rowData[headerMap['담당자명']] = data.contactName || '';
+  if (headerMap['담당자 연락처'] !== undefined) rowData[headerMap['담당자 연락처']] = data.contactPhone || '';
+  if (headerMap['담당자 이메일'] !== undefined) rowData[headerMap['담당자 이메일']] = data.contactEmail || '';
+  if (headerMap['신청서비스'] !== undefined) rowData[headerMap['신청서비스']] = data.serviceTypeKr || '';
+  
+  // 검품 서비스인 경우에만 입력되는 필드들
+  if (data.serviceType === 'inspection') {
+    if (headerMap['제품명'] !== undefined) rowData[headerMap['제품명']] = data.productName || '';
+    if (headerMap['생산수량'] !== undefined) rowData[headerMap['생산수량']] = data.quantity || '';
+    if (headerMap['검품 옵션'] !== undefined) rowData[headerMap['검품 옵션']] = data.inspectionTypeKr || '';
+  }
+  
+  if (headerMap['공장명'] !== undefined) rowData[headerMap['공장명']] = data.factoryName || '';
+  if (headerMap['공장 담당자명'] !== undefined) rowData[headerMap['공장 담당자명']] = data.factoryContact || '';
+  if (headerMap['공장 담당자 연락처'] !== undefined) rowData[headerMap['공장 담당자 연락처']] = data.factoryPhone || '';
+  if (headerMap['공장 주소'] !== undefined) rowData[headerMap['공장 주소']] = data.factoryAddress || '';
+  if (headerMap['공장 협의 여부'] !== undefined) rowData[headerMap['공장 협의 여부']] = data.scheduleStatusKr || '';
+  
+  // 일정 협의 완료인 경우에만 입력되는 필드들
+  if (data.scheduleStatus === 'agreed' || (data.startDate && data.endDate)) {
+    if (headerMap['시작일'] !== undefined) rowData[headerMap['시작일']] = data.startDate || '';
+    if (headerMap['종료일'] !== undefined) rowData[headerMap['종료일']] = data.endDate || '';
+  }
+  
+  if (headerMap['요청사항'] !== undefined) rowData[headerMap['요청사항']] = data.requirements || '';
+  if (headerMap['관련 자료 업로드'] !== undefined) rowData[headerMap['관련 자료 업로드']] = fileUrls.join('\n');
+  if (headerMap['예약번호'] !== undefined) rowData[headerMap['예약번호']] = data.reservationNumber || '';
+  if (headerMap['고객 추가 사항'] !== undefined) rowData[headerMap['고객 추가 사항']] = data.requirements || '';
+  if (headerMap['진행상태'] !== undefined) rowData[headerMap['진행상태']] = '접수';
+  
+  // 디버깅용 로그
+  Logger.log('=== 생성된 행 데이터 상세 ===');
+  Logger.log(`배열 길이: ${rowData.length}`);
+  
+  // 주요 필드 로그
+  const importantFields = ['타임스탬프', '회사명', '중국거래시 사용 회사명', '제품명', '생산수량', '검품 옵션', '예약번호', '진행상태'];
+  importantFields.forEach(field => {
+    if (headerMap[field] !== undefined) {
+      Logger.log(`${field} [${headerMap[field]}]: "${rowData[headerMap[field]]}"`);
+    }
+  });
 
   return rowData;
 }
@@ -259,6 +305,7 @@ function testWebhook() {
   // 테스트 데이터 생성
   const testData = {
     companyName: '테스트 회사',
+    companyNameCn: '测试公司',  // 중국거래시 사용 회사명 추가
     contactName: '김철수',
     contactPhone: '010-1234-5678',
     contactEmail: 'test@example.com',
@@ -308,6 +355,18 @@ function testWebhook() {
   const lastRowData = sheet.getRange(lastRow, 1, 1, sheet.getLastColumn()).getValues()[0];
   
   Logger.log('추가된 행 데이터:', lastRowData);
+  Logger.log('C열 (중국거래시 사용 회사명) 값:', lastRowData[2]);
+  
+  // 각 열의 값 확인
+  Logger.log('=== 추가된 데이터 확인 ===');
+  Logger.log(`A열 타임스탬프: "${lastRowData[0]}"`);
+  Logger.log(`B열 회사명: "${lastRowData[1]}"`);
+  Logger.log(`C열 중국거래시 사용 회사명: "${lastRowData[2]}"`);
+  Logger.log(`H열 제품명: "${lastRowData[7]}"`);
+  Logger.log(`I열 생산수량: "${lastRowData[8]}"`);
+  Logger.log(`J열 검품 옵션: "${lastRowData[9]}"`);
+  Logger.log(`U열 예약번호: "${lastRowData[20]}"`);
+  Logger.log(`AJ열 진행상태: "${lastRowData[35]}"`);
   
   return response;
 }
