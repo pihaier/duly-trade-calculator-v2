@@ -1,7 +1,7 @@
 // 중국 출장검품 서비스 신청서 JavaScript
 
-// Google Apps Script URL 설정
-const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWYFhU5rklJsuNTrfZ6g9tKlrTX_3EuOh4IQUHSn2R1_bGcwePPeNaSNCiXKnKlEDDHA/exec';
+// Google Apps Script URL (배포 후 실제 URL로 교체 필요)
+const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQIkak1ZssnHU3FuC9vWnBAgVXzGiEkV3kZNQ_5-gfmMceRFZ6YAOzIk-wjfySmLiy6A/exec';
 
 // 전역 변수
 let selectedFiles = [];
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     setupEventListeners();
     loadSavedData();
-    lucide.replace();
+    lucide.createIcons();
 });
 
 // 폼 초기화
@@ -190,7 +190,7 @@ function handleFiles(files) {
             </button>
         `;
         fileList.appendChild(fileItem);
-        lucide.replace();
+        lucide.createIcons();
     });
 }
 
@@ -220,7 +220,7 @@ function updateFileList() {
         `;
         fileList.appendChild(fileItem);
     });
-    lucide.replace();
+    lucide.createIcons();
 }
 
 // 파일 크기 포맷
@@ -309,7 +309,7 @@ async function handleFormSubmit(e) {
         if (response.success) {
             // 성공 처리
             localStorage.removeItem('applicationFormData');
-            showSuccessModal(response.reservationCode);
+            showSuccessModal();
         } else {
             throw new Error(response.message || '제출 실패');
         }
@@ -380,67 +380,35 @@ async function convertFilesToBase64() {
 
 // Google Sheets로 데이터 전송
 async function submitToGoogleSheets(data) {
-    console.log('Google Apps Script로 전송할 데이터:', data);
-    console.log('전송 URL:', GOOGLE_APPS_SCRIPT_URL);
+    // 실제 구현 시 Google Apps Script URL로 전송
+    // 현재는 시뮬레이션
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            console.log('제출 데이터:', data);
+            resolve({ success: true });
+        }, 2000);
+    });
     
-    try {
-        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors', // CORS 모드로 변경하여 응답 읽기 시도
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        
-        console.log('전송 완료, 응답 상태:', response.status);
-        
-        try {
-            // 응답 텍스트 읽기 시도
-            const responseText = await response.text();
-            console.log('응답 텍스트:', responseText);
-            
-            // JSON 파싱 시도
-            const result = JSON.parse(responseText);
-            console.log('파싱된 응답:', result);
-            
-            return result;
-        } catch (parseError) {
-            console.log('응답 파싱 실패, 성공으로 간주:', parseError);
-            // 파싱 실패해도 HTTP 상태가 성공이면 성공으로 처리
-            return { 
-                success: response.ok, 
-                message: response.ok ? '신청서가 성공적으로 제출되었습니다.' : '전송 중 오류가 발생했습니다.' 
-            };
-        }
-    } catch (error) {
-        console.error('Google Apps Script 전송 오류:', error);
-        return { success: false, message: error.message };
-    }
+    /* 실제 구현 코드:
+    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    });
+    
+    return { success: true };
+    */
 }
 
 // 성공 모달 표시
-function showSuccessModal(reservationCode) {
+function showSuccessModal() {
     const successModal = document.getElementById('successModal');
     successModal.classList.remove('hidden');
     successModal.classList.add('flex');
-    
-    // 예약번호 표시
-    if (reservationCode) {
-        document.getElementById('reservationCode').textContent = reservationCode;
-    } else {
-        document.getElementById('reservationCode').textContent = '생성 중...';
-    }
-}
-
-// 성공 모달 닫기
-function closeSuccessModal() {
-    const successModal = document.getElementById('successModal');
-    successModal.classList.add('hidden');
-    successModal.classList.remove('flex');
-    
-    // 홈페이지로 이동
-    window.location.href = '/';
+    lucide.createIcons();
 }
 
 // 전역 함수로 파일 제거 (인라인 onclick용)
