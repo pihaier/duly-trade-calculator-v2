@@ -294,7 +294,6 @@ const debounce = (func, wait) => {
 
 // Configuration
 const config = {
-    googleFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSddIosYdxt42JjxDWBlG8U2ZHomsKp6U4ntii9qQl8YiGS-hA/viewform?usp=dialog",
     tel: "031-699-8781",
     email: "duly@duly.co.kr",
     report: {
