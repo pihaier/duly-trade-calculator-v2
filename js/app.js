@@ -563,7 +563,7 @@ function renderServices() {
                 </div>
                 <h3 class="text-lg sm:text-xl md:text-3xl font-bold mb-3 md:mb-4 text-white">${service.title}</h3>
                 <p class="text-sm md:text-base text-gray-300 mb-4 md:mb-6">${service.description}</p>
-                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="opacity-100 transition-opacity">
                     <span class="text-yellow-400 font-bold text-sm md:text-lg">자세히 보기 →</span>
                 </div>
             </div>
