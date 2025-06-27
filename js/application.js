@@ -380,27 +380,22 @@ async function convertFilesToBase64() {
 
 // Google Sheets로 데이터 전송
 async function submitToGoogleSheets(data) {
-    // 실제 구현 시 Google Apps Script URL로 전송
-    // 현재는 시뮬레이션
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            console.log('제출 데이터:', data);
-            resolve({ success: true });
-        }, 2000);
-    });
-    
-    /* 실제 구현 코드:
-    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    });
-    
-    return { success: true };
-    */
+    try {
+        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        // no-cors 모드에서는 응답을 읽을 수 없으므로 성공으로 간주
+        return { success: true };
+    } catch (error) {
+        console.error('Google Apps Script 전송 오류:', error);
+        return { success: false, message: error.message };
+    }
 }
 
 // 성공 모달 표시
