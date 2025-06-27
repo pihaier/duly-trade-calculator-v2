@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>신청서 테스트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-2xl font-bold mb-6">Google Apps Script 연결 테스트</h1>
+        
+        <div class="space-y-4">
+            <button id="testBtn" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+                테스트 데이터 전송
+            </button>
+            
+            <div id="result" class="hidden mt-4 p-4 rounded-lg"></div>
+            
+            <div id="loading" class="hidden">
+                <div class="flex items-center">
+                    <div class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mr-3"></div>
+                    <span>전송 중...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 p-4 bg-gray-100 rounded-lg">
+            <h2 class="font-bold mb-2">테스트 데이터:</h2>
+            <pre id="testData" class="text-sm overflow-x-auto"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Google Apps Script URL
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQIkak1ZssnHU3FuC9vWnBAgVXzGiEkV3kZNQ_5-gfmMceRFZ6YAOzIk-wjfySmLiy6A/exec';
+        
+        // 예약번호 생성 함수 (중복 방지 버전)
+        function generateReservationNumber() {
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            
+            // 시간 정보 추가 (시분초)
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            
+            // 추가 랜덤 번호 (2자리)
+            const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+            
+            // 형식: DL + 연월일 + 시분초 + 랜덤2자리
+            return `DL${year}${month}${day}${hours}${minutes}${seconds}${random}`;
+        }
+        
+        // 테스트 데이터
+        const testData = {
+            companyName: '테스트 회사',
+            contactName: '김철수',
+            contactPhone: '010-1234-5678',
+            contactEmail: 'test@example.com',
+            serviceType: 'inspection',
+            serviceTypeKr: '품질 검품',
+            productName: '테스트 제품',
+            quantity: '1000개',
+            inspectionType: 'standard',
+            inspectionTypeKr: '표준 검품 (AQL 4.0)',
+            factoryName: '테스트 공장',
+            factoryAddress: '중국 광둥성 선전시',
+            factoryContact: '왕메이',
+            factoryPhone: '+86-123-4567-8900',
+            scheduleStatus: 'agreed',
+            scheduleStatusKr: '공장과 일정 협의 완료',
+            startDate: '2025-01-15',
+            endDate: '2025-01-17',
+            requirements: '특별 요구사항 테스트',
+            reservationNumber: generateReservationNumber(),
+            files: [],
+            timestamp: new Date().toISOString()
+        };
+        
+        // 테스트 데이터 표시
+        document.getElementById('testData').textContent = JSON.stringify(testData, null, 2);
+        
+        // 테스트 버튼 클릭 이벤트
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            const testBtn = document.getElementById('testBtn');
+            
+            // UI 상태 변경
+            testBtn.disabled = true;
+            loadingDiv.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            
+            try {
+                console.log('전송 데이터:', testData);
+                
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                // no-cors 모드에서는 응답을 읽을 수 없음
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-green-100 text-green-800';
+                resultDiv.innerHTML = `
+                    <strong>✅ 전송 완료!</strong><br>
+                    <span class="text-sm">no-cors 모드로 전송되었습니다. Google Sheets를 확인해주세요.</span><br>
+                    <a href="https://docs.google.com/spreadsheets/d/1e1klgcfhaFCeSTxukcZTi41a8BoklbH7MlB0fKse53w" target="_blank" class="text-blue-600 underline text-sm">시트 열기</a>
+                `;
+                resultDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('전송 오류:', error);
+                resultDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-800';
+                resultDiv.innerHTML = `<strong>❌ 오류 발생:</strong> ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            } finally {
+                testBtn.disabled = false;
+                loadingDiv.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html> 

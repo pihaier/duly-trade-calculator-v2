@@ -8,6 +8,25 @@ let selectedFiles = [];
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 1024 * 1024 * 1024; // 1GB
 
+// 예약번호 생성 함수 (중복 방지 버전)
+function generateReservationNumber() {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    
+    // 시간 정보 추가 (시분초)
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    
+    // 추가 랜덤 번호 (2자리)
+    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+    
+    // 형식: DL + 연월일 + 시분초 + 랜덤2자리
+    return `DL${year}${month}${day}${hours}${minutes}${seconds}${random}`;
+}
+
 // DOM 로드 완료 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
@@ -315,7 +334,7 @@ async function handleFormSubmit(e) {
         if (response.success) {
             // 성공 처리
             localStorage.removeItem('applicationFormData');
-            showSuccessModal();
+            showSuccessModal(formData.reservationNumber);
         } else {
             throw new Error(response.message || '제출 실패');
         }
@@ -338,6 +357,9 @@ function collectFormData(form) {
     for (let [key, value] of formData.entries()) {
         data[key] = value;
     }
+    
+    // 예약번호 생성
+    data.reservationNumber = generateReservationNumber();
     
     // 서비스 유형에 따른 한글 변환
     const serviceTypeMap = {
@@ -386,34 +408,65 @@ async function convertFilesToBase64() {
 
 // Google Sheets로 데이터 전송
 async function submitToGoogleSheets(data) {
-    // 실제 구현 시 Google Apps Script URL로 전송
-    // 현재는 시뮬레이션
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            console.log('제출 데이터:', data);
-            resolve({ success: true });
-        }, 2000);
-    });
-    
-    /* 실제 구현 코드:
-    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    });
-    
-    return { success: true };
-    */
+    try {
+        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // CORS 정책 우회
+            headers: {
+                'Content-Type': 'text/plain', // no-cors 모드에서는 text/plain만 허용
+            },
+            body: JSON.stringify(data)
+        });
+        
+        // no-cors 모드에서는 응답을 읽을 수 없으므로 성공으로 간주
+        return { success: true };
+    } catch (error) {
+        console.error('전송 오류:', error);
+        throw error;
+    }
 }
 
 // 성공 모달 표시
-function showSuccessModal() {
-    const successModal = document.getElementById('successModal');
-    successModal.classList.remove('hidden');
-    successModal.classList.add('flex');
+function showSuccessModal(reservationNumber) {
+    // 기존 모달이 있다면 제거
+    const existingModal = document.getElementById('successModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // 새로운 모달 생성
+    const modalHTML = `
+        <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                        <i data-lucide="check" class="h-8 w-8 text-green-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">신청이 완료되었습니다!</h3>
+                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                        <p class="text-sm text-gray-600 mb-2">예약번호</p>
+                        <p class="text-2xl font-bold text-blue-600">${reservationNumber}</p>
+                    </div>
+                    <p class="text-gray-600 mb-6">
+                        신청서가 성공적으로 제출되었습니다.<br>
+                        예약번호를 메모해 두시면 진행 상황 확인에 유용합니다.<br>
+                        빠른 시일 내에 담당자가 연락드리겠습니다.
+                    </p>
+                    <div class="flex gap-3 justify-center">
+                        <button onclick="window.location.href='index.html'" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            메인으로 돌아가기
+                        </button>
+                        <button onclick="window.location.reload()" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                            새 신청서 작성
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
     if (window.lucide) {
         lucide.createIcons();
     }
