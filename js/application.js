@@ -1,7 +1,7 @@
 // 중국 출장검품 서비스 신청서 JavaScript
 
-// Google Apps Script URL (배포 후 실제 URL로 교체 필요)
-const GOOGLE_APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+// Google Apps Script URL 설정
+const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWYFhU5rklJsuNTrfZ6g9tKlrTX_3EuOh4IQUHSn2R1_bGcwePPeNaSNCiXKnKlEDDHA/exec';
 
 // 전역 변수
 let selectedFiles = [];
