@@ -61,6 +61,44 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* 필수 필드 스타일 */
+        .required-field::after {
+            content: " *";
+            color: #ef4444;
+            font-weight: bold;
+        }
+        
+        input:required:invalid,
+        textarea:required:invalid,
+        select:required:invalid {
+            border-color: #fca5a5;
+        }
+        
+        input:required:valid,
+        textarea:required:valid,
+        select:required:valid {
+            border-color: #10b981;
+        }
+        
+        /* 필수 필드 포커스 스타일 */
+        input:required:focus,
+        textarea:required:focus,
+        select:required:focus {
+            outline: none;
+            ring: 2;
+            ring-color: #667eea;
+        }
+        
+        /* 필수 필드 표시 애니메이션 */
+        @keyframes pulse-red {
+            0%, 100% { border-color: #ef4444; }
+            50% { border-color: #fca5a5; }
+        }
+        
+        .invalid-field {
+            animation: pulse-red 1s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">

@@ -82,6 +82,88 @@ function setupEventListeners() {
         input.addEventListener('input', saveFormData);
         input.addEventListener('change', saveFormData);
     });
+    
+    // 실시간 유효성 검사
+    setupRealtimeValidation();
+}
+
+// 실시간 유효성 검사 설정
+function setupRealtimeValidation() {
+    const form = document.getElementById('applicationForm');
+    
+    // 이메일 필드
+    const emailInput = form.querySelector('input[name="contactEmail"]');
+    if (emailInput) {
+        emailInput.addEventListener('blur', function() {
+            if (this.value && !isValidEmail(this.value)) {
+                showFieldError(this, '올바른 이메일 형식을 입력해 주세요');
+            } else {
+                clearFieldError(this);
+            }
+        });
+    }
+    
+    // 전화번호 필드
+    const phoneInput = form.querySelector('input[name="contactPhone"]');
+    if (phoneInput) {
+        phoneInput.addEventListener('blur', function() {
+            if (this.value && !isValidPhone(this.value)) {
+                showFieldError(this, '올바른 전화번호 형식을 입력해 주세요');
+            } else {
+                clearFieldError(this);
+            }
+        });
+    }
+    
+    // 필수 텍스트 필드
+    const requiredInputs = form.querySelectorAll('input[required], textarea[required]');
+    requiredInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                showFieldError(this, '필수 입력 항목입니다');
+            } else {
+                clearFieldError(this);
+            }
+        });
+        
+        // 입력 중일 때는 에러 제거
+        input.addEventListener('input', function() {
+            if (this.value.trim()) {
+                clearFieldError(this);
+            }
+        });
+    });
+}
+
+// 필드 에러 표시
+function showFieldError(field, message) {
+    // 기존 에러 메시지 제거
+    clearFieldError(field);
+    
+    // 필드에 에러 스타일 추가
+    field.classList.add('border-red-500', 'focus:ring-red-500');
+    
+    // 에러 메시지 생성
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error text-xs text-red-600 mt-1 flex items-center';
+    errorDiv.innerHTML = `<i data-lucide="alert-circle" class="w-3 h-3 mr-1"></i>${message}`;
+    
+    // 필드 다음에 에러 메시지 추가
+    field.parentNode.appendChild(errorDiv);
+    
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+// 필드 에러 제거
+function clearFieldError(field) {
+    field.classList.remove('border-red-500', 'focus:ring-red-500');
+    
+    const errorDiv = field.parentNode.querySelector('.field-error');
+    if (errorDiv) {
+        errorDiv.remove();
+    }
 }
 
 // 서비스 유형 변경 처리
@@ -306,9 +388,10 @@ async function handleFormSubmit(e) {
     const submitBtn = document.getElementById('submitBtn');
     const loadingModal = document.getElementById('loadingModal');
     
-    // 유효성 검사
-    if (!form.checkValidity()) {
-        form.reportValidity();
+    // 커스텀 유효성 검사
+    const validationResult = validateForm(form);
+    if (!validationResult.isValid) {
+        showValidationModal(validationResult.errors);
         return;
     }
     
@@ -340,11 +423,235 @@ async function handleFormSubmit(e) {
         }
     } catch (error) {
         console.error('제출 오류:', error);
-        alert('신청서 제출 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        showErrorModal('신청서 제출 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
     } finally {
         submitBtn.disabled = false;
         loadingModal.classList.add('hidden');
         loadingModal.classList.remove('flex');
+    }
+}
+
+// 폼 유효성 검사
+function validateForm(form) {
+    const errors = [];
+    const formData = new FormData(form);
+    
+    // 필수 필드 검사
+    const requiredFields = [
+        { name: 'companyName', label: '기업명' },
+        { name: 'companyNameCn', label: '중국 거래 시 사용 기업명' },
+        { name: 'contactName', label: '담당자 성명' },
+        { name: 'contactPhone', label: '담당자 연락처' },
+        { name: 'contactEmail', label: '담당자 이메일' },
+        { name: 'serviceType', label: '서비스 유형' },
+        { name: 'factoryName', label: '공장명' },
+        { name: 'factoryContact', label: '공장 담당자명' },
+        { name: 'factoryPhone', label: '공장 담당자 연락처' },
+        { name: 'factoryAddress', label: '공장 주소' },
+        { name: 'scheduleStatus', label: '검품 일정 협의 상태' },
+        { name: 'privacy', label: '개인정보 수집 동의' }
+    ];
+    
+    // 서비스 유형이 검품인 경우 추가 필수 필드
+    if (formData.get('serviceType') === 'inspection') {
+        requiredFields.push(
+            { name: 'productName', label: '제품명' },
+            { name: 'quantity', label: '생산 수량' },
+            { name: 'inspectionType', label: '검품 방식' }
+        );
+    }
+    
+    // 일정 협의 완료인 경우 추가 필수 필드
+    if (formData.get('scheduleStatus') === 'agreed') {
+        requiredFields.push(
+            { name: 'startDate', label: '검품 시작일' },
+            { name: 'endDate', label: '검품 종료일' }
+        );
+    }
+    
+    // 각 필수 필드 검사
+    requiredFields.forEach(field => {
+        const value = formData.get(field.name);
+        if (!value || value.trim() === '') {
+            errors.push(field.label);
+        }
+    });
+    
+    // 이메일 형식 검사
+    const email = formData.get('contactEmail');
+    if (email && !isValidEmail(email)) {
+        errors.push('올바른 이메일 형식이 아닙니다');
+    }
+    
+    // 전화번호 형식 검사
+    const phone = formData.get('contactPhone');
+    if (phone && !isValidPhone(phone)) {
+        errors.push('올바른 전화번호 형식이 아닙니다');
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors: errors
+    };
+}
+
+// 이메일 유효성 검사
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// 전화번호 유효성 검사
+function isValidPhone(phone) {
+    const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+    return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
+}
+
+// 유효성 검사 실패 모달 표시
+function showValidationModal(errors) {
+    // 기존 모달이 있다면 제거
+    const existingModal = document.getElementById('validationModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // 첫 번째 오류 필드로 포커스 이동
+    highlightInvalidFields();
+    
+    // 새로운 모달 생성
+    const modalHTML = `
+        <div id="validationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 animate-bounce-in">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                        <i data-lucide="alert-circle" class="h-8 w-8 text-red-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">필수 입력 항목을 확인해 주세요</h3>
+                    <div class="bg-red-50 rounded-lg p-4 mb-6">
+                        <p class="text-sm text-gray-700 mb-3">다음 항목을 입력해 주세요:</p>
+                        <ul class="text-left text-sm text-red-600 space-y-1">
+                            ${errors.map(error => `<li class="flex items-center"><i data-lucide="x" class="w-4 h-4 mr-2"></i>${error}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <button onclick="closeValidationModal()" 
+                            class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                        확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+    
+    // 모달 애니메이션을 위한 스타일 추가
+    if (!document.getElementById('modalAnimationStyle')) {
+        const style = document.createElement('style');
+        style.id = 'modalAnimationStyle';
+        style.textContent = `
+            @keyframes bounce-in {
+                0% { transform: scale(0.9); opacity: 0; }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            .animate-bounce-in {
+                animation: bounce-in 0.3s ease-out;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// 유효성 검사 모달 닫기
+function closeValidationModal() {
+    const modal = document.getElementById('validationModal');
+    if (modal) {
+        modal.remove();
+    }
+    // 첫 번째 유효하지 않은 필드로 포커스 이동
+    const firstInvalidField = document.querySelector('.invalid-field');
+    if (firstInvalidField) {
+        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstInvalidField.focus();
+    }
+}
+
+// 유효하지 않은 필드 하이라이트
+function highlightInvalidFields() {
+    // 모든 필드의 invalid-field 클래스 제거
+    document.querySelectorAll('.invalid-field').forEach(field => {
+        field.classList.remove('invalid-field');
+    });
+    
+    // 필수 필드 확인 및 하이라이트
+    const form = document.getElementById('applicationForm');
+    const formData = new FormData(form);
+    
+    // 기본 필수 필드
+    const requiredFields = ['companyName', 'companyNameCn', 'contactName', 'contactPhone', 
+                          'contactEmail', 'serviceType', 'factoryName', 'factoryContact', 
+                          'factoryPhone', 'factoryAddress', 'scheduleStatus'];
+    
+    // 서비스 유형이 검품인 경우
+    if (formData.get('serviceType') === 'inspection') {
+        requiredFields.push('productName', 'quantity', 'inspectionType');
+    }
+    
+    // 일정 협의 완료인 경우
+    if (formData.get('scheduleStatus') === 'agreed') {
+        requiredFields.push('startDate', 'endDate');
+    }
+    
+    // 각 필드 검사
+    requiredFields.forEach(fieldName => {
+        const field = form.querySelector(`[name="${fieldName}"]`);
+        if (field && (!formData.get(fieldName) || formData.get(fieldName).trim() === '')) {
+            field.classList.add('invalid-field');
+        }
+    });
+    
+    // 개인정보 동의 체크박스
+    const privacyCheckbox = form.querySelector('[name="privacy"]');
+    if (privacyCheckbox && !privacyCheckbox.checked) {
+        privacyCheckbox.parentElement.classList.add('invalid-field');
+    }
+}
+
+// 오류 모달 표시
+function showErrorModal(message) {
+    // 기존 모달이 있다면 제거
+    const existingModal = document.getElementById('errorModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // 새로운 모달 생성
+    const modalHTML = `
+        <div id="errorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 animate-bounce-in">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                        <i data-lucide="x-circle" class="h-8 w-8 text-red-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">오류가 발생했습니다</h3>
+                    <p class="text-gray-600 mb-6">${message}</p>
+                    <button onclick="document.getElementById('errorModal').remove()" 
+                            class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium">
+                        확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    if (window.lucide) {
+        lucide.createIcons();
     }
 }
 
@@ -473,4 +780,7 @@ function showSuccessModal(reservationNumber) {
 }
 
 // 전역 함수로 파일 제거 (인라인 onclick용)
-window.removeFile = removeFile; 
+window.removeFile = removeFile;
+
+// 전역 함수로 추가
+window.closeValidationModal = closeValidationModal; 
