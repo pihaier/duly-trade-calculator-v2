@@ -17,23 +17,17 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html",
+      "destination": "/calculator.html",
       "has": [
         {
           "type": "host",
-          "value": "(?!calculator\\.)"
+          "value": "calculator\\.duly\\.co\\.kr"
         }
       ]
     },
     {
       "source": "/(.*)",
-      "destination": "/calculator.html",
-      "has": [
-        {
-          "type": "host",
-          "value": "calculator\\."
-        }
-      ]
+      "destination": "/index.html"
     }
   ],
   "headers": [
