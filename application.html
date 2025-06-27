@@ -19,479 +19,606 @@
     <script src="/lib/lucide.js"></script>
     
     <style>
-        /* 폼 애니메이션 */
-        .form-section {
-            animation: fadeIn 0.3s ease-in-out;
+        /* 기본 설정 - 폰트 즉시 적용 */
+        * {
+            font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         
+        body {
+            font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-display: swap;
+        }
+
+        /* 그라데이션 텍스트 */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 스크롤바 스타일링 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .form-section {
+            @apply bg-gray-50 rounded-lg p-6 border border-gray-200;
+        }
+        
+        .form-label {
+            @apply block text-sm font-medium text-gray-700 mb-1;
+        }
+        
+        .form-input {
+            @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all;
+        }
+        
+        .form-textarea {
+            @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none;
+        }
+        
+        .service-card {
+            @apply relative p-6 bg-white rounded-xl border-2 border-gray-200 hover:border-purple-500 transition-all cursor-pointer;
+        }
+        
+        .service-card.selected {
+            @apply border-purple-500 bg-purple-50;
+        }
+        
+        .service-card .check-icon {
+            @apply absolute top-4 right-4 w-6 h-6 bg-purple-500 text-white rounded-full hidden items-center justify-center;
+        }
+        
+        .service-card.selected .check-icon {
+            @apply flex;
+        }
+        
+        /* 실시간 유효성 검사 스타일 */
+        .form-input.error, .form-textarea.error {
+            @apply border-red-500 focus:ring-red-500;
+        }
+        
+        .form-input.success, .form-textarea.success {
+            @apply border-green-500;
+        }
+        
+        .error-message {
+            @apply text-xs text-red-600 mt-1 flex items-center gap-1;
+        }
+        
+        .success-message {
+            @apply text-xs text-green-600 mt-1 flex items-center gap-1;
+        }
+        
+        /* 필수 필드 표시 */
+        .required-mark {
+            @apply text-red-500 ml-1;
+        }
+        
+        /* 애니메이션 */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* 모달 스타일 */
+        .modal-overlay {
+            @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4;
+        }
+        
+        .modal-content {
+            @apply bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto;
+        }
+        
         /* 파일 업로드 영역 */
-        .file-drop-zone {
-            border: 2px dashed #cbd5e1;
-            transition: all 0.3s ease;
+        .file-upload-area {
+            @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-500 transition-colors cursor-pointer;
         }
         
-        .file-drop-zone.dragover {
-            border-color: #667eea;
-            background-color: #f7fafc;
-        }
-        
-        /* 커스텀 라디오 버튼 */
-        input[type="radio"]:checked + label {
-            background-color: #667eea;
-            color: white;
-            border-color: #667eea;
+        .file-upload-area.dragover {
+            @apply border-purple-500 bg-purple-50;
         }
         
         /* 로딩 스피너 */
         .spinner {
-            border: 3px solid #f3f4f6;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* 필수 필드 스타일 */
-        .required-field::after {
-            content: " *";
-            color: #ef4444;
-            font-weight: bold;
-        }
-        
-        input:required:invalid,
-        textarea:required:invalid,
-        select:required:invalid {
-            border-color: #fca5a5;
-        }
-        
-        input:required:valid,
-        textarea:required:valid,
-        select:required:valid {
-            border-color: #10b981;
-        }
-        
-        /* 필수 필드 포커스 스타일 */
-        input:required:focus,
-        textarea:required:focus,
-        select:required:focus {
-            outline: none;
-            ring: 2;
-            ring-color: #667eea;
-        }
-        
-        /* 필수 필드 표시 애니메이션 */
-        @keyframes pulse-red {
-            0%, 100% { border-color: #ef4444; }
-            50% { border-color: #fca5a5; }
-        }
-        
-        .invalid-field {
-            animation: pulse-red 1s ease-in-out infinite;
+            @apply inline-block w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin;
         }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-    <!-- 헤더 -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
+    <!-- 헤더 네비게이션 -->
+    <nav class="fixed top-0 w-full z-50 transition-all duration-300 bg-white shadow-lg border-b border-gray-300">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16 md:h-20">
                 <a href="/" class="flex items-center space-x-3">
-                    <img src="/images/KakaoTalk_20250626_155612887.jpg" alt="두리무역 로고" class="h-10 w-auto">
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900">중국 출장검품 서비스 신청서</h1>
-                        <p class="text-sm text-gray-600">China Inspection Service Application</p>
-                    </div>
+                    <img src="/images/KakaoTalk_20250626_155612887.jpg?v=2.4" alt="두리무역 로고" class="h-8 md:h-10 w-auto object-contain" style="max-height: 40px; display: block; border: 1px solid #ddd;">
+                    <span class="text-xl md:text-2xl font-black gradient-text">두리무역</span>
                 </a>
-                <div class="text-sm text-gray-500">
-                    <i data-lucide="phone" class="w-4 h-4 inline mr-1"></i>
-                    문의: 031-699-8781
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">홈</a>
+                    <a href="/#detailed-services" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">서비스</a>
+                    <a href="/#why-choose-us" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">왜 두리무역?</a>
+                    <a href="/#problem-solution" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">문제 해결</a>
+                    <a href="/#process" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">프로세스</a>
+                    <a href="/#faq-section" class="nav-link text-gray-700 hover:text-purple-600 font-medium transition-all hover:scale-105">FAQ</a>
+                    <a href="/calculator" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-xl transition-all hover:scale-105 hover:shadow-purple-500/25">
+                        무역 비용 계산기
+                    </a>
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" aria-label="메뉴 열기">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-xl rounded-b-2xl border-t border-gray-200">
+                <a href="/" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">홈</a>
+                <a href="/#detailed-services" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">서비스</a>
+                <a href="/#why-choose-us" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">왜 두리무역?</a>
+                <a href="/#problem-solution" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">문제 해결</a>
+                <a href="/#process" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">프로세스</a>
+                <a href="/#faq-section" class="block px-6 py-4 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors nav-link min-h-[44px] flex items-center">FAQ</a>
+                <a href="/calculator" class="block mx-6 my-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full font-bold text-center hover:shadow-lg transition-all">
+                    무역 비용 계산기
+                </a>
             </div>
         </div>
-    </header>
+    </nav>
 
     <!-- 메인 컨텐츠 -->
-    <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <main class="pt-24 md:pt-28 pb-8">
         <!-- 프로세스 안내 -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-            <div class="flex items-center space-x-2 text-sm text-blue-800">
-                <i data-lucide="info" class="w-5 h-5"></i>
-                <span class="font-medium">서비스 진행 프로세스:</span>
-            </div>
-            <div class="mt-2 text-sm text-blue-700 flex flex-wrap gap-2">
-                <span class="bg-blue-100 px-2 py-1 rounded">📋 신청서 제출</span>
-                <span>→</span>
-                <span class="bg-blue-100 px-2 py-1 rounded">🗓️ 일정 조율</span>
-                <span>→</span>
-                <span class="bg-blue-100 px-2 py-1 rounded">📄 견적서 발송</span>
-                <span>→</span>
-                <span class="bg-blue-100 px-2 py-1 rounded">💳 결제 확인</span>
-                <span>→</span>
-                <span class="bg-blue-100 px-2 py-1 rounded">📌 서비스 진행</span>
-                <span>→</span>
-                <span class="bg-blue-100 px-2 py-1 rounded">📊 결과 보고서</span>
+        <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-6">
+            <div class="container mx-auto px-4">
+                <div class="flex items-center justify-center space-x-2 text-sm md:text-base">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                    <span>서비스 진행 프로세스:</span>
+                </div>
+                <div class="flex items-center justify-center space-x-4 mt-3 flex-wrap">
+                    <span class="flex items-center">📋 신청서 제출</span>
+                    <span>→</span>
+                    <span class="flex items-center">🗓️ 일정 조율</span>
+                    <span>→</span>
+                    <span class="flex items-center">📄 견적서 발송</span>
+                    <span>→</span>
+                    <span class="flex items-center">💳 결제 확인</span>
+                    <span>→</span>
+                    <span class="flex items-center">📌 서비스 진행</span>
+                    <span>→</span>
+                    <span class="flex items-center">📊 결과 보고서</span>
+                </div>
             </div>
         </div>
 
         <!-- 신청서 폼 -->
-        <form id="applicationForm" class="bg-white rounded-xl shadow-lg p-8">
-            <!-- 1. 신청 기업 정보 -->
-            <div class="form-section mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">1</span>
-                    신청 기업 정보
-                </h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            기업명 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="companyName" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="주식회사 두리무역">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            중국 거래 시 사용 기업명 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="companyNameCn" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="韩国斗利贸易有限公司">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            담당자 성명 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="contactName" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="홍길동">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            담당자 연락처 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="tel" name="contactPhone" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="010-1234-5678">
-                    </div>
-                    
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            담당자 이메일 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="email" name="contactEmail" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="example@company.com">
-                    </div>
+        <div class="container mx-auto px-4 py-12">
+            <!-- 페이지 헤더 추가 -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">중국 출장검품 서비스 신청서</h1>
+                <p class="text-gray-600">China Inspection Service Application</p>
+                <div class="mt-4 text-sm text-gray-500">
+                    <i data-lucide="phone" class="w-4 h-4 inline mr-1"></i>
+                    문의: 031-699-8781
                 </div>
             </div>
 
-            <!-- 2. 신청 서비스 -->
-            <div class="form-section mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">2</span>
-                    신청 서비스
-                </h2>
-                
-                <div class="space-y-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-3">
-                        서비스 유형 선택 <span class="text-red-500">*</span>
-                    </label>
+            <form id="applicationForm" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-10">
+                <!-- 1. 신청 기업 정보 -->
+                <div class="form-section mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">1</span>
+                        신청 기업 정보
+                    </h2>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <input type="radio" name="serviceType" value="inspection" id="inspection" class="hidden" required>
-                            <label for="inspection" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all text-center">
-                                <i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2 text-purple-600"></i>
-                                <span class="font-medium">품질 검품</span>
-                                <p class="text-xs text-gray-600 mt-1">제품 품질 검사</p>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                기업명 <span class="text-red-500">*</span>
                             </label>
+                            <input type="text" name="companyName" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="주식회사 두리무역">
                         </div>
                         
                         <div>
-                            <input type="radio" name="serviceType" value="factory" id="factory" class="hidden">
-                            <label for="factory" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all text-center">
-                                <i data-lucide="building" class="w-8 h-8 mx-auto mb-2 text-purple-600"></i>
-                                <span class="font-medium">공장 실사</span>
-                                <p class="text-xs text-gray-600 mt-1">생산 시설 점검</p>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                중국 거래 시 사용 기업명 <span class="text-red-500">*</span>
                             </label>
+                            <input type="text" name="companyNameCn" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="韩国斗利贸易有限公司">
                         </div>
                         
                         <div>
-                            <input type="radio" name="serviceType" value="loading" id="loading" class="hidden">
-                            <label for="loading" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all text-center">
-                                <i data-lucide="truck" class="w-8 h-8 mx-auto mb-2 text-purple-600"></i>
-                                <span class="font-medium">적재 검사</span>
-                                <p class="text-xs text-gray-600 mt-1">선적 전 확인</p>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                담당자 성명 <span class="text-red-500">*</span>
                             </label>
+                            <input type="text" name="contactName" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="홍길동">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                담당자 연락처 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="tel" name="contactPhone" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="010-1234-5678">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                담당자 이메일 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" name="contactEmail" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="example@company.com">
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 3. 검품 상세 정보 (조건부) -->
-            <div id="inspectionDetails" class="form-section mb-8 hidden">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">3</span>
-                    검품 상세 정보
-                </h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            제품명 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="productName"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="예: 전자제품, 의류, 생활용품 등">
-                    </div>
+                <!-- 2. 신청 서비스 -->
+                <div class="form-section mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">2</span>
+                        신청 서비스
+                    </h2>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            생산 수량 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="quantity"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="예: 10,000개">
-                    </div>
-                    
-                    <div class="md:col-span-2">
+                    <div class="space-y-3">
                         <label class="block text-sm font-medium text-gray-700 mb-3">
-                            검품 방식 선택 <span class="text-red-500">*</span>
+                            서비스 유형 선택 <span class="text-red-500">*</span>
                         </label>
                         
-                        <div class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <input type="radio" name="inspectionType" value="standard" id="standard" class="hidden">
-                                <label for="standard" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
-                                    <div class="flex items-start">
-                                        <div class="flex-1">
-                                            <span class="font-medium">표준 검품 (AQL 4.0 기준)</span>
-                                            <p class="text-sm text-gray-600 mt-1">
-                                                ISO 2859-1 국제 표준에 따라 약 125~300개 샘플을 무작위 추출하여 검사합니다.
-                                            </p>
-                                        </div>
-                                    </div>
+                                <input type="radio" name="serviceType" value="inspection" id="inspection" class="hidden" required>
+                                <label for="inspection" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all text-center">
+                                    <i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2 text-purple-600"></i>
+                                    <span class="font-medium">품질 검품</span>
+                                    <p class="text-xs text-gray-600 mt-1">제품 품질 검사</p>
                                 </label>
                             </div>
                             
                             <div>
-                                <input type="radio" name="inspectionType" value="full" id="full" class="hidden">
-                                <label for="full" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
-                                    <div class="flex items-start">
-                                        <div class="flex-1">
-                                            <span class="font-medium">전수 검품</span>
-                                            <p class="text-sm text-gray-600 mt-1">
-                                                생산된 모든 제품을 개별적으로 검사합니다. 고가 제품이나 중요 제품에 권장됩니다.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. 공장 정보 -->
-            <div class="form-section mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">
-                        <span id="factoryStepNumber">3</span>
-                    </span>
-                    공장 정보
-                </h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            공장명 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="factoryName" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="예: Shenzhen ABC Electronics Co., Ltd.">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            공장 담당자명 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="factoryContact" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="예: 王经理">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            공장 담당자 연락처 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="factoryPhone" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="예: +86-138-1234-5678">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            공장 주소 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="factoryAddress" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                               placeholder="예: 深圳市龙岗区...">
-                    </div>
-                    
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">
-                            검품 일정 협의 상태 <span class="text-red-500">*</span>
-                        </label>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <input type="radio" name="scheduleStatus" value="agreed" id="agreed" class="hidden" required>
-                                <label for="agreed" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
-                                    <span class="font-medium">공장과 일정 협의 완료</span>
-                                    <p class="text-xs text-gray-600 mt-1">검품 날짜가 확정된 경우</p>
+                                <input type="radio" name="serviceType" value="factory" id="factory" class="hidden">
+                                <label for="factory" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all text-center">
+                                    <i data-lucide="building" class="w-8 h-8 mx-auto mb-2 text-purple-600"></i>
+                                    <span class="font-medium">공장 실사</span>
+                                    <p class="text-xs text-gray-600 mt-1">생산 시설 점검</p>
                                 </label>
                             </div>
                             
                             <div>
-                                <input type="radio" name="scheduleStatus" value="pending" id="pending" class="hidden">
-                                <label for="pending" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
-                                    <span class="font-medium">두리무역에서 협의 진행</span>
-                                    <p class="text-xs text-gray-600 mt-1">일정 조율이 필요한 경우</p>
+                                <input type="radio" name="serviceType" value="loading" id="loading" class="hidden">
+                                <label for="loading" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all text-center">
+                                    <i data-lucide="truck" class="w-8 h-8 mx-auto mb-2 text-purple-600"></i>
+                                    <span class="font-medium">적재 검사</span>
+                                    <p class="text-xs text-gray-600 mt-1">선적 전 확인</p>
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 5. 검품 일정 (조건부) -->
-            <div id="scheduleDetails" class="form-section mb-8 hidden">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">
-                        <span id="scheduleStepNumber">4</span>
-                    </span>
-                    검품 일정
-                </h2>
-                
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-center text-sm text-yellow-800">
-                        <i data-lucide="alert-circle" class="w-5 h-5 mr-2"></i>
-                        <span>검품 일정은 결제 확인일로부터 최소 72시간(3일) 이후로 설정해 주시기 바랍니다.</span>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            검품 시작일 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="date" name="startDate"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    </div>
+                <!-- 3. 검품 상세 정보 (조건부) -->
+                <div id="inspectionDetails" class="form-section mb-8 hidden">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                        검품 상세 정보
+                    </h2>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            검품 종료일 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="date" name="endDate"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    </div>
-                </div>
-            </div>
-
-            <!-- 6. 추가 요청사항 -->
-            <div class="form-section mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">
-                        <span id="additionalStepNumber">4</span>
-                    </span>
-                    추가 요청사항
-                </h2>
-                
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            특별 요청사항
-                        </label>
-                        <textarea name="requirements" rows="4"
-                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                  placeholder="검품 시 특별히 확인이 필요한 사항이나 요청사항을 자유롭게 기재해 주시기 바랍니다."></textarea>
-                        <p class="text-xs text-gray-500 mt-1">
-                            * 요청사항이 없을 경우, 국제 검품 기준 ISO 2859 및 ISO 9001에 의거하여 표준 검품 보고서를 작성해 드립니다.
-                        </p>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            관련 자료 업로드
-                        </label>
-                        <div id="fileDropZone" class="file-drop-zone p-8 rounded-lg text-center cursor-pointer">
-                            <i data-lucide="upload-cloud" class="w-12 h-12 mx-auto text-gray-400 mb-3"></i>
-                            <p class="text-sm text-gray-600 mb-2">
-                                파일을 드래그하여 업로드하거나 클릭하여 선택하세요
-                            </p>
-                            <p class="text-xs text-gray-500">
-                                최대 5개 파일, 파일당 최대 1GB (PDF, DOC, XLS, JPG, PNG 등)
-                            </p>
-                            <input type="file" id="fileInput" multiple class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                제품명 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="productName"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="예: 전자제품, 의류, 생활용품 등">
                         </div>
-                        <div id="fileList" class="mt-4 space-y-2"></div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                생산 수량 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="quantity"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="예: 10,000개">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                검품 방식 선택 <span class="text-red-500">*</span>
+                            </label>
+                            
+                            <div class="space-y-3">
+                                <div>
+                                    <input type="radio" name="inspectionType" value="standard" id="standard" class="hidden">
+                                    <label for="standard" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
+                                        <div class="flex items-start">
+                                            <div class="flex-1">
+                                                <span class="font-medium">표준 검품 (AQL 4.0 기준)</span>
+                                                <p class="text-sm text-gray-600 mt-1">
+                                                    ISO 2859-1 국제 표준에 따라 약 125~300개 샘플을 무작위 추출하여 검사합니다.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div>
+                                    <input type="radio" name="inspectionType" value="full" id="full" class="hidden">
+                                    <label for="full" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
+                                        <div class="flex items-start">
+                                            <div class="flex-1">
+                                                <span class="font-medium">전수 검품</span>
+                                                <p class="text-sm text-gray-600 mt-1">
+                                                    생산된 모든 제품을 개별적으로 검사합니다. 고가 제품이나 중요 제품에 권장됩니다.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- 개인정보 수집 동의 -->
-            <div class="form-section mb-8">
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <h3 class="font-medium text-gray-900 mb-3">개인정보 수집 및 이용 동의</h3>
-                    <div class="text-sm text-gray-600 space-y-2 mb-4">
-                        <p>• 수집 항목: 기업명, 담당자 정보(성명, 연락처, 이메일), 공장 정보</p>
-                        <p>• 수집 목적: 검품 서비스 제공 및 결과 보고</p>
-                        <p>• 보유 기간: 서비스 종료 후 3년</p>
+                <!-- 4. 공장 정보 -->
+                <div class="form-section mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">
+                            <span id="factoryStepNumber">3</span>
+                        </span>
+                        공장 정보
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                공장명 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="factoryName" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="예: Shenzhen ABC Electronics Co., Ltd.">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                공장 담당자명 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="factoryContact" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="예: 王经理">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                공장 담당자 연락처 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="factoryPhone" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="예: +86-138-1234-5678">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                공장 주소 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="factoryAddress" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                   placeholder="예: 深圳市龙岗区...">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                검품 일정 협의 상태 <span class="text-red-500">*</span>
+                            </label>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <input type="radio" name="scheduleStatus" value="agreed" id="agreed" class="hidden" required>
+                                    <label for="agreed" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
+                                        <span class="font-medium">공장과 일정 협의 완료</span>
+                                        <p class="text-xs text-gray-600 mt-1">검품 날짜가 확정된 경우</p>
+                                    </label>
+                                </div>
+                                
+                                <div>
+                                    <input type="radio" name="scheduleStatus" value="pending" id="pending" class="hidden">
+                                    <label for="pending" class="block p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
+                                        <span class="font-medium">두리무역에서 협의 진행</span>
+                                        <p class="text-xs text-gray-600 mt-1">일정 조율이 필요한 경우</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <label class="flex items-center">
-                        <input type="checkbox" name="privacy" required class="mr-2 rounded text-purple-600 focus:ring-purple-500">
-                        <span class="text-sm">개인정보 수집 및 이용에 동의합니다 <span class="text-red-500">*</span></span>
-                    </label>
                 </div>
-            </div>
 
-            <!-- 제출 버튼 -->
-            <div class="flex justify-center">
-                <button type="submit" id="submitBtn" 
-                        class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i data-lucide="send" class="w-5 h-5 inline mr-2"></i>
-                    신청서 제출하기
-                </button>
-            </div>
-        </form>
+                <!-- 5. 검품 일정 (조건부) -->
+                <div id="scheduleDetails" class="form-section mb-8 hidden">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">
+                            <span id="scheduleStepNumber">4</span>
+                        </span>
+                        검품 일정
+                    </h2>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-center text-sm text-yellow-800">
+                            <i data-lucide="alert-circle" class="w-5 h-5 mr-2"></i>
+                            <span>검품 일정은 결제 확인일로부터 최소 72시간(3일) 이후로 설정해 주시기 바랍니다.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                검품 시작일 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" name="startDate"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                검품 종료일 <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" name="endDate"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. 추가 요청사항 -->
+                <div class="form-section mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">
+                            <span id="additionalStepNumber">4</span>
+                        </span>
+                        추가 요청사항
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                특별 요청사항
+                            </label>
+                            <textarea name="requirements" rows="4"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                      placeholder="검품 시 특별히 확인이 필요한 사항이나 요청사항을 자유롭게 기재해 주시기 바랍니다."></textarea>
+                            <p class="text-xs text-gray-500 mt-1">
+                                * 요청사항이 없을 경우, 국제 검품 기준 ISO 2859 및 ISO 9001에 의거하여 표준 검품 보고서를 작성해 드립니다.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                관련 자료 업로드
+                            </label>
+                            <div id="fileDropZone" class="file-drop-zone p-8 rounded-lg text-center cursor-pointer">
+                                <i data-lucide="upload-cloud" class="w-12 h-12 mx-auto text-gray-400 mb-3"></i>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    파일을 드래그하여 업로드하거나 클릭하여 선택하세요
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    최대 5개 파일, 파일당 최대 1GB (PDF, DOC, XLS, JPG, PNG 등)
+                                </p>
+                                <input type="file" id="fileInput" multiple class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                            </div>
+                            <div id="fileList" class="mt-4 space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 개인정보 수집 동의 -->
+                <div class="form-section mb-8">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="font-medium text-gray-900 mb-3">개인정보 수집 및 이용 동의</h3>
+                        <div class="text-sm text-gray-600 space-y-2 mb-4">
+                            <p>• 수집 항목: 기업명, 담당자 정보(성명, 연락처, 이메일), 공장 정보</p>
+                            <p>• 수집 목적: 검품 서비스 제공 및 결과 보고</p>
+                            <p>• 보유 기간: 서비스 종료 후 3년</p>
+                        </div>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="privacy" required class="mr-2 rounded text-purple-600 focus:ring-purple-500">
+                            <span class="text-sm">개인정보 수집 및 이용에 동의합니다 <span class="text-red-500">*</span></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 제출 버튼 -->
+                <div class="flex justify-center">
+                    <button type="submit" id="submitBtn" 
+                            class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="send" class="w-5 h-5 inline mr-2"></i>
+                        신청서 제출하기
+                    </button>
+                </div>
+            </form>
+        </div>
     </main>
 
     <!-- 푸터 -->
-    <footer class="bg-gray-900 text-gray-400 py-8 mt-16">
+    <footer class="bg-gradient-to-br from-gray-900 to-gray-800 text-gray-400 py-16">
         <div class="container mx-auto px-4 text-center">
-            <p class="mb-2">두리무역 | 대표: 김두호 | 사업자등록번호: 605-29-80697</p>
-            <p class="mb-2">주소: 경기도 시흥시 마유로418번길 313 B2512</p>
-            <p>전화: 031-699-8781 | 이메일: duly@duly.co.kr</p>
-            <p class="mt-4 text-sm">Copyright © 2018 Duly Trade. All rights reserved.</p>
+            <div class="mb-8">
+                <button data-modal-target="terms" class="modal-trigger px-4 py-2 hover:text-white hover:underline transition-colors">
+                    이용약관
+                </button>
+                <span class="mx-2">|</span>
+                <button data-modal-target="privacy" class="modal-trigger px-4 py-2 hover:text-white hover:underline font-bold transition-colors">
+                    개인정보처리방침
+                </button>
+            </div>
+            <div class="mb-6 space-y-2">
+                <p class="text-lg">두리무역 | 대표자: 김두호 | 사업자등록번호: 605-29-80697</p>
+                <p>주소: 인천광역시 연수구 센트럴로 313 B2512</p>
+                <p class="flex items-center justify-center gap-4">
+                    <a href="tel:031-699-8781" class="hover:text-white transition-colors inline-flex items-center">
+                        <i data-lucide="phone" class="w-4 h-4 mr-2"></i>031-699-8781
+                    </a>
+                    <span>|</span>
+                    <a href="mailto:duly@duly.co.kr" class="hover:text-white transition-colors">
+                        duly@duly.co.kr
+                    </a>
+                </p>
+                <p class="mt-4">
+                    <a href="/calculator" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all hover:scale-105">
+                        🚢 두리무역 통합 무역 비용 계산기
+                    </a>
+                </p>
+            </div>
+            <p class="text-sm text-gray-500">Copyright © 2018 Duly Trade. All rights reserved.</p>
         </div>
     </footer>
+    
+    <!-- Mobile Bottom Navigation -->
+    <div class="pb-16 md:pb-0">
+        <nav class="fixed bottom-0 left-0 w-full h-16 bg-white shadow-2xl flex justify-around items-center md:hidden z-40 border-t border-gray-300">
+            <a href="/" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50 min-w-[44px] min-h-[44px] flex flex-col items-center justify-center">
+                <i data-lucide="home" class="w-5 h-5 mb-1"></i><span class="block text-xs font-medium">홈</span>
+            </a>
+            <a href="/#why-choose-us" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50 min-w-[44px] min-h-[44px] flex flex-col items-center justify-center">
+                <i data-lucide="thumbs-up" class="w-5 h-5 mb-1"></i><span class="block text-xs font-medium">실적</span>
+            </a>
+            <a href="/#detailed-services" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50 min-w-[44px] min-h-[44px] flex flex-col items-center justify-center">
+                <i data-lucide="briefcase" class="w-5 h-5 mb-1"></i><span class="block text-xs font-medium">서비스</span>
+            </a>
+            <a href="/calculator" class="text-center min-w-[44px] min-h-[44px] flex flex-col items-center justify-center">
+                <div class="p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl text-white px-3 hover:shadow-lg hover:scale-105 transition-all">
+                    <i data-lucide="calculator" class="w-5 h-5 mx-auto mb-1"></i><span class="block text-xs font-bold">계산기</span>
+                </div>
+            </a>
+            <a href="/#faq-section" class="text-center text-gray-600 hover:text-purple-600 transition-colors p-2 rounded-lg hover:bg-purple-50 min-w-[44px] min-h-[44px] flex flex-col items-center justify-center">
+                <i data-lucide="help-circle" class="w-5 h-5 mb-1"></i><span class="block text-xs font-medium">FAQ</span>
+            </a>
+        </nav>
+    </div>
 
     <!-- 로딩 모달 -->
     <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
@@ -501,6 +628,28 @@
             <p class="text-sm text-gray-600 mt-2">잠시만 기다려 주세요</p>
         </div>
     </div>
+
+    <!-- 모바일 메뉴 스크립트 추가 -->
+    <script>
+        // 모바일 메뉴 토글
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+                
+                // 메뉴 외부 클릭 시 닫기
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
 
     <script src="/js/application.js"></script>
 </body>
