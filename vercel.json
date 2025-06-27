@@ -17,7 +17,23 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/index.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "(?!calculator\\.)"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/calculator.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "calculator\\."
+        }
+      ]
     }
   ],
   "headers": [
