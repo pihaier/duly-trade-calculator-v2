@@ -17,16 +17,6 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/calculator.html",
-      "has": [
-        {
-          "type": "host",
-          "value": "calculator\\.duly\\.co\\.kr"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
