@@ -5,7 +5,6 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "vercel dev",
     "build": "echo 'Static files ready for deployment'",
     "deploy": "vercel --prod",
     "test": "jest",
