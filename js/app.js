@@ -19,7 +19,6 @@ class SmartVideoLoader {
     
     init() {
         if (!this.video) {
-            console.warn('⚠️ hero-video 요소를 찾을 수 없습니다.');
             return;
         }
         
@@ -44,9 +43,6 @@ class SmartVideoLoader {
         
         // 비디오 로딩 시작
         this.video.load();
-        
-        console.log('🔇 무음 배경 비디오 초기화 완료');
-        console.log('📂 비디오 경로:', this.video.src);
     }
     
     setupVideoEvents() {
@@ -54,7 +50,6 @@ class SmartVideoLoader {
         
         // 재생 가능 상태
         this.video.addEventListener('canplay', () => {
-            console.log('🔇 무음 비디오 재생 준비 완료');
             this.isLoaded = true;
             this.retryCount = 0; // 重置重试计数
             
@@ -64,18 +59,16 @@ class SmartVideoLoader {
         
         // 데이터 로딩 상태 추가
         this.video.addEventListener('loadeddata', () => {
-            console.log('📦 비디오 데이터 로딩 완료');
+            // 비디오 데이터 로딩 완료
         });
         
         // 메타데이터 로딩 완료
         this.video.addEventListener('loadedmetadata', () => {
-            console.log('📋 비디오 메타데이터 로딩 완료');
-            console.log(`⏱️ 비디오 길이: ${this.video.duration}초`);
+            // 비디오 메타데이터 로딩 완료
         });
         
         // 재생 시작
         this.video.addEventListener('play', () => {
-            console.log('🔇 무음 비디오 재생 시작');
             this.isPlaying = true;
             
             // 재생 중에도 무음 보장
@@ -85,13 +78,11 @@ class SmartVideoLoader {
         
         // 재생 일시정지 감지
         this.video.addEventListener('pause', () => {
-            console.log('⏸️ 비디오 일시정지 감지');
             this.isPlaying = false;
         });
         
         // 재생 완료 시 자동 반복
         this.video.addEventListener('ended', () => {
-            console.log('🔄 비디오 재생 완료, 다시 시작');
             this.video.currentTime = 0;
             this.startSilentPlayback();
         });
@@ -99,22 +90,16 @@ class SmartVideoLoader {
         // 강화된 에러 처리
         this.video.addEventListener('error', (e) => {
             const error = this.video.error;
-            console.error('❌ 비디오 에러 발생:', {
-                code: error?.code,
-                message: error?.message,
-                retryCount: this.retryCount
-            });
-            
             this.handleVideoError();
         });
         
         // 네트워크 상태 변화 감지
         this.video.addEventListener('stalled', () => {
-            console.warn('⚠️ 비디오 로딩 지연 감지');
+            // 비디오 로딩 지연 감지
         });
         
         this.video.addEventListener('waiting', () => {
-            console.warn('⏳ 비디오 버퍼링 중...');
+            // 비디오 버퍼링 중
         });
     }
     
@@ -122,8 +107,6 @@ class SmartVideoLoader {
         this.retryCount++;
         
         if (this.retryCount <= this.maxRetries) {
-            console.log(`🔄 비디오 재시도 ${this.retryCount}/${this.maxRetries}...`);
-            
             setTimeout(() => {
                 // 비디오 요소 초기화
                 this.video.muted = true;
@@ -140,7 +123,6 @@ class SmartVideoLoader {
                 
             }, this.retryDelay);
         } else {
-            console.log('❌ 비디오 재시도 한계 도달 - 정적 배경으로 전환');
             this.video.style.display = 'none';
             // 정적 배경 이미지 표시
             if (this.background) {
@@ -163,20 +145,15 @@ class SmartVideoLoader {
         if (playPromise !== undefined) {
             playPromise
                 .then(() => {
-                    console.log('🔇 무음 비디오 재생 성공');
                     this.isPlaying = true;
                     this.retryCount = 0; // 성공시 재시도 카운트 리셋
                 })
                 .catch(error => {
-                    console.warn('⚠️ 자동재생 실패:', error.name, error.message);
-                    
                     // NotAllowedError (자동재생 정책) vs 다른 에러 구분
                     if (error.name === 'NotAllowedError') {
-                        console.log('ℹ️ 브라우저 자동재생 정책으로 인한 제한 - 사용자 상호작용 대기');
                         // 사용자 상호작용을 위한 이벤트 리스너 추가
                         this.setupUserInteractionHandler();
                     } else {
-                        console.log('❌ 기타 재생 에러 - 재시도 시도');
                         this.handleVideoError();
                     }
                 });
@@ -188,7 +165,6 @@ class SmartVideoLoader {
         this.userInteractionAdded = true;
         
         const attemptPlay = () => {
-            console.log('👆 사용자 상호작용 감지 - 비디오 재생 시도');
             this.startSilentPlayback();
             
             // 이벤트 리스너 제거
@@ -207,16 +183,14 @@ class SmartVideoLoader {
     forcePlay() {
         if (!this.video) return;
         
-        console.log('🎬 강제 비디오 재생 시도');
         this.video.muted = true;
         this.video.volume = 0;
         this.video.currentTime = 0;
         
         this.video.play().then(() => {
-            console.log('✅ 강제 재생 성공');
             this.isPlaying = true;
         }).catch(error => {
-            console.error('❌ 강제 재생 실패:', error);
+            // 강제 재생 실패
         });
     }
     
@@ -499,45 +473,32 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 调试方法全局访问
     window.playVideo = () => {
-        console.log('🎬 수동 비디오 재생 시도');
         videoLoader.forcePlay();
     };
     
     window.getVideoStatus = () => {
         const status = videoLoader.getVideoStatus();
-        console.log('📊 현재 비디오 상태:');
-        console.table(status);
         return status;
     };
     
     // 3秒后自动检查视频状态并尝试播放
     setTimeout(() => {
-        console.log('📊 자동 비디오 상태 확인 중...');
         const status = videoLoader.getVideoStatus();
         
         if (status) {
-            console.table(status);
-            
             // 如果视频已加载但未播放，尝试强制播放
             if (status.readyState >= 2 && status.paused && !videoLoader.isPlaying) {
-                console.log('🔄 비디오가 로드되었지만 재생되지 않음. 강제 재생 시도...');
                 videoLoader.forcePlay();
             } else if (status.readyState < 2) {
-                console.log('⏳ 비디오가 아직 로딩 중입니다. 추가 대기...');
                 // 5초 후 추가 체크
                 setTimeout(() => {
                     const newStatus = videoLoader.getVideoStatus();
-                    console.log('🔍 5초 후 재확인:');
-                    console.table(newStatus);
                     
                     if (newStatus && newStatus.readyState >= 2 && newStatus.paused) {
-                        console.log('🚀 최종 강제 재생 시도');
                         videoLoader.forcePlay();
                     }
                 }, 5000);
             }
-        } else {
-            console.warn('⚠️ 비디오 상태를 가져올 수 없습니다.');
         }
     }, 3000);
     
