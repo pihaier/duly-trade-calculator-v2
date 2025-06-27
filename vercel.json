@@ -17,6 +17,16 @@
     },
     {
       "source": "/(.*)",
+      "destination": "/calculator.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "calculator\\."
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
