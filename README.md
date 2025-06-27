@@ -12,6 +12,7 @@
 - **실시간 환율**: 관세청 공식 환율 API 연동
 - **관세율 조회**: HS Code 기반 정확한 관세율 확인
 - **수입요건 확인**: 품목별 수입 규제사항 조회
+- **온라인 신청서**: 중국 출장검품 서비스 신청 (Google Sheets 연동)
 
 ## 🏗️ **프로젝트 구조 (정리 후)**
 
@@ -19,17 +20,20 @@
 /
 ├── 📄 index.html              ← 🎯 메인 페이지
 ├── 📄 calculator.html          ← 🧮 계산기 페이지
+├── 📄 application.html         ← 📝 검품 신청서 페이지
 ├── 🎨 style.css                ← 🎨 메인 스타일시트
 ├── 🎨 calculator.css           ← 🎨 계산기 전용 스타일시트
 ├── 📁 js/                       ← 💡 JavaScript 로직
 │   ├── main.js                 ← 🎮 UI 컨트롤러
 │   ├── apiService.js           ← 🔌 API 통신
 │   ├── cbmCalculator.js        ← 📦 CBM 계산기 로직
-│   └── totalCostCalculator.js  ← 💰 총 비용 계산기 로직
+│   ├── totalCostCalculator.js  ← 💰 총 비용 계산기 로직
+│   └── application.js          ← 📋 신청서 페이지 로직
 ├── 📁 api/                      ← ☁️ Vercel 서버리스 함수
 │   ├── exchange-rate.js        ← 💱 환율 조회
 │   ├── tariff-rate.js          ← 📜 관세율 조회
 │   └── ...
+├── 📄 google-apps-script.js    ← 📊 Google Sheets 연동 스크립트
 ├── 📄 vercel.json              ← 🚀 Vercel 배포 설정
 ├── 📄 package.json              ← 📦 Node.js 의존성
 └── 📄 README.md                 ← 📖 프로젝트 문서
@@ -44,8 +48,9 @@
 
 ## 🚀 배포 정보
 
-- **메인 URL**: https://duly-trade-calculator.vercel.app
-- **계산기 URL**: https://duly-trade-calculator.vercel.app/calculator
+- **메인 URL**: https://duly.co.kr
+- **계산기 URL**: https://duly.co.kr/calculator
+- **신청서 URL**: https://duly.co.kr/application
 - **GitHub 저장소**: https://github.com/pihaier/duly-trade-calculator-v2
 - **자동 배포**: Git 푸시 시 Vercel 자동 배포 활성화 ✅
 
