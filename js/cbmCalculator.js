@@ -1156,57 +1156,51 @@ class CBMCalculator {
         // 팔레트 그룹 생성
         const palletGroup = new THREE.Group();
         
-        // 팔레트를 개별 면으로 생성 (윗면 제외)
-        const palletMaterial = new THREE.MeshStandardMaterial({ color: 0xdeb887 });
+        // 실제 팔레트처럼 보이는 BoxGeometry 사용
+        const palletMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x8B4513,  // 갈색 목재 색상
+            roughness: 0.8,   // 거친 질감
+            metalness: 0.1    // 목재 재질감
+        });
         
-        // 팔레트 바닥면
-        const bottomGeometry = new THREE.PlaneGeometry(pallet.length, pallet.width);
-        const bottomMesh = new THREE.Mesh(bottomGeometry, palletMaterial);
-        bottomMesh.rotation.x = -Math.PI / 2;
-        bottomMesh.position.y = -pallet.height / 2;
-        bottomMesh.receiveShadow = true;
-        palletGroup.add(bottomMesh);
+        // 실제 팔레트 모양으로 생성
+        const palletGeometry = new THREE.BoxGeometry(pallet.length, pallet.height, pallet.width);
+        const palletMesh = new THREE.Mesh(palletGeometry, palletMaterial);
+        palletMesh.castShadow = true;
+        palletMesh.receiveShadow = true;
         
-        // 팔레트 측면들
-        const sideHeight = pallet.height;
+        // 팔레트 테두리
+        const palletEdges = new THREE.EdgesGeometry(palletGeometry);
+        const palletLine = new THREE.LineSegments(palletEdges, 
+            new THREE.LineBasicMaterial({ color: 0x654321, linewidth: 2 }));
         
-        // 앞면
-        const frontGeometry = new THREE.PlaneGeometry(pallet.length, sideHeight);
-        const frontMesh = new THREE.Mesh(frontGeometry, palletMaterial);
-        frontMesh.position.z = pallet.width / 2;
-        frontMesh.castShadow = true;
-        palletGroup.add(frontMesh);
+        palletGroup.add(palletMesh);
+        palletGroup.add(palletLine);
         
-        // 뒷면
-        const backGeometry = new THREE.PlaneGeometry(pallet.length, sideHeight);
-        const backMesh = new THREE.Mesh(backGeometry, palletMaterial);
-        backMesh.position.z = -pallet.width / 2;
-        backMesh.rotation.y = Math.PI;
-        backMesh.castShadow = true;
-        palletGroup.add(backMesh);
+        // 팔레트 나무 판자 디테일 추가 (상판)
+        const boardMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x8B4513,
+            roughness: 0.9,
+            metalness: 0.0
+        });
         
-        // 왼쪽면
-        const leftGeometry = new THREE.PlaneGeometry(pallet.width, sideHeight);
-        const leftMesh = new THREE.Mesh(leftGeometry, palletMaterial);
-        leftMesh.position.x = -pallet.length / 2;
-        leftMesh.rotation.y = Math.PI / 2;
-        leftMesh.castShadow = true;
-        palletGroup.add(leftMesh);
+        // 세로 판자들 (5개)
+        for (let i = 0; i < 5; i++) {
+            const boardGeometry = new THREE.BoxGeometry(pallet.length, 1, pallet.width / 6);
+            const boardMesh = new THREE.Mesh(boardGeometry, boardMaterial);
+            boardMesh.position.set(0, pallet.height / 2 + 0.5, -pallet.width / 2 + (pallet.width / 6) * (i + 0.5));
+            boardMesh.castShadow = true;
+            palletGroup.add(boardMesh);
+        }
         
-        // 오른쪽면
-        const rightGeometry = new THREE.PlaneGeometry(pallet.width, sideHeight);
-        const rightMesh = new THREE.Mesh(rightGeometry, palletMaterial);
-        rightMesh.position.x = pallet.length / 2;
-        rightMesh.rotation.y = -Math.PI / 2;
-        rightMesh.castShadow = true;
-        palletGroup.add(rightMesh);
-        
-        // 팔레트 테두리 (윗면만)
-        const topEdgesGeometry = new THREE.EdgesGeometry(new THREE.PlaneGeometry(pallet.length, pallet.width));
-        const topEdges = new THREE.LineSegments(topEdgesGeometry, new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 3 }));
-        topEdges.rotation.x = -Math.PI / 2;
-        topEdges.position.y = pallet.height / 2;
-        palletGroup.add(topEdges);
+        // 가로 지지대들 (3개)
+        for (let i = 0; i < 3; i++) {
+            const supportGeometry = new THREE.BoxGeometry(pallet.length / 4, pallet.height - 2, pallet.width / 8);
+            const supportMesh = new THREE.Mesh(supportGeometry, boardMaterial);
+            supportMesh.position.set(-pallet.length / 2 + (pallet.length / 4) * (i + 0.5), 0, 0);
+            supportMesh.castShadow = true;
+            palletGroup.add(supportMesh);
+        }
         
         palletGroup.position.y = pallet.height / 2;
         palletGroup.userData.isPallet = true;
@@ -1325,13 +1319,7 @@ class CBMCalculator {
             const palletLayout = this.lastCalculationResult.optimizedLayout;
             const pallet = input.pallet;
             
-            // 팔레트 재질
-            const palletMaterial = new THREE.MeshStandardMaterial({ color: 0xdeb887 });
-            const palletGeometry = new THREE.BoxGeometry(
-                palletLayout.dimensions.length,
-                palletLayout.dimensions.height,
-                palletLayout.dimensions.width
-            );
+            // 이전 팔레트 재질 정의 제거됨 - 실제 재질은 각 팔레트 그룹에서 정의
             
             // 컨테이너 내 팔레트 배치 계산
             const palletsX = Math.floor(containerSpec.length / palletLayout.dimensions.length);
@@ -1349,55 +1337,46 @@ class CBMCalculator {
                         // 팔레트 그룹
                         const palletGroup = new THREE.Group();
                         
-                        // 팔레트를 개별 면으로 생성 (윗면 제외)
-                        // 팔레트 바닥면
-                        const bottomGeometry = new THREE.PlaneGeometry(palletLayout.dimensions.length, palletLayout.dimensions.width);
-                        const bottomMesh = new THREE.Mesh(bottomGeometry, palletMaterial);
-                        bottomMesh.rotation.x = -Math.PI / 2;
-                        bottomMesh.position.y = -palletLayout.dimensions.height / 2;
-                        bottomMesh.receiveShadow = true;
-                        palletGroup.add(bottomMesh);
+                        // 실제 팔레트처럼 보이는 BoxGeometry 사용
+                        const realPalletMaterial = new THREE.MeshStandardMaterial({ 
+                            color: 0x8B4513,  // 갈색 목재 색상
+                            roughness: 0.8,   // 거친 질감
+                            metalness: 0.1    // 목재 재질감
+                        });
                         
-                        // 팔레트 측면들
-                        const sideHeight = palletLayout.dimensions.height;
+                        // 실제 팔레트 모양으로 생성
+                        const realPalletGeometry = new THREE.BoxGeometry(
+                            palletLayout.dimensions.length, 
+                            pallet.height, 
+                            palletLayout.dimensions.width
+                        );
+                        const realPalletMesh = new THREE.Mesh(realPalletGeometry, realPalletMaterial);
+                        realPalletMesh.castShadow = true;
+                        realPalletMesh.receiveShadow = true;
                         
-                        // 앞면
-                        const frontGeometry = new THREE.PlaneGeometry(palletLayout.dimensions.length, sideHeight);
-                        const frontMesh = new THREE.Mesh(frontGeometry, palletMaterial);
-                        frontMesh.position.z = palletLayout.dimensions.width / 2;
-                        frontMesh.castShadow = true;
-                        palletGroup.add(frontMesh);
+                        // 팔레트 테두리
+                        const realPalletEdges = new THREE.EdgesGeometry(realPalletGeometry);
+                        const realPalletLine = new THREE.LineSegments(realPalletEdges, 
+                            new THREE.LineBasicMaterial({ color: 0x654321, linewidth: 2 }));
                         
-                        // 뒷면
-                        const backGeometry = new THREE.PlaneGeometry(palletLayout.dimensions.length, sideHeight);
-                        const backMesh = new THREE.Mesh(backGeometry, palletMaterial);
-                        backMesh.position.z = -palletLayout.dimensions.width / 2;
-                        backMesh.rotation.y = Math.PI;
-                        backMesh.castShadow = true;
-                        palletGroup.add(backMesh);
+                        palletGroup.add(realPalletMesh);
+                        palletGroup.add(realPalletLine);
                         
-                        // 왼쪽면
-                        const leftGeometry = new THREE.PlaneGeometry(palletLayout.dimensions.width, sideHeight);
-                        const leftMesh = new THREE.Mesh(leftGeometry, palletMaterial);
-                        leftMesh.position.x = -palletLayout.dimensions.length / 2;
-                        leftMesh.rotation.y = Math.PI / 2;
-                        leftMesh.castShadow = true;
-                        palletGroup.add(leftMesh);
+                        // 팔레트 나무 판자 디테일 추가 (상판) - 컨테이너 뷰용
+                        const boardMaterial = new THREE.MeshStandardMaterial({ 
+                            color: 0x8B4513,
+                            roughness: 0.9,
+                            metalness: 0.0
+                        });
                         
-                        // 오른쪽면
-                        const rightGeometry = new THREE.PlaneGeometry(palletLayout.dimensions.width, sideHeight);
-                        const rightMesh = new THREE.Mesh(rightGeometry, palletMaterial);
-                        rightMesh.position.x = palletLayout.dimensions.length / 2;
-                        rightMesh.rotation.y = -Math.PI / 2;
-                        rightMesh.castShadow = true;
-                        palletGroup.add(rightMesh);
-                        
-                        // 팔레트 테두리 (윗면만)
-                        const topEdgesGeometry = new THREE.EdgesGeometry(new THREE.PlaneGeometry(palletLayout.dimensions.length, palletLayout.dimensions.width));
-                        const topEdges = new THREE.LineSegments(topEdgesGeometry, new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 }));
-                        topEdges.rotation.x = -Math.PI / 2;
-                        topEdges.position.y = palletLayout.dimensions.height / 2;
-                        palletGroup.add(topEdges);
+                        // 세로 판자들 (3개 - 컨테이너 뷰에서는 단순화)
+                        for (let i = 0; i < 3; i++) {
+                            const boardGeometry = new THREE.BoxGeometry(palletLayout.dimensions.length, 1, palletLayout.dimensions.width / 4);
+                            const boardMesh = new THREE.Mesh(boardGeometry, boardMaterial);
+                            boardMesh.position.set(0, pallet.height / 2 + 0.5, -palletLayout.dimensions.width / 2 + (palletLayout.dimensions.width / 4) * (i + 0.5));
+                            boardMesh.castShadow = true;
+                            palletGroup.add(boardMesh);
+                        }
                         
                         // 팔레트 위치
                         const palletX = -containerSpec.length / 2 + palletLayout.dimensions.length * (x + 0.5);
