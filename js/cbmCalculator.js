@@ -1378,10 +1378,10 @@ class CBMCalculator {
                             palletGroup.add(boardMesh);
                         }
                         
-                        // 팔레트 위치
+                        // 팔레트 위치 (컨테이너 바닥에 정확히 배치)
                         const palletX = -containerSpec.length / 2 + palletLayout.dimensions.length * (x + 0.5);
                         const palletZ = -containerSpec.width / 2 + palletLayout.dimensions.width * (y + 0.5);
-                        const palletY = palletLayout.dimensions.height / 2 + z * palletLayout.dimensions.height;
+                        const palletY = pallet.height / 2 + z * palletLayout.dimensions.height;
                         
                         palletGroup.position.set(palletX, palletY, palletZ);
                         palletGroup.userData.isPallet = true;
@@ -1426,7 +1426,7 @@ class CBMCalculator {
                                     
                                     boxGroup.position.set(
                                         palletX + boxXOffset,
-                                        palletY - palletLayout.dimensions.height / 2 + boxYOffset,
+                                        boxYOffset + z * palletLayout.dimensions.height,
                                         palletZ + boxZOffset
                                     );
                                     boxGroup.userData.isBox = true;
