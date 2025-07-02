@@ -133,6 +133,49 @@
     -   사용자 검색 의도와 정확히 일치하는 키워드로 클릭률 향상
     -   경쟁사 대비 차별화된 포지셔닝 확보
 
+### 6. 구글 SEO 2025 최적화 완료 (2025-01-02)
+- **목적**: AI 중심의 구글 검색 환경 변화에 대응한 SEO 최적화
+- **주요 작업**:
+    1.  **구글 SEO 전략 가이드 작성** (`GOOGLE_SEO_STRATEGY_2025.md`)
+        -   AI 기반 검색(SGE, RankBrain v2) 대응 전략
+        -   E-E-A-T(Experience, Expertise, Authoritativeness, Trustworthiness) 최적화 방법
+        -   Core Web Vitals(INP, LCP, CLS) 개선 가이드
+        -   모바일 최적화 및 PWA 전략
+        -   구조화 데이터 및 Featured Snippets 최적화
+    2.  **메인 페이지 구조화 데이터 강화** (`index.html`)
+        -   Organization 스키마에 slogan, aggregateRating 추가
+        -   WebSite 스키마에 SearchAction 추가
+        -   Service 스키마에 hasOfferCatalog 추가
+        -   FAQPage 스키마 추가로 Featured Snippets 최적화
+        -   구글 전용 메타 태그 추가 (googlebot, google:search_document 등)
+    3.  **계산기 페이지 SEO 강화** (`calculator.html`)
+        -   FAQ 스키마 추가 (CBM 계산법, 컨테이너 적재량, 수입금액 계산, 관세율 조회)
+        -   구글 SEO 2025 메타 태그 추가
+        -   Core Web Vitals 최적화 (이미지 preload, DNS prefetch, CLS 방지)
+    4.  **robots.txt 개선**
+        -   구글봇 최적화 설정 추가 (crawl-delay: 0)
+        -   Google Image Bot 전용 설정
+        -   Bing, DuckDuckGo 등 다른 검색엔진 지원
+        -   Host directive 추가로 도메인 우선순위 명시
+    5.  **sitemap.xml 최적화**
+        -   Google Image Sitemap 네임스페이스 추가
+        -   각 페이지에 image:image 태그 추가로 이미지 SEO 강화
+        -   lastmod 날짜 최신화 (2025-01-02)
+    6.  **Core Web Vitals 개선**
+        -   중요 리소스 preload 및 fetchpriority 설정
+        -   DNS prefetch로 외부 리소스 로딩 최적화
+        -   font-display: swap으로 CLS 방지
+        -   이미지 크기 명시 및 로딩 플레이스홀더 추가
+- **네이버 SEO vs 구글 SEO 차이점**:
+    -   네이버: 키워드 중심 + 블로그/카페 중심
+    -   구글: 품질 중심 + AI 친화적 콘텐츠 + 기술적 최적화
+    -   공통: 사용자 중심 콘텐츠 제작
+- **기대 효과**:
+    -   구글 Search Generative Experience(SGE) 대응으로 AI 요약에 포함 가능성 증대
+    -   Featured Snippets 노출로 Position Zero 획득 기회
+    -   Core Web Vitals 개선으로 검색 순위 상승
+    -   E-E-A-T 신호 강화로 무역 전문가로서의 권위성 확립
+
 ## 📞 연락처
 
 **두리무역**

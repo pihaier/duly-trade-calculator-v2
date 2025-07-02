@@ -33,6 +33,12 @@
     <meta property="naver:image" content="https://www.duly.co.kr/images/og-image.svg">
     <meta name="news_keywords" content="CBM계산기, 수입금액계산기, 관세계산기, 무역계산기, 컨테이너적재계산기, 물류비계산기, 환율계산기, 팔레트계산기, 중국수입계산기">
     
+    <!-- 구글 SEO 2025 최적화 -->
+    <meta name="google-site-verification" content="your-google-verification-code">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="google" content="notranslate">
+    <meta property="google:search_document" content="searchable">
+    
     <!-- 다음(Kakao) SEO -->
     <meta property="daumoa:title" content="두리무역 통합 무역 비용 계산기">
     <meta property="daumoa:description" content="CBM 계산과 관세율 조회를 한 번에! 관세청 API 연동">
@@ -147,6 +153,43 @@
             "@id": "https://www.duly.co.kr#organization"
           },
           "keywords": "CBM계산기, 수입금액계산기, 관세계산기, 무역계산기, 컨테이너적재계산기, 물류비계산기"
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "CBM 계산 공식은 무엇인가요?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "CBM = 가로(cm) × 세로(cm) × 높이(cm) ÷ 1,000,000 입니다. 예시: 100cm × 80cm × 60cm = 480,000 ÷ 1,000,000 = 0.48 CBM"
+              }
+            },
+            {
+              "@type": "Question", 
+              "name": "컨테이너 적재량은 어떻게 계산하나요?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "컨테이너 용량을 개별 상품의 CBM으로 나누면 적재 가능 수량을 계산할 수 있습니다. 20ft 컨테이너는 약 33CBM, 40ft는 약 67CBM입니다."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "수입금액 계산에 포함되는 비용은?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "상품가격 + 운송비 + 보험료 + 관세 + 부가세 + 기타 수수료가 포함됩니다. 이를 CIF 가격 기준으로 계산합니다."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "관세율은 어떻게 조회하나요?",
+              "acceptedAnswer": {
+                "@type": "Answer", 
+                "text": "HS코드를 입력하여 관세청 공식 API를 통해 실시간 관세율을 조회할 수 있습니다. 기본관세, 협정관세, 특혜관세를 모두 확인 가능합니다."
+              }
+            }
+          ]
         }
       ]
     }
@@ -182,9 +225,18 @@
     <!-- 커스텀 스타일 -->
     <link rel="stylesheet" href="/calculator.css">
     
+    <!-- Core Web Vitals 최적화 (구글 SEO 2025) -->
+    <link rel="preload" href="/calculator.css" as="style">
+    <link rel="preload" href="/lib/fonts.css" as="style">
+    <link rel="preload" href="/images/og-image.svg" as="image" fetchpriority="high">
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    
     <!-- 메인 페이지와 동일한 스타일 추가 -->
     <style>
-      /* 기본 설정 */
+      /* 기본 설정 - font-display swap으로 CLS 방지 */
       body {
         font-family: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         font-display: swap;
@@ -214,6 +266,24 @@
       
       ::-webkit-scrollbar-thumb:hover {
         background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+      }
+      
+      /* Core Web Vitals 개선 - 이미지 크기 명시 */
+      img {
+        height: auto;
+        max-width: 100%;
+      }
+      
+      /* 로딩 상태 표시로 CLS 방지 */
+      .loading-placeholder {
+        background: #f0f0f0;
+        border-radius: 8px;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
       }
     </style>
     

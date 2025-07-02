@@ -5,6 +5,17 @@ Allow: /
 Sitemap: https://www.duly.co.kr/sitemap.xml
 Sitemap: https://www.duly.co.kr/naver-sitemap.xml
 
+# Google Bot 최적화 (SEO 2025)
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Google Image Bot
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
 # 네이버 봇 특별 설정
 User-agent: Yeti
 Allow: /
@@ -12,7 +23,15 @@ Allow: /
 User-agent: NaverBot
 Allow: /
 
-# Crawl-delay for polite crawling
+# 기타 검색엔진 봇
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: DuckDuckBot
+Allow: /
+
+# Crawl-delay for other bots
 Crawl-delay: 1
 
 # Disallow certain file types to save crawl budget
@@ -21,12 +40,25 @@ Disallow: *.doc$
 Disallow: *.docx$
 Disallow: *.xls$
 Disallow: *.xlsx$
+Disallow: *.zip$
+Disallow: *.rar$
 
 # Allow important directories
 Allow: /css/
 Allow: /js/
 Allow: /images/
-Allow: /videos/
+Allow: /lib/
+Allow: /calculator
+Allow: /application.html
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+Disallow: /_drafts/
+
+# Host directive for preferred domain
+Host: https://www.duly.co.kr
 
 # Block specific bots if needed (uncomment if necessary)
 # User-agent: BadBot

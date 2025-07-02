@@ -1,54 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.duly.co.kr/</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.duly.co.kr/" />
+    <image:image>
+      <image:loc>https://www.duly.co.kr/images/og-image.svg</image:loc>
+      <image:title>두리무역 | 중국 수입 검품 전문가</image:title>
+      <image:caption>중국 수입 검품 전문 서비스</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.duly.co.kr/calculator</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.duly.co.kr/calculator" />
+    <image:image>
+      <image:loc>https://www.duly.co.kr/images/og-image.svg</image:loc>
+      <image:title>CBM계산기 | 수입금액계산기 | 관세계산기</image:title>
+      <image:caption>무료 무역비용 계산 도구</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://www.duly.co.kr/application</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://www.duly.co.kr/application" />
   </url>
   <url>
     <loc>https://www.duly.co.kr/#detailed-services</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#why-choose-us</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#problem-solution</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#process</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#faq-section</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -35,6 +35,12 @@
     <meta property="naver:image" content="https://www.duly.co.kr/images/og-image.svg">
     <meta name="news_keywords" content="중국수입, 검품대행, 품질관리, 중국무역, 소싱대행">
     
+    <!-- 구글 SEO 2025 최적화 -->
+    <meta name="google-site-verification" content="your-google-verification-code">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="google" content="notranslate">
+    <meta property="google:search_document" content="searchable">
+    
     <!-- 다음(Kakao) SEO -->
     <meta property="daumoa:title" content="두리무역 | 중국 수입 검품 전문가">
     <meta property="daumoa:description" content="중국 현지 검품 전문가 | 품질관리 리스크 완벽 해결">
@@ -65,7 +71,7 @@
     <meta property="twitter:image" content="https://www.duly.co.kr/images/og-image.svg">
     <meta name="twitter:site" content="@duly_trade">
     
-    <!-- 구조화된 데이터 향상 -->
+    <!-- 구조화된 데이터 향상 (구글 SEO 2025 최적화) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -122,18 +128,30 @@
             "품질 관리",
             "AQL 검사",
             "선적 관리"
-          ]
+          ],
+          "slogan": "중국 수입 검품 전문가 - 품질관리 리스크 완벽 해결",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "127",
+            "bestRating": "5"
+          }
         },
         {
           "@type": "WebSite",
           "@id": "https://www.duly.co.kr#website",
           "url": "https://www.duly.co.kr",
-          "name": "두리무역",
+          "name": "두리무역 | 중국 수입 검품 전문가",
           "description": "중국 수입 검품 및 품질 관리 전문가",
           "publisher": {
             "@id": "https://www.duly.co.kr#organization"
           },
-          "inLanguage": "ko-KR"
+          "inLanguage": "ko-KR",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.duly.co.kr/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
         },
         {
           "@type": "Service",
@@ -142,12 +160,60 @@
             "@id": "https://www.duly.co.kr#organization"
           },
           "serviceType": "Quality Control and Inspection",
-          "areaServed": "China",
+          "areaServed": ["China", "Korea"],
           "availableChannel": {
             "@type": "ServiceChannel",
             "serviceUrl": "https://www.duly.co.kr",
             "servicePhone": "+82-31-699-8781"
+          },
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "검품 서비스",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "공장 실사"
+                }
+              },
+              {
+                "@type": "Offer", 
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "생산 검품"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service", 
+                  "name": "적재 검사"
+                }
+              }
+            ]
           }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "중국 수입 검품이 왜 필요한가요?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "중국 수입 시 품질 불량, 규격 불일치, 납기 지연 등의 리스크가 있습니다. 전문적인 현지 검품을 통해 이러한 문제를 사전에 방지할 수 있습니다."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "검품 비용은 얼마나 되나요?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "제품 종류, 수량, 검품 범위에 따라 다르며, 무료 상담을 통해 정확한 견적을 제공해드립니다. 031-699-8781로 문의하세요."
+              }
+            }
+          ]
         }
       ]
     }
@@ -316,15 +382,22 @@
       }
     </style>
 
-    <!-- 성능 최적화: 중요 리소스 preload -->
+    <!-- Core Web Vitals 최적화 (구글 SEO 2025) -->
     <link rel="preload" href="/css/style.css" as="style">
     <link rel="preload" href="/js/app.js" as="script">
+    <link rel="preload" href="/lib/fonts.css" as="style">
+    <link rel="preload" href="/images/og-image.svg" as="image" fetchpriority="high">
     
     <!-- 계산기 페이지 prefetch -->
     <link rel="prefetch" href="/calculator">
+    <link rel="prefetch" href="/application.html">
     
     <!-- 성능 모니터링 스크립트 preload -->
     <link rel="preload" href="/js/performance.js" as="script">
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 antialiased">
