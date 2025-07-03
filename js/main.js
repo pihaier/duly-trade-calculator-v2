@@ -7,7 +7,7 @@
 
 class MainController {
     constructor() {
-        this.currentTab = 'cbm';
+        this.currentTab = 'ai';
         this.loadingTimeout = null;
         this.init();
     }
@@ -44,9 +44,11 @@ class MainController {
      * 탭 전환 이벤트 초기화
      */
     initTabEvents() {
+        const aiTab = document.getElementById('aiTab');
         const cbmTab = document.getElementById('cbmTab');
         const costTab = document.getElementById('costTab');
 
+        aiTab.addEventListener('click', () => this.switchTab('ai'));
         cbmTab.addEventListener('click', () => this.switchTab('cbm'));
         costTab.addEventListener('click', () => this.switchTab('cost'));
     }
@@ -96,7 +98,11 @@ class MainController {
         const middleAd = document.getElementById('middleAdBanner');
         const bottomAd = document.getElementById('bottomAdBanner');
         
-        if (tabName === 'cbm') {
+        if (tabName === 'ai') {
+            // AI 탭: 모든 광고 숨김 (깔끔한 AI 인터페이스)
+            if (middleAd) middleAd.classList.add('hidden');
+            if (bottomAd) bottomAd.classList.add('hidden');
+        } else if (tabName === 'cbm') {
             // CBM 탭: 중간 광고만 표시 (계산 완료 후에만)
             if (bottomAd) bottomAd.classList.add('hidden');
             // middleAd는 계산 완료 후에만 표시되므로 여기서는 건드리지 않음
@@ -142,14 +148,20 @@ class MainController {
      */
     initKeyboardEvents() {
         document.addEventListener('keydown', (e) => {
-            // Ctrl + 1: CBM 계산기 탭
+            // Ctrl + 1: AI 전문가 탭
             if (e.ctrlKey && e.key === '1') {
+                e.preventDefault();
+                this.switchTab('ai');
+            }
+            
+            // Ctrl + 2: CBM 계산기 탭
+            if (e.ctrlKey && e.key === '2') {
                 e.preventDefault();
                 this.switchTab('cbm');
             }
             
-            // Ctrl + 2: 총 비용 계산기 탭
-            if (e.ctrlKey && e.key === '2') {
+            // Ctrl + 3: 총 비용 계산기 탭
+            if (e.ctrlKey && e.key === '3') {
                 e.preventDefault();
                 this.switchTab('cost');
             }
