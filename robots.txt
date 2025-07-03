@@ -4,6 +4,8 @@ Allow: /
 # Sitemap locations
 Sitemap: https://www.duly.co.kr/sitemap.xml
 Sitemap: https://www.duly.co.kr/naver-sitemap.xml
+Sitemap: https://helper.duly.co.kr/sitemap.xml
+Sitemap: https://helper.duly.co.kr/naver-sitemap.xml
 
 # Google Bot 최적화 (SEO 2025)
 User-agent: Googlebot
@@ -59,6 +61,19 @@ Disallow: /_drafts/
 
 # Host directive for preferred domain
 Host: https://www.duly.co.kr
+
+# helper.duly.co.kr 전용 설정
+User-agent: *
+Host: https://helper.duly.co.kr
+
+# helper.duly.co.kr 네이버 봇 최적화
+User-agent: Yeti
+Allow: /
+Host: https://helper.duly.co.kr
+
+User-agent: NaverBot  
+Allow: /
+Host: https://helper.duly.co.kr
 
 # Block specific bots if needed (uncomment if necessary)
 # User-agent: BadBot

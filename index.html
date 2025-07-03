@@ -402,6 +402,21 @@
     <!-- helper.duly.co.kr 전용 처리 -->
     <script>
         if (window.location.hostname === 'helper.duly.co.kr') {
+            // SEO 메타태그 업데이트
+            console.log('helper.duly.co.kr 도메인 감지 - 리다이렉트 및 SEO 처리');
+            
+            // Meta description 업데이트
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+                metaDesc.content = '중국수입 무역헬퍼 - AI와 함께하는 스마트 무역계산 서비스! CBM계산, 수입금액계산, 관세계산을 한번에. GPT 기반 무역 전문가 AI, 3D 시뮬레이션, 실시간 환율 적용.';
+            }
+            
+            // Meta keywords 업데이트
+            const metaKeywords = document.querySelector('meta[name="keywords"]');
+            if (metaKeywords) {
+                metaKeywords.content = '중국수입 무역헬퍼, CBM계산기, 수입금액계산기, 관세계산기, 무역계산기, AI무역계산, 두리무역, 무료계산기';
+            }
+            
             // calculator.html로 즉시 이동
             window.location.replace('/calculator.html');
         }
