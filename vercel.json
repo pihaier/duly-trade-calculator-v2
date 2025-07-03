@@ -8,32 +8,32 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/(.*)",
+      "destination": "/calculator.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "helper\\.duly\\.co\\.kr"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/calculator.html", 
+      "has": [
+        {
+          "type": "host",
+          "value": "calculator\\.duly\\.co\\.kr"
+        }
+      ]
+    },
+    {
       "source": "/calculator",
       "destination": "/calculator.html"
     },
     {
       "source": "/calculator/(.*)",
       "destination": "/calculator/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/calculator.html",
-      "has": [
-        {
-          "type": "host",
-          "value": "helper\\."
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/calculator.html",
-      "has": [
-        {
-          "type": "host",
-          "value": "calculator\\."
-        }
-      ]
     },
     {
       "source": "/(.*)",
