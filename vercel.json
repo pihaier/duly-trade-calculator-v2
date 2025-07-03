@@ -13,7 +13,7 @@
       "has": [
         {
           "type": "host",
-          "value": "helper\\.duly\\.co\\.kr"
+          "value": "helper.duly.co.kr"
         }
       ]
     },
@@ -23,7 +23,7 @@
       "has": [
         {
           "type": "host",
-          "value": "calculator\\.duly\\.co\\.kr"
+          "value": "calculator.duly.co.kr"
         }
       ]
     },
