@@ -234,14 +234,6 @@
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
     
-    <!-- helper.duly.co.kr URL 정리 -->
-    <script>
-        if (window.location.hostname === 'helper.duly.co.kr' && window.location.pathname === '/calculator.html') {
-            // URL을 깔끔하게 / 로 변경
-            window.history.replaceState({}, '', '/');
-        }
-    </script>
-    
     <!-- 메인 페이지와 동일한 스타일 추가 -->
     <style>
       /* 기본 설정 - font-display swap으로 CLS 방지 */
@@ -903,5 +895,15 @@
     <script src="js/cbmCalculator.js?v=2.4"></script>
     <script src="js/totalCostCalculator.js?v=2.4"></script>
     <script src="js/main.js?v=2.4"></script>
+    
+    <!-- helper.duly.co.kr URL 정리 스크립트 -->
+    <script>
+        // helper.duly.co.kr 도메인에서 URL을 깔끔하게 / 로 변경
+        if (window.location.hostname === 'helper.duly.co.kr' && window.location.pathname === '/calculator.html') {
+            console.log('URL 정리 중...');
+            window.history.replaceState({}, '', '/');
+            console.log('URL이 / 로 변경되었습니다.');
+        }
+    </script>
 </body>
 </html> 
