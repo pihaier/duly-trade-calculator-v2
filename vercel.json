@@ -8,16 +8,6 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/:path*",
-      "destination": "/calculator.html",
-      "has": [
-        {
-          "type": "host",
-          "value": "helper.duly.co.kr"
-        }
-      ]
-    },
-    {
       "source": "/calculator",
       "destination": "/calculator.html"
     },
