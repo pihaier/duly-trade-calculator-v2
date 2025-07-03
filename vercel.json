@@ -2,11 +2,7 @@
   "buildCommand": "echo 'No build needed'",
   "outputDirectory": ".",
   "installCommand": "npm install",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
+  "redirects": [
     {
       "source": "/(.*)",
       "destination": "/calculator.html",
@@ -15,7 +11,14 @@
           "type": "host",
           "value": "helper.duly.co.kr"
         }
-      ]
+      ],
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     },
     {
       "source": "/calculator",
