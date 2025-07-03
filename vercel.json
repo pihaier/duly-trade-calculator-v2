@@ -21,6 +21,16 @@
       "has": [
         {
           "type": "host",
+          "value": "helper\\."
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/calculator.html",
+      "has": [
+        {
+          "type": "host",
           "value": "calculator\\."
         }
       ]
