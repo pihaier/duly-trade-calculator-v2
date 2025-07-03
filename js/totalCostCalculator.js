@@ -796,8 +796,8 @@ class TotalCostCalculator {
 
         // 1. CIF 계산 (원화 환산)
         const productValue = unitPrice * quantity; // 외화
-        const productValueKRW = productCurrency === 'KRW' ? productValue : productValue * productExchangeRate; // 원화
-        const shippingCostKRW = shippingCurrency === 'KRW' ? shippingCost : shippingCost * shippingExchangeRate; // 원화
+        const productValueKRW = Math.round(productCurrency === 'KRW' ? productValue : productValue * productExchangeRate); // 원화 반올림
+        const shippingCostKRW = Math.round(shippingCurrency === 'KRW' ? shippingCost : shippingCost * shippingExchangeRate); // 원화 반올림
         const cifKRW = productValueKRW + shippingCostKRW;
 
         // 2. 관세율 결정
@@ -819,18 +819,18 @@ class TotalCostCalculator {
             }
         }
 
-        // 3. 관세액 계산
-        const tariffAmount = cifKRW * appliedTariffRate;
+        // 3. 관세액 계산 (반올림)
+        const tariffAmount = Math.round(cifKRW * appliedTariffRate);
 
-        // 4. 부가세 계산 - 총 비용의 정확히 10%가 되도록 계산 ✅
+        // 4. 부가세 계산 - 총 비용의 정확히 10%가 되도록 계산 ✅ (반올림)
         const baseAmount = cifKRW + tariffAmount + coCost + otherCosts;
         // 부가세가 총 비용의 10%가 되려면: 부가세 = 기본비용 ÷ 9
-        const vatAmount = baseAmount / 9; // 총 비용의 정확히 10%
+        const vatAmount = Math.round(baseAmount / 9); // 총 비용의 정확히 10%, 반올림
         const vatBase = baseAmount; // 부가세 과세표준
 
-        // 5. 총 비용 계산
-        const totalCost = baseAmount + vatAmount;
-        const costPerUnit = totalCost / quantity;
+        // 5. 총 비용 계산 (반올림)
+        const totalCost = Math.round(baseAmount + vatAmount);
+        const costPerUnit = Math.round(totalCost / quantity);
 
         return {
             input,
@@ -970,7 +970,7 @@ class TotalCostCalculator {
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-medium text-gray-300">개당 부가세 별도 원가</span>
-                                <span class="text-xl font-bold text-purple-400">${formatCurrency(Math.round(calculation.costPerUnit / 1.1))}</span>
+                                <span class="text-xl font-bold text-purple-400">${formatCurrency(Math.round(Math.round(calculation.costPerUnit) / 1.1))}</span>
                             </div>
                         </div>
                     </div>
@@ -1141,8 +1141,8 @@ class TotalCostCalculator {
         const baseTotal = breakdown.productCost + breakdown.shippingCost + 
                          breakdown.tariffCost + breakdown.coCost + breakdown.otherCosts;
         
-        // 부가세가 총 비용의 정확히 10%가 되도록 계산
-        const vatCostForChart = baseTotal / 9; // 총 비용의 정확히 10%
+        // 부가세가 총 비용의 정확히 10%가 되도록 계산 (반올림)
+        const vatCostForChart = Math.round(baseTotal / 9); // 총 비용의 정확히 10%, 반올림
         
         // 전체 총합 (부가세 포함)
         const total = baseTotal + vatCostForChart;
@@ -1554,7 +1554,7 @@ class TotalCostCalculator {
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
                         <span style="font-size: 16px; font-weight: bold;">개당 원가 (부가세 별도)</span>
-                        <span class="main-value">${Math.round(calculation.costPerUnit / 1.1).toLocaleString()}원</span>
+                        <span class="main-value">${Math.round(Math.round(calculation.costPerUnit) / 1.1).toLocaleString()}원</span>
                     </div>
                 </div>
                 <p style="margin-top: 15px; font-size: 12px; color: #7c3aed; font-weight: bold;">※ 실제 통관 시 환율 변동, 관세율 변경 등으로 차이가 발생할 수 있습니다.</p>
@@ -1747,8 +1747,8 @@ class TotalCostCalculator {
         const baseTotal = breakdown.productCost + breakdown.shippingCost + 
                          breakdown.tariffCost + breakdown.coCost + breakdown.otherCosts;
         
-        // 부가세가 총 비용의 정확히 10%가 되도록 계산
-        const vatCostForChart = baseTotal / 9; // 총 비용의 정확히 10%
+        // 부가세가 총 비용의 정확히 10%가 되도록 계산 (반올림)
+        const vatCostForChart = Math.round(baseTotal / 9); // 총 비용의 정확히 10%, 반올림
         
         // 전체 총합 (부가세 포함)
         const total = baseTotal + vatCostForChart;
