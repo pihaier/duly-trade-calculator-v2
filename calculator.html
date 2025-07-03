@@ -40,8 +40,8 @@
     <meta property="google:search_document" content="searchable">
     
     <!-- 다음(Kakao) SEO -->
-    <meta property="daumoa:title" content="두리무역 통합 무역 비용 계산기">
-    <meta property="daumoa:description" content="CBM 계산과 관세율 조회를 한 번에! 관세청 API 연동">
+    <meta property="daumoa:title" content="중국수입 무역헬퍼 - 두리무역">
+    <meta property="daumoa:description" content="AI와 함께하는 스마트 무역계산! CBM계산, 수입금액계산, GPT 기반 무역 전문가 AI">
     <meta property="daumoa:image" content="https://www.duly.co.kr/images/og-image.svg">
     
     <!-- Open Graph 강화 -->
@@ -233,6 +233,14 @@
     <!-- DNS prefetch for external resources -->
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    
+    <!-- helper.duly.co.kr URL 정리 -->
+    <script>
+        if (window.location.hostname === 'helper.duly.co.kr' && window.location.pathname === '/calculator.html') {
+            // URL을 깔끔하게 / 로 변경
+            window.history.replaceState({}, '', '/');
+        }
+    </script>
     
     <!-- 메인 페이지와 동일한 스타일 추가 -->
     <style>

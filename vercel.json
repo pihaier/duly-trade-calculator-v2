@@ -8,26 +8,6 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/",
-      "destination": "/calculator.html",
-      "has": [
-        {
-          "type": "host",
-          "value": "helper.duly.co.kr"
-        }
-      ]
-    },
-    {
-      "source": "/((?!calculator|api|images|js|css|lib).*)",
-      "destination": "/calculator.html",
-      "has": [
-        {
-          "type": "host", 
-          "value": "helper.duly.co.kr"
-        }
-      ]
-    },
-    {
       "source": "/calculator",
       "destination": "/calculator.html"
     },
