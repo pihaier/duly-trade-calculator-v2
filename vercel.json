@@ -16,7 +16,7 @@
       "destination": "/calculator/$1"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!robots\\.txt|sitemap\\.xml|naver-sitemap\\.xml|helper-naver-sitemap\\.xml|manifest\\.json|favicon\\.ico|favicon\\.svg).*)",
       "destination": "/index.html"
     }
   ],
