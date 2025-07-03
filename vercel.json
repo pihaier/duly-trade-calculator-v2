@@ -18,16 +18,6 @@
       ]
     },
     {
-      "source": "/(.*)",
-      "destination": "/calculator.html", 
-      "has": [
-        {
-          "type": "host",
-          "value": "calculator.duly.co.kr"
-        }
-      ]
-    },
-    {
       "source": "/calculator",
       "destination": "/calculator.html"
     },
