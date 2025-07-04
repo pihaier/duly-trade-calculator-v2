@@ -4,8 +4,8 @@ Allow: /
 # Sitemap locations
 Sitemap: https://www.duly.co.kr/sitemap.xml
 Sitemap: https://www.duly.co.kr/naver-sitemap.xml
-Sitemap: https://helper.duly.co.kr/sitemap.xml
-Sitemap: https://helper.duly.co.kr/naver-sitemap.xml
+Sitemap: https://helper.duly.co.kr/helper-sitemap.xml
+Sitemap: https://helper.duly.co.kr/helper-naver-sitemap.xml
 
 # Google Bot 최적화 (SEO 2025)
 User-agent: Googlebot
