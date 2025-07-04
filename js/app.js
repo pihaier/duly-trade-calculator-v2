@@ -696,7 +696,7 @@ function initializeCounters() {
     const animateCounters = () => {
         const counters = [
             { id: 'counter-years', end: 8, duration: 2000 },
-            { id: 'counter-satisfaction', end: 95, duration: 2000 },
+            { id: 'counter-satisfaction', end: 98, duration: 2000 },
             { id: 'counter-projects', end: 3000, duration: 2000 }
         ];
         
