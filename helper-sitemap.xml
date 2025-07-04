@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://helper.duly.co.kr/</loc>
+    <lastmod>2025-07-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://helper.duly.co.kr/" />
+    <image:image>
+      <image:loc>https://www.duly.co.kr/images/dULY_trad.CALCULATOR.jpg</image:loc>
+      <image:title>중국수입 무역헬퍼 - AI 무역계산 서비스</image:title>
+      <image:caption>무료 CBM계산기, 수입금액계산기, 관세계산기</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://helper.duly.co.kr/calculator.html</loc>
+    <lastmod>2025-07-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://helper.duly.co.kr/calculator.html" />
+    <image:image>
+      <image:loc>https://www.duly.co.kr/images/dULY_trad.CALCULATOR.jpg</image:loc>
+      <image:title>CBM계산기 | 수입금액계산기 | 관세계산기</image:title>
+      <image:caption>무료 무역비용 계산 도구</image:caption>
+    </image:image>
+  </url>
+</urlset> 
