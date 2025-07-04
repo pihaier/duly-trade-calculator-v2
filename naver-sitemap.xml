@@ -3,7 +3,7 @@
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
     <loc>https://www.duly.co.kr/</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-07-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <news:news>
@@ -11,14 +11,14 @@
         <news:name>두리무역</news:name>
         <news:language>ko</news:language>
       </news:publication>
-      <news:publication_date>2025-06-27</news:publication_date>
+      <news:publication_date>2025-07-04</news:publication_date>
       <news:title>중국 수입 검품 전문가 두리무역 공식 홈페이지</news:title>
       <news:keywords>중국수입, 검품대행, 품질관리, 공장실사, 무역계산기, CBM계산</news:keywords>
     </news:news>
   </url>
   <url>
     <loc>https://www.duly.co.kr/calculator</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-07-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <news:news>
@@ -26,14 +26,14 @@
         <news:name>두리무역</news:name>
         <news:language>ko</news:language>
       </news:publication>
-      <news:publication_date>2025-06-27</news:publication_date>
+      <news:publication_date>2025-07-04</news:publication_date>
       <news:title>CBM계산기 | 수입금액계산기 | 관세계산기 - 두리무역 무료 무역비용 계산기</news:title>
       <news:keywords>CBM계산기, 수입금액계산기, 관세계산기, 무역계산기, 컨테이너적재계산기, 물류비계산기, 환율계산기, 팔레트계산기, 중국수입계산기, 무역비용계산기</news:keywords>
     </news:news>
   </url>
   <url>
     <loc>https://www.duly.co.kr/application</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-07-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <news:news>
@@ -41,38 +41,38 @@
         <news:name>두리무역</news:name>
         <news:language>ko</news:language>
       </news:publication>
-      <news:publication_date>2025-06-27</news:publication_date>
+      <news:publication_date>2025-07-04</news:publication_date>
       <news:title>중국 출장검품 서비스 온라인 신청서</news:title>
       <news:keywords>중국검품신청, 품질관리신청, 검품대행, 공장실사신청</news:keywords>
     </news:news>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#detailed-services</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-07-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#why-choose-us</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-07-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#problem-solution</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-07-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#process</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-07-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.duly.co.kr/#faq-section</loc>
-    <lastmod>2025-06-27</lastmod>
+    <lastmod>2025-07-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
