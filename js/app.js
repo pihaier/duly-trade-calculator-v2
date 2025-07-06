@@ -220,19 +220,20 @@ class BatteryOptimizer {
     }
     
     async init() {
+        // 배터리 API 지원 확인
         if ('getBattery' in navigator) {
             try {
                 const battery = await navigator.getBattery();
                 
                 // 배터리 20% 이하면 비디오 일시정지
                 if (battery.level < 0.2) {
-                    this.videoLoader.pauseVideo();
+                    this.pauseVideo();
                 }
                 
                 // 배터리 상태 변화 감지
                 battery.addEventListener('levelchange', () => {
                     if (battery.level < 0.15 && this.videoLoader.isPlaying) {
-                        this.videoLoader.pauseVideo();
+                        this.pauseVideo();
                     }
                 });
                 
@@ -243,7 +244,25 @@ class BatteryOptimizer {
                 });
                 
             } catch (error) {
-                // 배터리 API 지원 안함
+                // 배터리 API 호출 실패 (권한 없음 등)
+                console.warn('배터리 API 사용 불가:', error.message);
+            }
+        } else {
+            // 배터리 API 미지원 브라우저
+            console.info('배터리 API가 지원되지 않는 브라우저입니다.');
+        }
+    }
+
+    /**
+     * 비디오 일시정지 메서드
+     */
+    pauseVideo() {
+        if (this.videoLoader && this.videoLoader.video) {
+            try {
+                this.videoLoader.video.pause();
+                this.videoLoader.isPlaying = false;
+            } catch (error) {
+                // 비디오 일시정지 실패 시 무시
             }
         }
     }

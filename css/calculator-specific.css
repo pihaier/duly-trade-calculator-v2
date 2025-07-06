@@ -1,0 +1,388 @@
+/* 🧮 계산기 페이지 전용 스타일 */
+
+/* ===== 계산기 레이아웃 ===== */
+
+.calculator-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.calculator-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 1024px) {
+  .calculator-grid {
+    grid-template-columns: 1fr 400px;
+  }
+}
+
+/* ===== 계산기 패널 ===== */
+
+.calculator-panel {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-lg);
+}
+
+.calculator-header {
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.calculator-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.calculator-subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ===== 입력 그룹 ===== */
+
+.input-group {
+  margin-bottom: var(--space-6);
+}
+
+.input-label {
+  display: block;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.input-description {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-1);
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .input-row--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .input-row--3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* ===== 계산 결과 ===== */
+
+.result-panel {
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.result-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-4);
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.result-item:last-child {
+  border-bottom: none;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+}
+
+.result-label {
+  font-size: var(--font-size-sm);
+}
+
+.result-value {
+  font-weight: var(--font-weight-medium);
+}
+
+/* ===== 3D 시뮬레이션 ===== */
+
+.simulation-container {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.simulation-canvas {
+  width: 100%;
+  height: 400px;
+  border-radius: var(--radius-lg);
+  background: #f8fafc;
+}
+
+.simulation-controls {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* ===== 탭 네비게이션 ===== */
+
+.calculator-tabs {
+  display: flex;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-1);
+  margin-bottom: var(--space-6);
+}
+
+.calculator-tab {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+}
+
+.calculator-tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.calculator-tab.active {
+  background: var(--color-bg-primary);
+  color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== 계산기 버튼 ===== */
+
+.calc-button {
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.calc-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.calc-button:active {
+  transform: translateY(0);
+}
+
+.calc-button--secondary {
+  background: var(--color-bg-primary);
+  color: var(--brand-primary);
+  border: 1px solid var(--brand-primary);
+}
+
+.calc-button--secondary:hover {
+  background: var(--brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* ===== 정보 카드 ===== */
+
+.info-card {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.info-card--warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.info-card--success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.info-card-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.info-card-content {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+}
+
+/* ===== 진행 상태 ===== */
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+  position: relative;
+}
+
+.progress-steps::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-border-light);
+  z-index: 1;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.progress-step.active .progress-step-circle {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: var(--color-text-inverse);
+}
+
+.progress-step.completed .progress-step-circle {
+  background: var(--brand-success);
+  border-color: var(--brand-success);
+  color: var(--color-text-inverse);
+}
+
+.progress-step-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.progress-step.active .progress-step-label {
+  color: var(--brand-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ===== 반응형 최적화 ===== */
+
+@media (max-width: 640px) {
+  .calculator-container {
+    padding: var(--space-4);
+  }
+  
+  .calculator-panel {
+    padding: var(--space-6);
+  }
+  
+  .calculator-tabs {
+    flex-direction: column;
+  }
+  
+  .calculator-tab {
+    margin-bottom: var(--space-1);
+  }
+  
+  .simulation-canvas {
+    height: 300px;
+  }
+  
+  .progress-steps {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .progress-steps::before {
+    display: none;
+  }
+}
+
+/* ===== 애니메이션 ===== */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calculator-panel {
+  animation: slideIn 0.5s ease-out;
+}
+
+.result-panel {
+  animation: slideIn 0.5s ease-out 0.2s both;
+}
+
+/* ===== 인쇄 스타일 ===== */
+
+@media print {
+  .calculator-container {
+    max-width: none;
+    padding: 0;
+  }
+  
+  .simulation-container,
+  .calculator-tabs,
+  .calc-button {
+    display: none;
+  }
+  
+  .result-panel {
+    background: transparent;
+    color: #000;
+    border: 1px solid #000;
+  }
+}

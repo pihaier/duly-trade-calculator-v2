@@ -2,6 +2,15 @@
   "buildCommand": "echo 'No build needed'",
   "outputDirectory": ".",
   "installCommand": "npm install",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://www.duly.co.kr/$1",
+      "permanent": true,
+      "statusCode": 301,
+      "has": [{"type": "host", "value": "^duly\\.co\\.kr$"}]
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",

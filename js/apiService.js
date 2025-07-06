@@ -1,58 +1,64 @@
 /**
- * 🌐 API 서비스 모듈 v3.1 - INP 최적화
- * 
- * 관세청 Open API와의 통신을 담당하며,
+ * 🌐 API 서비스 모듈 v4.0 - 보안 강화
+ *
+ * Vercel 서버리스 함수를 통해 관세청 Open API와 안전하게 통신하며,
  * 관세율, 환율, 수입요건 정보를 조회합니다.
- * 
- * @version 3.1.0 - INP 성능 최적화
- * @updated 2025-06-26
+ *
+ * @version 4.0.0 - API 키 보안 강화 및 서버리스 함수 전용
+ * @updated 2025-07-06
+ * @security API 키 완전 제거, 서버리스 함수만 사용
  */
 
 /**
- * API 서비스 클래스 - INP 최적화
+ * API 서비스 클래스 - 보안 강화 및 INP 최적화
+ *
+ * 모든 API 호출은 Vercel 서버리스 함수를 통해 처리되며,
+ * 클라이언트에서 직접 관세청 API를 호출하지 않습니다.
  */
 class ApiService {
     constructor() {
         this.cache = new Map();
         
-        // Vercel 서버리스 함수 설정 (우선순위)
+        // Vercel 서버리스 함수 설정 (보안 강화)
         this.BACKEND_CONFIG = {
             BASE_URL: '/api',  // Vercel 서버리스 함수 경로
-            TIMEOUT: 8000,     // 타임아웃 단축
-            RETRY_COUNT: 1     // 재시도 횟수 감소
+            TIMEOUT: 8000,     // 타임아웃 8초
+            RETRY_COUNT: 1     // 재시도 횟수 1회
         };
         
-        // 직접 관세청 API 호출 설정 (fallback)
-        this.API_CONFIG = {
-            API_KEY: 'o260t225i086q161g060c050i0',
-            TIMEOUT: 8000,     // 타임아웃 단축
-            RETRY_COUNT: 1,    // 재시도 횟수 감소
-            CACHE_DURATION: 300000
-        };
-        this.API_ENDPOINTS = {
-            BASE_URL: 'https://unipass.customs.go.kr:38010/ext/rest',
-            TARIFF_RATE: '/trrtQry/retrieveTrrt',
-            CUSTOMS_REQUIREMENT: '/ccctLworCdQry/retrieveCcctLworCd',
-            EXCHANGE_RATE: '/trifFxrtInfoQry/retrieveTrifFxrtInfo'
+        // 캐시 설정
+        this.CACHE_CONFIG = {
+            CACHE_DURATION: 300000  // 5분 캐시
         };
         this.CURRENCIES = {
             USD: { defaultRate: 1350 },
             CNY: { defaultRate: 190 }
         };
         
-        this.useBackend = true; // 서버리스 함수 사용
+        this.useBackend = true; // 서버리스 함수만 사용 (보안 강화)
         this.initCache();
         this.checkBackendConnection();
     }
 
     /**
-     * 서버리스 함수 연결 확인 - 타임아웃 단축
+     * 서버리스 함수 연결 확인 - 로컬 환경 대응
      */
     async checkBackendConnection() {
         try {
+            // 로컬 환경 감지 (localhost, 127.0.0.1, file://)
+            const isLocalEnvironment = window.location.hostname === 'localhost' ||
+                                     window.location.hostname === '127.0.0.1' ||
+                                     window.location.protocol === 'file:';
+
+            if (isLocalEnvironment) {
+                console.log('🏠 로컬 환경 감지 - 백엔드 API 비활성화');
+                this.useBackend = false;
+                return false;
+            }
+
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2000); // 3초 → 2초 단축
-            
+
             const response = await fetch('/api/health', {
                 signal: controller.signal,
                 method: 'GET',
@@ -60,9 +66,9 @@ class ApiService {
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             clearTimeout(timeoutId);
-            
+
             if (response.ok) {
                 this.useBackend = true;
                 return true;
@@ -71,6 +77,7 @@ class ApiService {
                 return false;
             }
         } catch (error) {
+            console.log('⚠️ 백엔드 연결 실패 - 로컬 모드로 전환:', error.message);
             this.useBackend = false;
             return false;
         }
@@ -95,7 +102,7 @@ class ApiService {
             const cached = localStorage.getItem('exchangeRateCache');
             if (cached) {
                 const data = JSON.parse(cached);
-                if (Date.now() - data.timestamp < this.API_CONFIG.CACHE_DURATION) {
+                if (Date.now() - data.timestamp < this.CACHE_CONFIG.CACHE_DURATION) {
                     this.cache.set('exchangeRates', data.rates);
                 }
             }
@@ -123,7 +130,7 @@ class ApiService {
      */
     async makeRequest(url, options = {}) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.API_CONFIG.TIMEOUT);
+        const timeoutId = setTimeout(() => controller.abort(), this.BACKEND_CONFIG.TIMEOUT);
 
         try {
             // 🔧 INP 최적화: 메인 스레드 양보
@@ -170,7 +177,7 @@ class ApiService {
             }
             
             // 재시도 횟수 감소 (3회 → 1회)
-            if (retryCount < this.API_CONFIG.RETRY_COUNT) {
+            if (retryCount < this.BACKEND_CONFIG.RETRY_COUNT) {
                 // 재시도 대기 시간 단축
                 await new Promise(resolve => setTimeout(resolve, 500));
                 

@@ -20,7 +20,24 @@ class MainController {
         this.initClock();
         this.initTooltips();
         this.loadUserPreferences();
-        
+
+        // 로컬 환경에서는 즉시 로딩 오버레이 숨기기
+        this.hideLoadingIfLocal();
+    }
+
+    /**
+     * 로컬 환경에서 로딩 오버레이 즉시 숨기기
+     */
+    hideLoadingIfLocal() {
+        const isLocalEnvironment = window.location.hostname === 'localhost' ||
+                                 window.location.hostname === '127.0.0.1' ||
+                                 window.location.protocol === 'file:';
+
+        if (isLocalEnvironment) {
+            // 로컬 환경에서는 즉시 로딩 숨기기
+            setTimeout(() => {
+                this.hideLoading();
+            }, 100);
         }
 
     /**

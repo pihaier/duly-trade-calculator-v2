@@ -47,6 +47,28 @@ class CBMCalculator {
     }
 
     /**
+     * 안전한 showAlert 호출 함수
+     */
+    safeShowAlert(message, type = 'info', duration = 3000) {
+        // 1순위: window.showAlert 함수 사용
+        if (typeof window.showAlert === 'function') {
+            window.showAlert(message, type, duration);
+            return;
+        }
+
+        // 2순위: mainController.showAlert 함수 사용
+        if (typeof window.mainController !== 'undefined' &&
+            typeof window.mainController.showAlert === 'function') {
+            window.mainController.showAlert(message, type, duration);
+            return;
+        }
+
+        // 3순위: 브라우저 기본 alert 사용
+        console.warn('showAlert 함수를 찾을 수 없어 기본 alert를 사용합니다.');
+        alert(message);
+    }
+
+    /**
      * 초기화
      */
     init() {
@@ -131,6 +153,8 @@ class CBMCalculator {
      */
     async calculateCBM() {
         try {
+            console.log('🔍 CBM 계산 시작 - 상세 디버깅');
+
             // 로딩 시작 (즉시 표시)
             this.showCalculationLoading();
 
@@ -138,22 +162,31 @@ class CBMCalculator {
             await new Promise(resolve => setTimeout(resolve, 0));
 
             // 입력값 수집
+            console.log('📊 입력값 수집 중...');
             const input = this.collectInput();
-            
+            console.log('📊 수집된 입력값:', input);
+
             // 🔧 INP 최적화: 메인 스레드 양보
             await new Promise(resolve => setTimeout(resolve, 0));
-            
+
             // 입력값 검증
+            console.log('✅ 입력값 검증 중...');
             const validation = this.validateInput(input);
+            console.log('✅ 검증 결과:', validation);
+
             if (!validation.valid) {
+                console.log('❌ 입력값 검증 실패:', validation.message);
                 throw new Error(validation.message);
             }
 
             // 🔧 INP 최적화: 계산 처리를 청크로 분할
+            console.log('🧮 계산 처리 시작...');
             await this.performCalculationWithYield(input);
+            console.log('✅ 계산 처리 완료');
 
         } catch (error) {
-            showAlert(`❌ 계산 오류: ${error.message}`, 'error');
+            console.error('❌ CBM 계산 오류:', error);
+            this.safeShowAlert(`❌ 계산 오류: ${error.message}`, 'error');
         } finally {
             this.hideCalculationLoading();
         }
@@ -203,8 +236,8 @@ class CBMCalculator {
         
         // 중간 광고 표시
         this.showMiddleAd();
-        
-        showAlert('✅ CBM 계산이 완료되었습니다!', 'success');
+
+        this.safeShowAlert('✅ CBM 계산이 완료되었습니다!', 'success');
     }
 
     /**
@@ -831,24 +864,46 @@ class CBMCalculator {
      * 결과 표시
      */
     displayResults(result) {
+        console.log('📊 결과 표시 시작');
+        console.log('📊 결과 데이터:', result);
+
         const resultsContainer = document.getElementById('cbmResults');
-        if (!resultsContainer) return;
+        console.log('📊 결과 컨테이너:', resultsContainer);
+
+        if (!resultsContainer) {
+            console.error('❌ cbmResults 요소를 찾을 수 없음');
+            return;
+        }
 
         const { input, recommendation, containerResults } = result;
+        console.log('📊 추천 결과:', recommendation);
+        console.log('📊 컨테이너 결과:', containerResults);
 
-        resultsContainer.innerHTML = `
-            <div class="space-y-6">
-                <!-- 요약 정보 -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="stat-card">
-                        <span class="stat-value">${formatNumber(input.totalQuantity)}</span>
-                        <div class="stat-label">총 박스 수량</div>
+        try {
+            console.log('📊 HTML 생성 시작');
+
+            // formatNumber 함수 안전 호출
+            const safeFormatNumber = (num, decimals = 0) => {
+                if (typeof window.formatNumber === 'function') {
+                    return window.formatNumber(num, decimals);
+                } else {
+                    return Number(num).toLocaleString('ko-KR');
+                }
+            };
+
+            resultsContainer.innerHTML = `
+                <div class="space-y-6">
+                    <!-- 요약 정보 -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="stat-card">
+                            <span class="stat-value">${safeFormatNumber(input.totalQuantity)}</span>
+                            <div class="stat-label">총 박스 수량</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value">${result.boxCBM.toFixed(3)}</span>
+                            <div class="stat-label">박스당 CBM</div>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-value">${result.boxCBM.toFixed(3)}</span>
-                        <div class="stat-label">박스당 CBM</div>
-                    </div>
-                </div>
 
                 <!-- 추천 컨테이너 -->
                 <div class="alert alert-success">
@@ -875,7 +930,7 @@ class CBMCalculator {
                                 <tr>
                                     <td class="font-medium">${this.containers[type].name}</td>
                                     <td>${result.layout.boxesX} × ${result.layout.boxesY} × ${result.layout.boxesZ}</td>
-                                    <td>${formatNumber(result.boxesPerContainer)}</td>
+                                    <td>${safeFormatNumber(result.boxesPerContainer)}</td>
                                     <td>${result.containersNeeded}</td>
                                     <td class="status-${result.efficiency > 70 ? 'success' : result.efficiency > 50 ? 'warning' : 'error'}">
                                         ${result.efficiency}%
@@ -894,6 +949,19 @@ class CBMCalculator {
                 </div>
             </div>
         `;
+
+        console.log('✅ 결과 표시 완료');
+
+        } catch (error) {
+            console.error('❌ 결과 표시 중 오류:', error);
+            resultsContainer.innerHTML = `
+                <div class="alert alert-error">
+                    <h4 class="font-bold mb-2">❌ 결과 표시 오류</h4>
+                    <p>결과를 표시하는 중 오류가 발생했습니다.</p>
+                    <p class="text-sm mt-2">오류 내용: ${error.message}</p>
+                </div>
+            `;
+        }
     }
 
     /**
@@ -1107,25 +1175,8 @@ class CBMCalculator {
             return;
         }
 
-        // 기존 박스들 제거
-        const objectsToRemove = [];
-        this.scene.traverse((child) => {
-            if (child.userData.isBox || child.userData.isPallet || child.userData.isContainer) {
-                objectsToRemove.push(child);
-            }
-        });
-
-        objectsToRemove.forEach(obj => {
-            this.scene.remove(obj);
-            if (obj.geometry) obj.geometry.dispose();
-            if (obj.material) {
-                if (Array.isArray(obj.material)) {
-                    obj.material.forEach(m => m.dispose());
-                } else {
-                    obj.material.dispose();
-                }
-            }
-        });
+        // 기존 3D 객체들 정리 (메모리 누수 방지)
+        this.reset3DView();
 
         const input = this.lastCalculationResult.input;
         const containerResult = this.lastCalculationResult.containerResults[viewType];
@@ -2063,6 +2114,144 @@ class CBMCalculator {
         </body>
         </html>
         `;
+    }
+
+    /**
+     * 🧹 메모리 정리 메서드들 - 메모리 누수 방지
+     */
+
+    /**
+     * Three.js 리소스 정리
+     */
+    dispose3DResources() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+
+        if (this.scene) {
+            // 씬의 모든 객체 순회하며 리소스 정리
+            this.scene.traverse((object) => {
+                if (object.geometry) {
+                    object.geometry.dispose();
+                }
+
+                if (object.material) {
+                    if (Array.isArray(object.material)) {
+                        object.material.forEach(material => {
+                            this.disposeMaterial(material);
+                        });
+                    } else {
+                        this.disposeMaterial(object.material);
+                    }
+                }
+
+                // 텍스처 정리
+                if (object.texture) {
+                    object.texture.dispose();
+                }
+            });
+
+            // 씬 정리
+            this.scene.clear();
+            this.scene = null;
+        }
+
+        if (this.renderer) {
+            // WebGL 컨텍스트 정리
+            this.renderer.dispose();
+            this.renderer.forceContextLoss();
+            this.renderer.domElement = null;
+            this.renderer = null;
+        }
+
+        if (this.controls) {
+            this.controls.dispose();
+            this.controls = null;
+        }
+
+        this.camera = null;
+        this.directionalLight = null;
+    }
+
+    /**
+     * 머티리얼 정리 헬퍼 메서드
+     */
+    disposeMaterial(material) {
+        if (!material) return;
+
+        // 텍스처 정리
+        if (material.map) material.map.dispose();
+        if (material.lightMap) material.lightMap.dispose();
+        if (material.bumpMap) material.bumpMap.dispose();
+        if (material.normalMap) material.normalMap.dispose();
+        if (material.specularMap) material.specularMap.dispose();
+        if (material.envMap) material.envMap.dispose();
+        if (material.alphaMap) material.alphaMap.dispose();
+        if (material.aoMap) material.aoMap.dispose();
+        if (material.displacementMap) material.displacementMap.dispose();
+        if (material.emissiveMap) material.emissiveMap.dispose();
+        if (material.gradientMap) material.gradientMap.dispose();
+        if (material.metalnessMap) material.metalnessMap.dispose();
+        if (material.roughnessMap) material.roughnessMap.dispose();
+
+        // 머티리얼 정리
+        material.dispose();
+    }
+
+    /**
+     * 3D 뷰 리셋 (기존 객체들만 정리)
+     */
+    reset3DView() {
+        if (!this.scene) return;
+
+        const objectsToRemove = [];
+        this.scene.traverse((child) => {
+            if (child.userData.isBox || child.userData.isPallet || child.userData.isContainer) {
+                objectsToRemove.push(child);
+            }
+        });
+
+        objectsToRemove.forEach(obj => {
+            this.scene.remove(obj);
+
+            // Geometry 정리
+            if (obj.geometry) {
+                obj.geometry.dispose();
+            }
+
+            // Material 정리
+            if (obj.material) {
+                if (Array.isArray(obj.material)) {
+                    obj.material.forEach(material => this.disposeMaterial(material));
+                } else {
+                    this.disposeMaterial(obj.material);
+                }
+            }
+
+            // 자식 객체들도 정리
+            if (obj.children && obj.children.length > 0) {
+                obj.children.forEach(child => {
+                    if (child.geometry) child.geometry.dispose();
+                    if (child.material) this.disposeMaterial(child.material);
+                });
+            }
+        });
+    }
+
+    /**
+     * 페이지 언로드 시 정리
+     */
+    cleanup() {
+        this.dispose3DResources();
+
+        // 이벤트 리스너 제거
+        window.removeEventListener('beforeunload', this.cleanup.bind(this));
+        window.removeEventListener('unload', this.cleanup.bind(this));
+
+        // 기타 참조 정리
+        this.lastCalculationResult = null;
+        this.currentView = null;
     }
 }
 
