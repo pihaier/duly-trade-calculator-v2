@@ -54,9 +54,16 @@ class MainController {
     }
 
     /**
-     * 탭 전환
+     * 탭 전환 - 안전성 강화
      */
     switchTab(tabName) {
+        // 유효한 탭인지 확인
+        const validTabs = ['ai', 'cbm', 'cost'];
+        if (!validTabs.includes(tabName)) {
+            console.error(`유효하지 않은 탭 이름: ${tabName}`);
+            return;
+        }
+
         if (this.currentTab === tabName) return;
 
         // 기존 탭 비활성화
@@ -76,19 +83,28 @@ class MainController {
             tabButton.classList.add('active');
             tabContent.classList.remove('hidden');
             tabContent.classList.add('active');
-            
+
             this.currentTab = tabName;
-            
+
             // 탭 전환 애니메이션
             this.animateTabTransition(tabContent);
-            
+
             // 광고 표시/숨김 처리
             this.handleAdVisibility(tabName);
-            
+
             // 사용자 설정 저장
             this.saveUserPreference('lastTab', tabName);
-            
+
+            console.log(`✅ 탭 전환 완료: ${tabName}`);
+        } else {
+            console.error(`탭 요소를 찾을 수 없습니다: ${tabName}Tab 또는 ${tabName}Section`);
+
+            // 요소를 찾을 수 없는 경우 기본 탭으로 폴백
+            if (tabName !== 'ai') {
+                console.log('기본 탭(ai)으로 폴백합니다.');
+                this.switchTab('ai');
             }
+        }
     }
 
     /**
@@ -375,51 +391,59 @@ class MainController {
     }
 
     /**
-     * 숫자 포맷팅
+     * 숫자 포맷팅 (utils.js 위임)
      */
     formatNumber(num, decimals = 0) {
-        if (typeof num !== 'number') {
-            num = parseFloat(num) || 0;
-        }
-        
-        return num.toLocaleString('ko-KR', {
-            minimumFractionDigits: decimals,
-            maximumFractionDigits: decimals
-        });
+        return window.utils ? window.utils.formatNumber(num, decimals) : num.toString();
     }
 
     /**
-     * 통화 포맷팅
+     * 통화 포맷팅 (utils.js 위임)
      */
     formatCurrency(amount, currency = 'KRW') {
-        const symbols = {
-            KRW: '₩',
-            USD: '$',
-            CNY: '¥'
-        };
-        
-        const symbol = symbols[currency] || '₩';
-        const formatted = this.formatNumber(amount, currency === 'KRW' ? 0 : 2);
-        
-        return `${symbol} ${formatted}`;
+        return window.utils ? window.utils.formatCurrency(amount, currency) : `${amount}`;
     }
 
     /**
-     * 사용자 설정 로드
+     * 사용자 설정 로드 - 안전한 탭 복원 로직
      */
     loadUserPreferences() {
+        // 유효한 탭 목록 정의
+        const validTabs = ['ai', 'cbm', 'cost'];
+        let targetTab = 'ai'; // 기본 탭
+
         try {
             const preferences = localStorage.getItem('userPreferences');
             if (preferences) {
                 const prefs = JSON.parse(preferences);
-                
-                // 마지막 탭 복원
-                if (prefs.lastTab) {
-                    this.switchTab(prefs.lastTab);
+
+                // 마지막 탭이 유효한지 확인
+                if (prefs.lastTab && validTabs.includes(prefs.lastTab)) {
+                    // 해당 탭 요소가 실제로 존재하는지 확인
+                    const tabButton = document.getElementById(`${prefs.lastTab}Tab`);
+                    const tabContent = document.getElementById(`${prefs.lastTab}Section`);
+
+                    if (tabButton && tabContent) {
+                        targetTab = prefs.lastTab;
+                    } else {
+                        console.warn(`탭 요소를 찾을 수 없습니다: ${prefs.lastTab}`);
+                    }
+                } else if (prefs.lastTab) {
+                    console.warn(`유효하지 않은 탭 이름: ${prefs.lastTab}`);
                 }
             }
         } catch (error) {
-            }
+            console.warn('사용자 설정 로드 중 오류 발생:', error);
+            // localStorage 오류 시에도 기본 탭으로 설정
+        }
+
+        // 안전한 탭 전환 실행
+        this.switchTab(targetTab);
+
+        // 기본 탭으로 설정된 경우 localStorage 업데이트
+        if (targetTab === 'ai') {
+            this.saveUserPreference('lastTab', 'ai');
+        }
     }
 
     /**
