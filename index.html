@@ -500,17 +500,17 @@
         </div>
     </nav>
     
-    <!-- Hero Section -->
-    <header id="hero-section" class="relative min-h-[75vh] md:h-screen overflow-hidden pt-24 md:pt-0">
-        <div class="absolute inset-0 z-0">
-            <!-- 배경 그라데이션 (안정적인 배경) -->
-            <div id="hero-background" class="absolute inset-0 hero-loading-bg"></div>
-            
-            <!-- 배경 비디오 - 정적 배경용 -->
-            <video 
+    <!-- Hero Section - Hero UI Pro 스타일 -->
+    <header id="hero-section" class="relative isolate overflow-hidden bg-gray-900 py-24 sm:py-32">
+        <div class="absolute inset-0 -z-10">
+            <!-- 배경 그라데이션 -->
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900"></div>
+
+            <!-- 배경 비디오 -->
+            <video
                 id="hero-video"
-                class="background-video opacity-60" 
-                muted 
+                class="absolute inset-0 h-full w-full object-cover opacity-30"
+                muted
                 autoplay
                 playsinline
                 loop
@@ -521,89 +521,118 @@
             >
                 <source src="/video/WeChat_20250625002234.mp4" type="video/mp4">
             </video>
-            
-            <!-- 동영상 위 오버레이 (텍스트 가독성을 위한 약간의 어둡게 처리) -->
-            <div class="absolute inset-0 bg-black/20 z-10"></div>
-            
-            <!-- 비디오 컨트롤 버튼 제거됨 -->
+
+            <!-- 그라데이션 오버레이 -->
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/50 to-gray-900/80"></div>
+
+            <!-- 장식적 요소 -->
+            <svg class="absolute inset-0 -z-10 h-full w-full stroke-white/10 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]" aria-hidden="true">
+                <defs>
+                    <pattern id="983e3e4c-de6d-4c3f-8d64-b9761d1534cc" width="200" height="200" x="50%" y="-1" patternUnits="userSpaceOnUse">
+                        <path d="M.5 200V.5h200" fill="none" />
+                    </pattern>
+                </defs>
+                <svg x="50%" y="-1" class="overflow-visible fill-gray-800/20">
+                    <path d="m-1 0 1-1v1z" />
+                </svg>
+                <rect width="100%" height="100%" stroke-width="0" fill="url(#983e3e4c-de6d-4c3f-8d64-b9761d1534cc)" />
+            </svg>
         </div>
-        <div class="relative z-20 h-full flex items-center justify-center text-white px-4 py-8 pt-12 md:pt-8">
-          <div class="text-center max-w-5xl mx-auto">
-            <h1 class="text-2xl sm:text-3xl md:text-7xl font-black mb-4 md:mb-6 leading-tight animate-fade-in-up">
-              중국 수입 <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">'품질 리스크'</span>가<br class="hidden md:block">
-              가장 큰 문제입니다
-            </h1>
-            <h2 class="text-base sm:text-lg md:text-3xl font-light mb-8 md:mb-12 max-w-3xl mx-auto opacity-90 animate-fade-in-up animation-delay-300">
-              두리무역의 전문적인 현지 관리 시스템으로,<br class="hidden md:block">
-              생산부터 선적까지 모든 단계를 안심하고 맡기세요.
-            </h2>
-            <div class="flex flex-col gap-4 sm:gap-6 justify-center animate-fade-in-up animation-delay-600">
-              <a href="/application.html" class="group relative inline-flex items-center justify-center px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 text-sm sm:text-base md:text-lg font-bold text-white overflow-hidden rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 max-w-xs sm:max-w-sm md:max-w-none mx-auto">
-                <i data-lucide="send" class="w-4 h-4 md:w-5 md:h-5 mr-2 md:mr-3 group-hover:rotate-12 transition-transform flex-shrink-0"></i>
-                <span class="leading-none">무료 견적 및 상담 신청</span>
-              </a>
-              <a href="tel:031-699-8781" class="group relative inline-flex items-center justify-center px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 text-sm sm:text-base md:text-lg font-bold bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full hover:bg-white hover:text-purple-700 transition-all duration-300 hover:scale-105 max-w-xs sm:max-w-sm md:max-w-none mx-auto">
-                <i data-lucide="phone" class="w-4 h-4 md:w-5 md:h-5 mr-2 md:mr-3 group-hover:animate-pulse flex-shrink-0"></i>
-                <span class="leading-none">전화 상담 문의</span>
-              </a>
+
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto max-w-4xl text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
+                    중국 수입 <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">'품질 리스크'</span>가<br class="hidden sm:block">
+                    가장 큰 문제입니다
+                </h1>
+                <p class="mt-6 text-lg leading-8 text-gray-300 sm:text-xl lg:text-2xl">
+                    두리무역의 전문적인 현지 관리 시스템으로,<br class="hidden sm:block">
+                    생산부터 선적까지 모든 단계를 안심하고 맡기세요.
+                </p>
+                <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
+                    <a href="/application.html"
+                       class="group relative inline-flex items-center gap-x-3 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:from-indigo-500 hover:to-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all duration-200 hover:scale-105 hover:shadow-xl">
+                        <i data-lucide="send" class="h-5 w-5 group-hover:rotate-12 transition-transform"></i>
+                        무료 견적 및 상담 신청
+                    </a>
+                    <a href="tel:031-699-8781"
+                       class="group inline-flex items-center gap-x-3 rounded-full bg-white/10 px-8 py-4 text-lg font-semibold text-white ring-1 ring-inset ring-white/20 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all duration-200 hover:scale-105 backdrop-blur-sm">
+                        <i data-lucide="phone" class="h-5 w-5 group-hover:animate-pulse"></i>
+                        전화 상담 문의
+                    </a>
+                </div>
             </div>
-          </div>
         </div>
-        
-        <!-- 스크롤 인디케이터 - 깜박임 제거 -->
-        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 text-white z-20">
-            <i data-lucide="chevron-down" class="w-6 h-6 md:w-8 md:h-8"></i>
+
+        <!-- 스크롤 인디케이터 -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/60">
+            <i data-lucide="chevron-down" class="h-8 w-8 animate-bounce"></i>
         </div>
     </header>
 
     <main>
-        <!-- Services Section -->
-        <section id="detailed-services" class="py-12 md:py-24 relative overflow-hidden fade-in-section">
-            <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900"></div>
-            <div class="container mx-auto px-4 relative z-10">
-              <div class="text-center mb-8 md:mb-20">
-                <h2 class="text-2xl sm:text-3xl md:text-6xl font-black text-white mb-3 md:mb-6">
-                  맞춤형 전문 검품 솔루션
-                </h2>
-                <p class="text-sm sm:text-base md:text-xl text-gray-300 max-w-3xl mx-auto">
-                  귀사의 비즈니스 단계와 필요에 따라 가장 적합한 서비스를 선택하세요. 
-                  각 서비스는 독립적으로 또는 함께 이용 가능합니다.
-                </p>
-              </div>
-              <div id="services-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 max-w-6xl mx-auto">
-                <!-- Service cards will be injected here by JavaScript -->
-              </div>
+        <!-- Services Section - Hero UI Pro 스타일 -->
+        <section id="detailed-services" class="relative isolate overflow-hidden bg-gray-900 py-24 sm:py-32">
+            <div class="absolute inset-0 -z-10 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900"></div>
+            <div class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.indigo.100),transparent)] opacity-20"></div>
+            <div class="absolute inset-y-0 right-1/2 -z-10 mr-16 w-[200%] origin-bottom-left skew-x-[-30deg] bg-white shadow-xl shadow-indigo-600/10 ring-1 ring-indigo-50 sm:mr-28 lg:mr-0 xl:mr-16 xl:origin-center"></div>
+
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-6xl">
+                        맞춤형 전문 검품 솔루션
+                    </h2>
+                    <p class="mt-6 text-lg leading-8 text-gray-300 sm:text-xl">
+                        귀사의 비즈니스 단계와 필요에 따라 가장 적합한 서비스를 선택하세요.
+                        각 서비스는 독립적으로 또는 함께 이용 가능합니다.
+                    </p>
+                </div>
+                <div id="services-container" class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                    <!-- Service cards will be injected here by JavaScript -->
+                </div>
             </div>
         </section>
 
-        <!-- Value Section -->
-        <section id="why-choose-us" class="py-12 md:py-24 bg-gradient-to-b from-white to-gray-50 fade-in-section">
-            <div class="container mx-auto px-4">
-              <div class="text-center mb-8 md:mb-20">
-                <h2 class="text-2xl sm:text-3xl md:text-6xl font-black text-gray-900 mb-3 md:mb-6">
-                  결과로 증명하는 <span class="gradient-text">두리무역의 가치</span>
-                </h2>
-                <p class="text-sm sm:text-base md:text-xl text-gray-600 max-w-2xl mx-auto">
-                  단순 검품 대행을 넘어, 귀사의 성공적인 비즈니스를 위한 가장 확실한 파트너가 되어드립니다.
-                </p>
-              </div>
-              <div id="stats-section" class="grid grid-cols-3 gap-4 md:gap-8 mb-8 md:mb-20 max-w-5xl mx-auto">
-                    <div class="group relative bg-white p-4 md:p-10 rounded-2xl md:rounded-3xl text-center shadow-xl hover:shadow-2xl hover-transform transition-all border border-gray-100">
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 rounded-2xl md:rounded-3xl transition-opacity"></div>
-                        <div class="mb-2 md:mb-4 text-purple-600 flex justify-center"><i data-lucide="trending-up" class="w-5 h-5 md:w-8 md:h-8"></i></div>
-                        <p class="text-2xl sm:text-3xl md:text-6xl font-black mb-1 md:mb-2">
-                            <span id="counter-years" class="gradient-text">0</span>
-                            <span class="text-xl sm:text-2xl md:text-5xl gradient-text">+</span>
-                        </p>
-                        <p class="text-xs md:text-xl font-bold text-gray-700">현장 검품<br class="md:hidden"> 노하우</p>
+        <!-- Value Section - Hero UI Pro 스타일 -->
+        <section id="why-choose-us" class="bg-white py-24 sm:py-32">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-6xl">
+                        결과로 증명하는 <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">두리무역의 가치</span>
+                    </h2>
+                    <p class="mt-6 text-lg leading-8 text-gray-600 sm:text-xl">
+                        단순 검품 대행을 넘어, 귀사의 성공적인 비즈니스를 위한 가장 확실한 파트너가 되어드립니다.
+                    </p>
+                </div>
+
+                <div id="stats-section" class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:grid-cols-3 lg:mx-0 lg:max-w-none">
+                    <div class="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-lg ring-1 ring-gray-900/5 hover:shadow-xl transition-all duration-300 hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative">
+                            <div class="mb-4 flex justify-center text-indigo-600">
+                                <i data-lucide="trending-up" class="h-8 w-8"></i>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                                    <span id="counter-years" class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">0</span>
+                                    <span class="text-3xl sm:text-5xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">+</span>
+                                </p>
+                                <p class="mt-2 text-sm font-semibold leading-6 text-gray-600 sm:text-lg">현장 검품 노하우</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="group relative bg-white p-4 md:p-10 rounded-2xl md:rounded-3xl text-center shadow-xl hover:shadow-2xl hover-transform transition-all border border-gray-100">
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-5 rounded-2xl md:rounded-3xl transition-opacity"></div>
-                        <div class="mb-2 md:mb-4 text-purple-600 flex justify-center"><i data-lucide="star" class="w-5 h-5 md:w-8 md:h-8"></i></div>
-                        <p class="text-2xl sm:text-3xl md:text-6xl font-black mb-1 md:mb-2">
-                            <span id="counter-satisfaction" class="gradient-text">0</span>
-                            <span class="text-xl sm:text-2xl md:text-5xl gradient-text">%</span>
-                        </p>
+
+                    <div class="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-lg ring-1 ring-gray-900/5 hover:shadow-xl transition-all duration-300 hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="relative">
+                            <div class="mb-4 flex justify-center text-indigo-600">
+                                <i data-lucide="star" class="h-8 w-8"></i>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                                    <span id="counter-satisfaction" class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">0</span>
+                                    <span class="text-3xl sm:text-5xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">%</span>
+                                </p>
                         <p class="text-xs md:text-xl font-bold text-gray-700">높은 고객<br class="md:hidden"> 만족도</p>
                     </div>
                     <div class="group relative bg-white p-4 md:p-10 rounded-2xl md:rounded-3xl text-center shadow-xl hover:shadow-2xl hover-transform transition-all border border-gray-100">
