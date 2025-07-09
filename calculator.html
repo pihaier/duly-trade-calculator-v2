@@ -254,14 +254,19 @@
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/components.css">
     <link rel="stylesheet" href="/css/calculator-specific.css">
-    
+
+    <!-- 커스텀 스타일 -->
+    <link rel="stylesheet" href="/calculator.css">
+
+    <!-- 폰트 스타일 로드 (preload와 함께 실제 사용) -->
+    <link rel="stylesheet" href="/lib/fonts.css">
     <!-- Core Web Vitals 최적화 (구글 SEO 2025) -->
     <link rel="preload" href="/css/design-system.css" as="style">
     <link rel="preload" href="/css/base.css" as="style">
     <link rel="preload" href="/css/components.css" as="style">
     <link rel="preload" href="/css/calculator-specific.css" as="style">
     <link rel="preload" href="/lib/fonts.css" as="style">
-    <link rel="preload" href="/images/og-image.svg" as="image" fetchpriority="high">
+    <!-- og-image.svg는 실제로 사용되지 않으므로 preload 제거 -->
     
     <!-- DNS prefetch 제거 - 로컬 라이브러리 사용으로 불필요 -->
     
@@ -920,11 +925,21 @@
         });
     </script>
 
-    <!-- JavaScript 파일들 (캐시 무효화 버전 2.4) -->
+    <!-- JavaScript 파일들 - 의존성 순서 최적화 (캐시 무효화 버전 2.4) -->
+    <!-- 1. 설정 파일 (독립적) -->
     <script src="js/config.js?v=2.4"></script>
+
+    <!-- 2. 공통 유틸리티 (독립적, 다른 모듈들이 의존) -->
+    <script src="js/utils.js?v=2.4"></script>
+
+    <!-- 3. API 서비스 (utils에 의존) -->
     <script src="js/apiService.js?v=2.4"></script>
+
+    <!-- 4. 계산기 모듈들 (utils, API 서비스에 의존) -->
     <script src="js/cbmCalculator.js?v=2.4"></script>
     <script src="js/totalCostCalculator.js?v=2.4"></script>
+
+    <!-- 5. 메인 컨트롤러 (모든 모듈이 로드된 후 실행) -->
     <script src="js/main.js?v=2.4"></script>
     
     <!-- helper.duly.co.kr URL 정리 스크립트 -->
